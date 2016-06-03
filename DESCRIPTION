@@ -1,9 +1,11 @@
 Package: bmass
-Title: What the Package Does (one line, title case)
+Title: Bayesian multivariate analysis of summary statistics
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Authors@R: c(
+    person("Michael", "Turchin", email = "mturchin20@uchicago.edu", role = c("aut", "cre")),
+    person("Matthew", "Stephens", email = "mstephens@uchicago.edu", role = c("aut", "cre")))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.3.0)
-License: What license is it under?
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
