@@ -74,6 +74,8 @@ Data1 Data2
 > cat("write to log", file = log_con)
 > cat("write to console")
 write to console
+ cat(... , file = "", sep = " ", fill = FALSE, labels = NULL,
+         append = FALSE)
 ~~~
 
 CheckColumns <- function (ExpectedColumnNames, DataFile, logFile) {
