@@ -9,24 +9,24 @@
 #' func(1, 1)
 #' func(10, 1)
 
-OpenLogFile <- function(FileNameBase) {
-	FileNameLog <- paste(FileNameBase, ".bmass.log", sep="")
+OpenLogFile <- function(OutputFileBase) {
+	FileNameLog <- paste(OutputFileBase, ".bmass.log", sep="")
 	if (file.exists(FileNameLog)) {
 		file.create(FileNameLog)
-		WriteLogFile(FileNameBase, paste("Warning -- file ", FileNameLog, " already existed and was overwritten.", sep=""))
+		WriteLogFile(OutputFileBase, paste("Warning -- file ", FileNameLog, " already existed and was overwritten.", sep=""))
 	}
 	else {
 		file.create(FileNameLog)
 	}
 }
 
-WriteLogFile <- function(FileNameBase, OutputData) {
-	FileNameLog <- paste(FileNameBase, ".bmass.log", sep="")
+WriteLogFile <- function(OutputFileBase, OutputData) {
+	FileNameLog <- paste(OutputFileBase, ".bmass.log", sep="")
 	write(OutputData, file=FileNameLog, append=TRUE)
 }
 
-WriteTableLogFile <- function(FileNameBase, OutputData) {
-	FileNameLog <- paste(FileNameBase, ".bmass.log", sep="")
+WriteTableLogFile <- function(OutputFileBase, OutputData) {
+	FileNameLog <- paste(OutputFileBase, ".bmass.log", sep="")
 	write.table(OutputData, file=FileNameLog, append=TRUE, row.names=FALSE, quote=FALSE)
 }
 

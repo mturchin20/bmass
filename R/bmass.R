@@ -13,9 +13,9 @@
 
 
 
-bmass <- function(ExpectedColumnNames, DataFileNames, DataFileLocations) {
+bmass <- function(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) {
 
-	PrepareData(ExpectedColumnNames, DataFileNames, DataFileLocations)
+	PrepareData(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase)
 
 }
 

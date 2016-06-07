@@ -7,6 +7,7 @@
 ####' @param DataFileList Comma-separated list of all the datafile names being analyzed (these are assumed to be the names of the phenotypes being analyzed). This should be in the same order as DataFileLocations. The default value for this paramter is NULL. If NULL, the list of datafile names are derived from the list of datafile locations.
 #' @param DataFileLocations Comma-separated list of all the datafile locations being analyzed. This should be in the same order as PhenotypeList. The default value for this parameter is NULL. Users must supply a list of datafile locations to run bmass.
 #' @param ExpectedColumnNames Comma-separated list of the expected column names to be found at the head of each datafile. The default value for this parameter is Chr,BP,A1,MAF,Direction,p_Value,N. Users should not supply or alter this parameter.
+#' @param OutputFileBase
 #' @return A merged and combined dataset The sum of \code{x} and \code{y}.
 #' @examples
 #' func(1, 1)
@@ -20,7 +21,7 @@ Data2
 DataList <- c("Data1", "Data2")
 
 
-CheckDataframeFormat <- function (DataFileName, FileNameBase) {
+CheckDataframeFormat <- function (DataFileName, OutputFileBase) {
 	returnValue <- 0
 	
 	if (!is.data.frame(eval(parse(text=DataFileName)))) {
@@ -93,12 +94,14 @@ CheckDataframeFormat <- function (DataFileName, FileNameBase) {
 #~~~
 
 OpenData <- function (DataFileNames, DataFileLocations) {
-	FileNameBase
+	OutputFileBase
 	#Get list of 	
+
+	return(OutputFileBase)
 
 }
 
-CheckColumns <- function (ExpectedColumnNames, DataFile, FileNameBase) {
+CheckColumns <- function (ExpectedColumnNames, DataFile, OutputFileBase) {
 	DataColumnNames <- names(DataFile)
 	for ColumnName in ExpectedColumnNames {
 		if (! ColumnName %in% DataColumnNames) {
@@ -108,14 +111,15 @@ CheckColumns <- function (ExpectedColumnNames, DataFile, FileNameBase) {
 }
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
-#PrepareData <- function (ColumnNames, DataFileNames, FileNameBase) {
-PrepareData <- function (ExpectedColumnNames, DataFileNames, DataFileLocations) {
+#PrepareData <- function (ColumnNames, DataFileNames, OutputFileBase) {
+PrepareData <- function (ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) {
 
-	FileNameBase <- OpenData(DataFileNames, DataFileLocations) 
+	OutputFileBase <- OpenData(DataFileNames, DataFileLocations, OutputFileBase) 
+	#If no outputfilebase is provided figure it out from the first input file given?
 
 	DataFrameCheckValues <- apply(DataFileNames, CheckDataframeFormat)
 	if (sum(apply(DataFrameCheckValues, as.numeric)) > 0) {
-		WriteLogFile(FileNameBase, paste("	
+		WriteLogFile(OutputFileBase, paste("	
 		cat("
 	
 	}
