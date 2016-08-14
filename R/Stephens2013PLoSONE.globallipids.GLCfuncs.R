@@ -1,4 +1,8 @@
 
+
+
+
+
 #function to return the top hits exceeding some threshold,
 #removing duplicates within 1Mb in a greedy way
 indephits=function(score,chr,pos,T=5e5){
