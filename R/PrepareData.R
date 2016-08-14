@@ -91,10 +91,102 @@ CheckDataframeFormat <- function (DataFileName, OutputFileBase) {
 #[1] TRUE
 #> cat("nana4\n", file = FileName2, append=TRUE)
 #> cat("nana4\n", file = FileName2, append=TRUE)
+#20160812 NOTE -- cat will include newlines only if I add them myself. Using write() or write.table() does automatically include newlines
+#> cat("nana4\n", file = FileName3, append=TRUE)
+#> write(OutputData, file=FileNameLog, append=TRUE)
+#Error in cat(x, file = file, sep = c(rep.int(sep, ncolumns - 1), "\n"),  : 
+#  object 'FileNameLog' not found
+#> write(c(1,2,3,4), file=FileName3, append=TRUE)
+#> write.table(c(1,2,3,4), file=FileName3, append=TRUE)
+#Warning message:
+#In write.table(c(1, 2, 3, 4), file = FileName3, append = TRUE) :
+#  appending column names to file
+#[  mturchin21@Michaels-MacBook-Air  ~/Documents/Work/LabMisc/StephensLab/bmass/R]$cat nana3.out 
+#nana4
+#nana4nana4nana4nana4
+#1 2 3 4
+#"x"
+#"1" 1
+#"2" 2
+#"3" 3
+#"4" 4
 #~~~
 
-OpenData <- function (DataFileNames, DataFileLocations) {
-	OutputFileBase
+#Convert a comma-separated string of data file locations into a vector
+#20160812 CHECK_0 -- Prob: Come up with way to send off log message and then immediately leave program due to an error. Eg, here in this instance, if there are no commas the program should exit -- either the person has inputted things incorrectly or the person has supplied only a single datafile. The former should be obvious and in the latter bmass presumably cannot run on just one file/one phenotype.
+VectorizeDataLocations <- function(DataFileLocations) {
+
+	VectorizedDataFileLocations <- c()
+
+	if (grep(",", DataFileLocations)) {
+
+	}
+	else {
+		log file ( explain error then end with 'exiting...' )
+		exit program? or supply a flag?
+		problem -- at this stage we are trying to create the name for the log file so have not set it up yet
+		use warning() and then exit program? say something like 'cannot initialize function/program'
+		create log file or just create a variable that contains log message output and supply it as one of the output variables via list()? eg output$log
+		can just keep doing rbind() rbind()....start each log message also with some sort of R time call?
+	}
+
+	return(VectorizedDataFileLocations)
+
+}
+
+~~~
+#> txt3 <- "nana,nana2"
+#> grep(",", txt3)
+#[1] 1
+#> ?grep
+#> txt3 <- "nana,nana2,nana3"
+#> grep(",", txt3)
+#[1] 1
+#> ?grep
+#> grep(",", c(txt3,txt3))
+#[1] 1 2
+#> grep(",", c(txt3,txt3,txt3))
+#[1] 1 2 3
+#> grep(",", c(txt3,txt3,txt3,txt2))
+#[1] 1 2 3
+#> grep(",", c(txt3,txt3,txt2,txt3))
+#[1] 1 2 4
+~~~
+
+#20160812 NOTE -- Check/force 'character' setting of input here?
+GetListOfFileNames <- function(DataFileLocations) {
+
+	
+
+}
+
+~~~
+#> txt1 <- "nana"
+#> txt2 <- "nana/nan2"
+#> strsplit(txt1, "/")
+#[[1]]
+#[1] "nana"
+#
+#> strsplit(txt2, "/")
+#[[1]]
+#[1] "nana" "nan2"
+#
+#> strsplit(txt2, "/")[[1]][1]
+#[1] "nana"
+#> strsplit(txt2, "/")[[1]][2]
+#[1] "nan2"
+#> length(strsplit(txt2, "/")[[1]])  
+#[1] 2
+#> strsplit(txt2, "/")[[1]][length(strsplit(txt2, "/")[[1]])]
+#[1] "nan2"
+~~~
+
+#I don't recall if I have a greater function for 'OpenData' other than
+OpenData <- function (DataFileNames, DataFileLocations, OutputFileBase) {
+	
+	#Check whether OutputFileBase is NULL and if so, create it from 
+	OutputFileBase <- 
+		
 	#Get list of 	
 
 	return(OutputFileBase)
@@ -112,7 +204,15 @@ CheckColumns <- function (ExpectedColumnNames, DataFile, OutputFileBase) {
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ColumnNames, DataFileNames, OutputFileBase) {
-PrepareData <- function (ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) {
+#PrepareData <- function (ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) { #20160812 NOTE -- deciding to remove 'DataFileNames' as a requested/given input. Just going to assume that we are given a list of file locations and I will parse that list for the 'names' of the datasources 
+PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) {
+
+	#First thing should be setup log file
+	SetUpLogFile <-
+
+	DataFileLocations <- VectorizeDataLocations(DataFileLocations)
+
+	DataFileNames <- GetListOfFilesNames(DataFileLocations)
 
 	OutputFileBase <- OpenData(DataFileNames, DataFileLocations, OutputFileBase) 
 	#If no outputfilebase is provided figure it out from the first input file given?
