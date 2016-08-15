@@ -51,6 +51,23 @@ CheckDataFrameFormat <- function (DataSource1) {
 	return(returnValue)
 }
 
+CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
+	returnValueVector <- c()
+	for DataSource1 in DataSources1 {
+		returnValue <- TRUE
+		DataSource1ColumnNames <- names(eval(parse(text=DataSource1)))
+		for ColumnName in ExpectedColumnNames {
+			if (! ColumnName %in% DataColumnNames) {
+				returnValue <- FALSE
+			}
+		}
+		returnValueVector <- c(returnValueVector, returnValue)
+	}
+
+	return(returnValueVector)
+}
+
+
 #~~~
 #> read.table("../data/TestData1.txt")
 #   V1   V2 V3  V4        V5      V6   V7
@@ -175,15 +192,6 @@ CheckDataFrameFormat <- function (DataSource1) {
 #[1] "nan2"
 ~~~
 
-CheckColumns <- function (ExpectedColumnNames, DataFile, OutputFileBase) {
-	DataColumnNames <- names(DataFile)
-	for ColumnName in ExpectedColumnNames {
-		if (! ColumnName %in% DataColumnNames) {
-
-		}
-	}
-}
-
 
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
@@ -198,6 +206,9 @@ bmass <- function (DataSources, ExpectedColumnNames=c(c("Chr", "BP", "MAF", "Dir
 
 	#Loading and checking data
 	~~~~~~
+	
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks."))
+	
 	if (!is.vector(DataSources)) {
 		stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
 	}
@@ -230,10 +241,22 @@ bmass <- function (DataSources, ExpectedColumnNames=c(c("Chr", "BP", "MAF", "Dir
 
 	#Check DataSources headers for proper names
 
-	
+	CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
+	DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
+	if (FALSE %in% DataSourcesCheckHeaderNames) {
+		stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are ", paste(ExpectedColumnNames, sep=" "), ". Please fix and rerun bmass: ", DataSources[DataSourcesCheckHeaderNames])
+	}
+
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check."))
 
 	#Preparing and merging data
 	~~~~~~
+	
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Beginning DataSources merging."))
+
+	#Merge different data sources into main file with all *$pValue & *$n entries for each pheno
+
+
 
 
 
