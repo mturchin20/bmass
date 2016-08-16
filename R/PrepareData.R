@@ -198,63 +198,108 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 #PrepareData <- function (ColumnNames, DataFileNames, OutputFileBase) {
 #PrepareData <- function (ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) { #20160812 NOTE -- deciding to remove 'DataFileNames' as a requested/given input. Just going to assume that we are given a list of file locations and I will parse that list for the 'names' of the datasources 
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, ExpectedColumnNames=c(c("Chr", "BP", "MAF", "Direction", "p_Value", "N")) {
+bmass <- function (DataSources, ExpectedColumnNames=c(c("Chr", "BP", "MAF", "Direction", "p_Value", "N"), MergedDataSources=NULL) {
 
 	LogFile1 <- c()
 
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning bmass."))
 
 	#Loading and checking data
-	~~~~~~
-	
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks."))
-	
-	if (!is.vector(DataSources)) {
-		stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
+	#~~~~~~
+
+	if (is.null(MergedDataSources)) {
+
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks."))
+		
+		if (!is.vector(DataSources)) {
+			stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
+		}
+		
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed vector check."))
+
+		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterFormat)	
+		if (FALSE %in% DataSourcesCheckCharacters) {
+			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[DataSourcesCheckCharacters])
+		}
+		
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed string check."))
+
+		DataSourcesCheckExists <- sapply(DataSources, CheckVariableExists)
+		if (FALSE %in% DataSourcesCheckExists) {
+			stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", DataSources[DataSourcesCheckExists])
+		}
+
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed exists check."))
+		
+		eval(parse(text=DataFileName))
+
+		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
+		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
+		if (FALSE %in% DataSourcesCheckDataFrames) {
+			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", DataSources[DataSourcesCheckDataFrames])
+		}
+
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed data.frame check."))
+
+		#Check DataSources headers for proper names
+
+		CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
+		DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
+		if (FALSE %in% DataSourcesCheckHeaderNames) {
+			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are ", paste(ExpectedColumnNames, sep=" "), ". Please fix and rerun bmass: ", DataSources[DataSourcesCheckHeaderNames])
+		}
+
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check."))
+
 	}
-	
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed vector check."))
+	else {
+		
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- MergedDataSources file provided, going through data checks."))
 
-	DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterFormat)	
-	if (FALSE %in% DataSourcesCheckCharacters) {
-		stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[DataSourcesCheckCharacters])
+		###### do thissssss
+		#
+		#Routine for checks if MergedDataSources file provided?
+		#
+		###### do thissssss
+
 	}
-	
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed string check."))
-
-	DataSourcesCheckExists <- sapply(DataSources, CheckVariableExists)
-	if (FALSE %in% DataSourcesCheckExists) {
-		stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", DataSources[DataSourcesCheckExists])
-	}
-
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed exists check."))
-	
-	eval(parse(text=DataFileName))
-
-	#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
-	DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
-	if (FALSE %in% DataSourcesCheckDataFrames) {
-		stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", DataSources[DataSourcesCheckDataFrames])
-	}
-
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed data.frame check."))
-
-	#Check DataSources headers for proper names
-
-	CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
-	DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
-	if (FALSE %in% DataSourcesCheckHeaderNames) {
-		stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are ", paste(ExpectedColumnNames, sep=" "), ". Please fix and rerun bmass: ", DataSources[DataSourcesCheckHeaderNames])
-	}
-
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check."))
 
 	#Preparing and merging data
 	~~~~~~
 	
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Beginning DataSources merging."))
 
+	###### do thissssss
+	#
+	#Change p-values based on direction of effect?
+	#
+	###### do thissssss
+
 	#Merge different data sources into main file with all *$pValue & *$n entries for each pheno
+	
+	MergedDataSources <- data.frame()
+	for CurrentDataSource in DataSources {
+		
+		eval(parse(text=DataSource1))	
+		ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "p_Value", "N")
+	
+		if (nrow(MergedDataSources)==0) {
+			MergedDataSources <- eval(parse(text=CurrentDataSource))	
+		}
+		else {
+		
+			CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"))
+			CurrentDataSource_temp$ChrBP <- paste(CurrentDataSource_temp$Ch	
+
+			eval(parse(text=paste(CurrentDataSource, "$ChrBP <- ", paste(paste(CurrentDataSource, "$Chr", sep=""), paste(CurrentDataSource, "$BP", sep=""), sep="_"), sep="")))
+			> blah1$ChrBP <- paste(blah1$Chr, blah1$BP, sep="_")
+			
+			merge(MergedDataSources, eval(parse(text=CurrentDataSource))[,c("",)], by="rsID")
+		}
+	
+		rm(CurrentDataSource_temp)
+	
+	}
 
 
 
@@ -343,7 +388,56 @@ val1
 [1] FALSE
 > FALSE %in% c(TRUE, TRUE, FALSE)
 [1] TRUE
-
+> blah <- data.frame()
+> blah
+data frame with 0 columns and 0 rows
+> nrow(blah)
+[1] 0
+> Data1
+  Chr   BP A1  MAF Direction p_Value    N
+1   1 1000  A 0.20         -  0.0100 2500
+2   1 2000  G 0.10         -  0.0760 2467
+3   2 3000  T 0.06         +  0.3100 2761
+4   3 4000  C 0.40         +  0.0056 2310
+5   4 5000  C 0.35         -  0.7200 2632
+> blah1 <- data.frame()
+> blah1 <- Data1
+> blah1
+  Chr   BP A1  MAF Direction p_Value    N
+1   1 1000  A 0.20         -  0.0100 2500
+2   1 2000  G 0.10         -  0.0760 2467
+3   2 3000  T 0.06         +  0.3100 2761
+4   3 4000  C 0.40         +  0.0056 2310
+5   4 5000  C 0.35         -  0.7200 2632
+> eval(parse(text="blah1$nana1 <- c(1,2,3,4,5)"))
+> blah1
+  Chr   BP A1  MAF Direction p_Value    N nana1
+1   1 1000  A 0.20         -  0.0100 2500     1
+2   1 2000  G 0.10         -  0.0760 2467     2
+3   2 3000  T 0.06         +  0.3100 2761     3
+4   3 4000  C 0.40         +  0.0056 2310     4
+5   4 5000  C 0.35         -  0.7200 2632     5
+> eval(parse(text=paste("blah1", "$nana2 <- c(1,2,3,4,5)", sep="")))
+> blah1
+  Chr   BP A1  MAF Direction p_Value    N nana1 nana2
+1   1 1000  A 0.20         -  0.0100 2500     1     1
+2   1 2000  G 0.10         -  0.0760 2467     2     2
+3   2 3000  T 0.06         +  0.3100 2761     3     3
+4   3 4000  C 0.40         +  0.0056 2310     4     4
+5   4 5000  C 0.35         -  0.7200 2632     5     5
+> val2 <- "shana"
+> paste(val2, " haha ", paste("blahblah", val2), sep="")
+[1] "shana haha blahblah shana"
+> paste(val2, " haha ", paste("blahblah", val2, sep="_"), sep="")
+[1] "shana haha blahblah_shana"
+> blah1$ChrBP <- paste(blah1$Chr, blah1$BP, sep="_")
+> blah1
+  Chr   BP A1  MAF Direction p_Value    N nana1 nana2  ChrBP
+1   1 1000  A 0.20         -  0.0100 2500     1     1 1_1000
+2   1 2000  G 0.10         -  0.0760 2467     2     2 1_2000
+3   2 3000  T 0.06         +  0.3100 2761     3     3 2_3000
+4   3 4000  C 0.40         +  0.0056 2310     4     4 3_4000
+5   4 5000  C 0.35         -  0.7200 2632     5     5 4_5000
 ~~~
 
 
