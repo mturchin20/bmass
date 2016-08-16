@@ -1,4 +1,4 @@
-Chr 	BP 	A1 	MAF 	Direction 	p_Value	N
+Chr 	BP 	A1 	MAF 	Direction 	pValue	N
 1	1000	A	.2	-	.01	2500
 1	2000	G	.1	-	.076	2467
 2	3000	T	.06	+	.31	2761
