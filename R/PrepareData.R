@@ -14,12 +14,8 @@
 #' func(10, 1)
 
 #Data1 <- read.table("../data/TestData1.txt")
-#Data1
 #ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
-#Data2 <- as.matrix(Data1)
-#Data2
 #DataList <- c("Data1", "Data2")
-#	if (!is.data.frame(eval(parse(text=DataFileName)))) {
 
 CheckCharacterFormat <- function (DataSource1) {
 	returnValue <- FALSE
@@ -65,6 +61,40 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 	}
 
 	return(returnValueVector)
+}
+
+
+
+
+
+
+#Annotating merged data with, if provided, GWAS SNPs
+#~~~~~~
+
+AnnotateMergedDataWithGWASsnps <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
+	annot1 <- 0
+	for (snpIndex in 1:nrow(GWASsnps1)) {
+		if (GWASsnps1[snpIndex,]$Chr == MergedDataSource1["Chr"]) {
+			if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
+				annot1 <- 1
+			}
+			else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (annot1 != 1)) {
+				annot1 <- 2	
+			}
+			else {
+				PH <- NULL
+			}
+		}
+	}
+	return(annot1)
+}
+
+GetZScoreAndDirection < - function(pValue1, Direction1) {
+	Zscore <- qnorm(log(pValue1), log.p=TRUE);
+	if (Direction1 == "-") {
+		Zscore <- Zscore * -1;
+	}
+	return(ZScore);
 }
 
 
@@ -150,7 +180,7 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 #~~~
 
 #Convert a comma-separated string of data file locations into a vector
-#20160812 CHECK_0 -- Prob: Come up with way to send off log message and then immediately leave program due to an error. Eg, here in this instance, if there are no commas the program should exit -- either the person has inputted things incorrectly or the person has supplied only a single datafile. The former should be obvious and in the latter bmass presumably cannot run on just one file/one phenotype.
+#20160812 20160814 CHECK_1 -- Prob: Come up with way to send off log message and then immediately leave program due to an error. Eg, here in this instance, if there are no commas the program should exit -- either the person has inputted things incorrectly or the person has supplied only a single datafile. The former should be obvious and in the latter bmass presumably cannot run on just one file/one phenotype. Soln: Found/used stop().
 
 #~~~
 #> txt3 <- "nana,nana2"
@@ -192,17 +222,14 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 #[1] "nan2"
 #~~~
 
-
-
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
-#PrepareData <- function (ColumnNames, DataFileNames, OutputFileBase) {
-#PrepareData <- function (ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) { #20160812 NOTE -- deciding to remove 'DataFileNames' as a requested/given input. Just going to assume that we are given a list of file locations and I will parse that list for the 'names' of the datasources 
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), MergedDataSources=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), MergedDataSources=NULL) {
 
 	print(DataSources)
 
 	LogFile1 <- c()
+	bmassOutput <- list()
 
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning bmass."))
 
@@ -233,8 +260,6 @@ bmass <- function (DataSources, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direc
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed exists check."))
 		
-#		eval(parse(text=DataFileName))
-
 		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
 		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
 		if (FALSE %in% DataSourcesCheckDataFrames) {
@@ -266,6 +291,12 @@ bmass <- function (DataSources, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direc
 
 	}
 
+	
+
+	
+	
+	
+	
 	#Preparing and merging data
 	#~~~~~~
 	
@@ -275,32 +306,52 @@ bmass <- function (DataSources, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direc
 	#
 	#Change p-values based on direction of effect?
 	#
+	#
 	###### do thissssss
-
+	
 	#Merge different data sources into main file with all *$pValue & *$n entries for each pheno
 	
 	MergedDataSources <- data.frame()
 	for (CurrentDataSource in DataSources) {
-		
-#		eval(parse(text=DataSource1))	
-#		ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 	
+		###### do thissssss
+		#
+		#Keep MAF and average across datasets?
+		#
+		###### do thissssss
+		
 		if (nrow(MergedDataSources)==0) {
 			MergedDataSources <- eval(parse(text=CurrentDataSource))	
+			MergedDataSources$Zscore <- sapply(MergedDataSources[,c("pValue", "Direction")], GetZScoreAndDirection) 
+			MergedDataSources$pValue <- NULL
+			MergedDataSources$Direction <- NULL
 			MergedDataSources_namesCurrent <- names(MergedDataSources)
 			MergedDataSources_namesNew <- c()
 			for (columnHeader1 in MergedDataSources_namesCurrent) {
-				MergedDataSources_namesNew <- c(MergedDataSources_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))	
+				#ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
+				if (columnHeader1 %in% c("Chr", "BP")) {
+					MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
+				}
+				else {
+					MergedDataSources_namesNew <- c(MergedDataSources_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))	
+				}
 			}
 			names(MergedDataSources) <- MergedDataSources_namesNew
-			MergedDataSources$ChrBP <- paste(eval(parse(text=paste("MergedDataSources$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("MergedDataSources$", CurrentDataSource, "_BP", sep=""))), sep="_")
+#			MergedDataSources$ChrBP <- paste(eval(parse(text=paste("MergedDataSources$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("MergedDataSources$", CurrentDataSource, "_BP", sep=""))), sep="_")
+			MergedDataSources$ChrBP <- paste(MergedDataSources$Chr, MergedDataSources$BP, sep="_")
 		}
 		else {
-		
-#			eval(parse(text=paste(CurrentDataSource, "$ChrBP <- ", paste(paste(CurrentDataSource, "$Chr", sep=""), paste(CurrentDataSource, "$BP", sep=""), sep="_"), sep="")))
-#			> blah1$ChrBP <- paste(blah1$Chr, blah1$BP, sep="_")
+			CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"Direction\", \"pValue\", \"N\")]", sep="")))
+				for (CurrentDataSource in DataSources) {
+	
+					eval(parse(text=paste(CurrentDataSource, "$ZScore <- sapply(", CurrentDataSource, "[,c(\"pValue\", \"Direction\")] function(x,y) { ZScore <- qnorm(log(x), log.p=TRUE); if (y == "-") { ZScore <- -1 * ZScore; }			
+					CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"pValue\", \"N\")]", sep="")))
+				}
 			
-			CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"pValue\", \"N\")]", sep="")))
+			MergedDataSources$Zscore <- sapply(MergedDataSources[,c("pValue", "Direction")], GetZScoreAndDirection) 
+			CurrentDataSource_temp$Zscore <- sapply(CurrentDataSource_temp[,c("pValue", "Direction")], function(x,y) { ZScore <- qnorm(log(x), log.p=TRUE); if (y == "-") { ZScore <- -1 * ZScore; } return(ZScore);})
+			CurrentDataSource_temp$Direction <- NULL
+			CurrentDataSource_temp$pValue <- NULL
 			CurrentDataSource_temp_namesCurrent <- names(CurrentDataSource_temp)
 			CurrentDataSource_temp_namesNew <- c()
 			for (columnHeader1 in CurrentDataSource_temp_namesCurrent) {
@@ -318,17 +369,71 @@ bmass <- function (DataSources, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direc
 			MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 		
 			rm(CurrentDataSource_temp)
-		
 		}
-	
 	}
 
-	print(MergedDataSources)
+#	print(MergedDataSources)
 
-	#Annotate with GWAS SNPs now?
+	#Annotating merged data with, if provided, GWAS SNPs
+	#~~~~~~
 
-	#Cut down to marginal SNPs now and get RSS0, mvstat, pvals?
+	if (is.null(GWASsnps)) {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list."))
+		MergedDataSources$GWASannot <- 0
+	}
+	else {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources."))
+		MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateMergedDataWithGWASsnps, GWASsnps1=GWASsnps, BPWindow=500000) 
+	}
 
+	print(MergedDataSources)	
+
+	#Calculating RSS0 and subsetting down to marginally significant SNPs
+	#~~~~~~
+
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Determining Z-score correlation matrix."))
+	
+
+	bmassOutput$ZScoreCorMatrix <- ZScoreCor
+
+
+
+
+
+
+
+	nullset = (abs(dt3$Z.tc)<2) & (abs(dt3$Z.tg)<2) & (abs(dt3$Z.hdl)<2) & (abs(dt3$Z.ldl)<2) #extract null Z values
+Z = cbind(Z.tc,Z.tg,Z.hdl,Z.ldl)
+
+#compute correlation based only on "null" results
+Znull = Z[nullset,]
+RSS0 =cor(Znull)
+RSS0inv = chol2inv(chol(RSS0))
+
+mvstat =  rowSums(Z * (Z %*% RSS0inv)) # comptues Z RSS0^-1 Z'
+dt3$mvstat = mvstat
+statchi = -log10(exp(1))*pchisq(mvstat,df=4,log.p=TRUE,lower.tail=FALSE)
+dt3$mvp = statchi
+
+maxZ2 = apply(Z^2,1,max)
+max.unip = -log10(exp(1))*pchisq(maxZ2,df=1,log.p=TRUE, lower.tail=FALSE)
+dt3$unip = max.unip
+
+dtsignif = dt3[dt3$mvp>-log10(5e-8) | dt3$unip>-log10(5e-8),]
+dtlesssignif = dt3[dt3$mvp>-log10(1e-6) | dt3$unip>-log10(1e-6),]
+
+
+write.table(file="dtsignif.txt",dtsignif,sep=",",row.names=F,quote=F)
+write.table(file="dtsignif.rs.txt",dtsignif$rs,sep=",",row.names=F,quote=F)
+write.table(file="dtlesssignif.txt",dtlesssignif,sep=",",row.names=F,quote=F)
+write.table(file="dtlesssignif.rs.txt",dtlesssignif$rs,sep=",",row.names=F,quote=F)
+write.table(file="dtlesssignif.rs.txt",paste(dtlesssignif$rs,"[[:space:]]",sep=""),row.names=F,quote=F)
+
+
+
+
+	
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on threshold: ", as.character(SNPMarginalpValThreshold) ,"."))
 
 
 }
@@ -495,6 +600,55 @@ if (FALSE) {
 #3    2761       0.3100    2761       0.3100    2761
 #4    2310       0.0056    2310       0.0056    2310
 #5    2632       0.7200    2632       0.7200    2632
+#
+#> bmass(c("Data1", "Data2"))
+#[1] "Data1" "Data2"
+#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
+#1 1_1000   1 1000        A      0.20               -       0.0100    2500
+#2 1_2000   1 2000        G      0.10               -       0.0760    2467
+#3 2_3000   2 3000        T      0.06               +       0.3100    2761
+#4 3_4000   3 4000        C      0.40               +       0.0056    2310
+#5 4_5000   4 5000        C      0.35               -       0.7200    2632
+#  Data2_pValue Data2_N
+#1       0.0100    2500
+#2       0.0760    2467
+#3       0.3100    2761
+#4       0.0056    2310
+#5       0.7200    2632
+#> SigSNPs
+#  Chr   BP
+#1   1 1000
+#2   2 3000
+#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
+#[1] "Data1" "Data2"
+#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
+#1 1_1000   1 1000        A      0.20               -       0.0100    2500
+#2 1_2000   1 2000        G      0.10               -       0.0760    2467
+#3 2_3000   2 3000        T      0.06               +       0.3100    2761
+#4 3_4000   3 4000        C      0.40               +       0.0056    2310
+#5 4_5000   4 5000        C      0.35               -       0.7200    2632
+#  Data2_pValue Data2_N GWASannot
+#1       0.0100    2500         1
+#2       0.0760    2467         2
+#3       0.3100    2761         1
+#4       0.0056    2310         0
+#5       0.7200    2632         0
+#> val6
+#list()
+#> val6$bps <- c(1,2,3,4,5)
+#> val6
+#$bps
+#[1] 1 2 3 4 5
+#
+#> val6$yal1 <- matrix(c(1,2,3,4), nrow=2) 
+#> val6
+#$bps
+#[1] 1 2 3 4 5
+#
+#$yal1
+#     [,1] [,2]
+#[1,]    1    3
+#[2,]    2    4
 #
 }
 
