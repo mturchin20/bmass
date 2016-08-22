@@ -13,7 +13,11 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#Data1 <- read.table("../data/TestData1.txt")
+#Data1 <- read.table("../data/TestData1.txt", header=T)
+#Data2 <- Data1
+#SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
+#source("PrepareData.R")
+#bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
 #ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 #DataList <- c("Data1", "Data2")
 
@@ -63,7 +67,15 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 	return(returnValueVector)
 }
 
-
+CheckDataSourceDirectionColumn <- function (DataSources1) {
+	returnValue <- TRUE
+	for (DirectionValue in eval(parse(text=paste(DataSources1, "$Direction", sep="")))) {
+		if ((DirectionValue != "+") && (DirectionValue != "-")) {
+			returnValue <- FALSE
+		}
+	}
+	return(returnValue)
+}
 
 
 
@@ -89,10 +101,10 @@ AnnotateMergedDataWithGWASsnps <- function (MergedDataSource1, GWASsnps1, BPWind
 	return(annot1)
 }
 
-GetZScoreAndDirection < - function(pValue1, Direction1) {
-	Zscore <- qnorm(log(pValue1), log.p=TRUE);
-	if (Direction1 == "-") {
-		Zscore <- Zscore * -1;
+GetZScoreAndDirection <- function(DataSources1) {
+	ZScore <- qnorm(log(as.numeric(as.character(DataSources1["pValue"]))/2), lower.tail=FALSE, log.p=TRUE);
+	if (DataSources1["Direction"] == "-") {
+		ZScore <- ZScore * -1;
 	}
 	return(ZScore);
 }
@@ -224,7 +236,7 @@ GetZScoreAndDirection < - function(pValue1, Direction1) {
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), MergedDataSources=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(), MergedDataSources=NULL) {
 
 	print(DataSources)
 
@@ -277,6 +289,13 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		}
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check."))
+	
+		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
+		if (FALSE %in% DataSourcesCheckDirectionColumn) {
+			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDirectionColumn])
+		}
+		
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed Direction column check."))
 
 	}
 	else {
@@ -290,10 +309,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		###### do thissssss
 
 	}
-
-	
-
-	
 	
 	
 	
@@ -305,7 +320,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	###### do thissssss
 	#
 	#Change p-values based on direction of effect?
-	#
 	#
 	###### do thissssss
 	
@@ -322,9 +336,9 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		
 		if (nrow(MergedDataSources)==0) {
 			MergedDataSources <- eval(parse(text=CurrentDataSource))	
-			MergedDataSources$Zscore <- sapply(MergedDataSources[,c("pValue", "Direction")], GetZScoreAndDirection) 
-			MergedDataSources$pValue <- NULL
-			MergedDataSources$Direction <- NULL
+			MergedDataSources$ZScore <- apply(MergedDataSources[,c("pValue", "Direction")], 1, GetZScoreAndDirection) 
+#			MergedDataSources$pValue <- NULL
+#			MergedDataSources$Direction <- NULL
 			MergedDataSources_namesCurrent <- names(MergedDataSources)
 			MergedDataSources_namesNew <- c()
 			for (columnHeader1 in MergedDataSources_namesCurrent) {
@@ -342,16 +356,9 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		}
 		else {
 			CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"Direction\", \"pValue\", \"N\")]", sep="")))
-				for (CurrentDataSource in DataSources) {
-	
-					eval(parse(text=paste(CurrentDataSource, "$ZScore <- sapply(", CurrentDataSource, "[,c(\"pValue\", \"Direction\")] function(x,y) { ZScore <- qnorm(log(x), log.p=TRUE); if (y == "-") { ZScore <- -1 * ZScore; }			
-					CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"pValue\", \"N\")]", sep="")))
-				}
-			
-			MergedDataSources$Zscore <- sapply(MergedDataSources[,c("pValue", "Direction")], GetZScoreAndDirection) 
-			CurrentDataSource_temp$Zscore <- sapply(CurrentDataSource_temp[,c("pValue", "Direction")], function(x,y) { ZScore <- qnorm(log(x), log.p=TRUE); if (y == "-") { ZScore <- -1 * ZScore; } return(ZScore);})
-			CurrentDataSource_temp$Direction <- NULL
-			CurrentDataSource_temp$pValue <- NULL
+			CurrentDataSource_temp$ZScore <- apply(CurrentDataSource_temp[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
+#			CurrentDataSource_temp$Direction <- NULL
+#			CurrentDataSource_temp$pValue <- NULL
 			CurrentDataSource_temp_namesCurrent <- names(CurrentDataSource_temp)
 			CurrentDataSource_temp_namesNew <- c()
 			for (columnHeader1 in CurrentDataSource_temp_namesCurrent) {
@@ -393,41 +400,71 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Determining Z-score correlation matrix."))
 	
+	ZScoresFull_CommandText <- ""
+	for (DataSource in DataSources) {
+		if (length(strsplit(ZScoresFull_CommandText, "")[[1]]) == 0) {
+			ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, "cbind(MergedDataSources$", DataSource, "_ZScore", sep="")
+		}
+		else {
+			ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, ",MergedDataSources$", DataSource, "_ZScore", sep="")
+		}
+	}
+	ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, ")", sep="")
+	ZScoresFull <- eval(parse(text=ZScoresFull_CommandText))
 
-	bmassOutput$ZScoreCorMatrix <- ZScoreCor
+	ZScoresFullNames_CommandText <- c()
+	for (DataSource in DataSources) {
+		if (length(strsplit(ZScoresFullNames_CommandText, "")[[1]]) == 0) {
+			ZScoresFullNames_CommandText <- paste(ZScoresFullNames_CommandText, "c(", DataSource, "_ZScore", sep="")
+		}
+		else {
+			ZScoresFullNames_CommandText <- paste(ZScoresFullNames_CommandText, ",", DataSource, "_ZScore", sep="")
+		}
+	}
+	ZScoresFullNames_CommandText <- paste(ZScoresFullNames_CommandText, ")", sep="")
+	names(ZScoresFull) <- ZScoresFullNames_CommandText
+	print(ZScoresFull)
 
+	ZScoresNullSetSelection_CommandText <- ""
+	for (DataSource in DataSources) {
+		if (length(strsplit(ZScoresNullSetSelection_CommandText, "")[[1]]) == 0) {
+			ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, "(abs(MergedDataSources$", DataSource, "_ZScore)<2)", sep="")
+		}
+		else {
+			ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, " & (abs(MergedDataSources$", DataSource, "_ZScore)<2)", sep="") 
+		}
+	}
+	ZScoresNullSetSelection <- eval(parse(text=ZScoresNullSetSelection_CommandText))
+#	ZScoresNullset <- Merged
 
+#	bmassOutput$ZScoreCorMatrix <- ZScoreCor
 
-
-
-
-
-	nullset = (abs(dt3$Z.tc)<2) & (abs(dt3$Z.tg)<2) & (abs(dt3$Z.hdl)<2) & (abs(dt3$Z.ldl)<2) #extract null Z values
-Z = cbind(Z.tc,Z.tg,Z.hdl,Z.ldl)
+#	nullset = (abs(dt3$Z.tc)<2) & (abs(dt3$Z.tg)<2) & (abs(dt3$Z.hdl)<2) & (abs(dt3$Z.ldl)<2) #extract null Z values
+#Z = cbind(Z.tc,Z.tg,Z.hdl,Z.ldl)
 
 #compute correlation based only on "null" results
-Znull = Z[nullset,]
-RSS0 =cor(Znull)
-RSS0inv = chol2inv(chol(RSS0))
+#Znull = Z[nullset,]
+#RSS0 =cor(Znull)
+#RSS0inv = chol2inv(chol(RSS0))
 
-mvstat =  rowSums(Z * (Z %*% RSS0inv)) # comptues Z RSS0^-1 Z'
-dt3$mvstat = mvstat
-statchi = -log10(exp(1))*pchisq(mvstat,df=4,log.p=TRUE,lower.tail=FALSE)
-dt3$mvp = statchi
+#mvstat =  rowSums(Z * (Z %*% RSS0inv)) # comptues Z RSS0^-1 Z'
+#dt3$mvstat = mvstat
+#statchi = -log10(exp(1))*pchisq(mvstat,df=4,log.p=TRUE,lower.tail=FALSE)
+#dt3$mvp = statchi
 
-maxZ2 = apply(Z^2,1,max)
-max.unip = -log10(exp(1))*pchisq(maxZ2,df=1,log.p=TRUE, lower.tail=FALSE)
-dt3$unip = max.unip
+#maxZ2 = apply(Z^2,1,max)
+#max.unip = -log10(exp(1))*pchisq(maxZ2,df=1,log.p=TRUE, lower.tail=FALSE)
+#dt3$unip = max.unip
 
-dtsignif = dt3[dt3$mvp>-log10(5e-8) | dt3$unip>-log10(5e-8),]
-dtlesssignif = dt3[dt3$mvp>-log10(1e-6) | dt3$unip>-log10(1e-6),]
+#dtsignif = dt3[dt3$mvp>-log10(5e-8) | dt3$unip>-log10(5e-8),]
+#dtlesssignif = dt3[dt3$mvp>-log10(1e-6) | dt3$unip>-log10(1e-6),]
 
 
-write.table(file="dtsignif.txt",dtsignif,sep=",",row.names=F,quote=F)
-write.table(file="dtsignif.rs.txt",dtsignif$rs,sep=",",row.names=F,quote=F)
-write.table(file="dtlesssignif.txt",dtlesssignif,sep=",",row.names=F,quote=F)
-write.table(file="dtlesssignif.rs.txt",dtlesssignif$rs,sep=",",row.names=F,quote=F)
-write.table(file="dtlesssignif.rs.txt",paste(dtlesssignif$rs,"[[:space:]]",sep=""),row.names=F,quote=F)
+#write.table(file="dtsignif.txt",dtsignif,sep=",",row.names=F,quote=F)
+#write.table(file="dtsignif.rs.txt",dtsignif$rs,sep=",",row.names=F,quote=F)
+#write.table(file="dtlesssignif.txt",dtlesssignif,sep=",",row.names=F,quote=F)
+#write.table(file="dtlesssignif.rs.txt",dtlesssignif$rs,sep=",",row.names=F,quote=F)
+#write.table(file="dtlesssignif.rs.txt",paste(dtlesssignif$rs,"[[:space:]]",sep=""),row.names=F,quote=F)
 
 
 
@@ -650,6 +687,48 @@ if (FALSE) {
 #[1,]    1    3
 #[2,]    2    4
 #
+#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
+#[1] "Data1" "Data2"
+#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_N Data1_ZScore Data2_N Data2_ZScore
+#1 1_1000   1 1000        A      0.20    2500    2.3263479    2500    2.3263479
+#2 1_2000   1 2000        G      0.10    2467    1.4325027    2467    1.4325027
+#3 2_3000   2 3000        T      0.06    2761   -0.4958503    2761   -0.4958503
+#4 3_4000   3 4000        C      0.40    2310   -2.5363960    2310   -2.5363960
+#5 4_5000   4 5000        C      0.35    2632   -0.5828415    2632   -0.5828415
+#  GWASannot
+#1         1
+#2         2
+#3         1
+#4         0
+#5         0
+#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
+#[1] "Data1" "Data2"
+#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
+#1 1_1000   1 1000        A      0.20               -       0.0100    2500
+#2 1_2000   1 2000        G      0.10               -       0.0760    2467
+#3 2_3000   2 3000        T      0.06               +       0.3100    2761
+#4 3_4000   3 4000        C      0.40               +       0.0056    2310
+#5 4_5000   4 5000        C      0.35               -       0.7200    2632
+#  Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
+#1    2.3263479               -       0.0100    2500    2.3263479         1
+#2    1.4325027               -       0.0760    2467    1.4325027         2
+#3   -0.4958503               +       0.3100    2761   -0.4958503         1
+#4   -2.5363960               +       0.0056    2310   -2.5363960         0
+#5   -0.5828415               -       0.7200    2632   -0.5828415         0
+#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
+#[1] "Data1" "Data2"
+#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
+#1 1_1000   1 1000        A      0.20               -       0.0100    2500
+#2 1_2000   1 2000        G      0.10               -       0.0760    2467
+#3 2_3000   2 3000        T      0.06               +       0.3100    2761
+#4 3_4000   3 4000        C      0.40               +       0.0056    2310
+#5 4_5000   4 5000        C      0.35               -       0.7200    2632
+#  Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
+#1   -2.3263479               -       0.0100    2500   -2.3263479         1
+#2   -1.4325027               -       0.0760    2467   -1.4325027         2
+#3    0.4958503               +       0.3100    2761    0.4958503         1
+#4    2.5363960               +       0.0056    2310    2.5363960         0
+#5    0.5828415               -       0.7200    2632    0.5828415         0
 }
 
 
