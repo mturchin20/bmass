@@ -13,11 +13,11 @@
 
 
 
-bmass <- function(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) {
-
-	PrepareData(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase)
-
-}
+#bmass <- function(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) {
+#
+#	PrepareData(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase)
+#
+#}
 
 
 

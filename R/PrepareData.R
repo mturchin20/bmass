@@ -14,7 +14,7 @@
 #' func(10, 1)
 
 #Data1 <- read.table("../data/TestData1.txt", header=T)
-#Data2 <- Data1
+#Data2 <- read.table("../data/TestData2.txt", header=T)
 #SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
 #source("PrepareData.R")
 #bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
@@ -86,7 +86,7 @@ CheckDataSourceDirectionColumn <- function (DataSources1) {
 AnnotateMergedDataWithGWASsnps <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
 	annot1 <- 0
 	for (snpIndex in 1:nrow(GWASsnps1)) {
-		if (GWASsnps1[snpIndex,]$Chr == MergedDataSource1["Chr"]) {
+		if (GWASsnps1[snpIndex,]$Chr == as.numeric(as.character(MergedDataSource1["Chr"]))) {
 			if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
 				annot1 <- 1
 			}
@@ -97,10 +97,13 @@ AnnotateMergedDataWithGWASsnps <- function (MergedDataSource1, GWASsnps1, BPWind
 				PH <- NULL
 			}
 		}
+			print("yaya")
+			print(as.numeric(as.character(MergedDataSource1["Chr"])))
+			print(GWASsnps1[snpIndex,]$Chr)
 	}
 	return(annot1)
 }
-
+#val1 <- qnorm(log(abs(x)/2), lower.tail=FALSE, log.p=TRUE
 GetZScoreAndDirection <- function(DataSources1) {
 	ZScore <- qnorm(log(as.numeric(as.character(DataSources1["pValue"]))/2), lower.tail=FALSE, log.p=TRUE);
 	if (DataSources1["Direction"] == "-") {
@@ -109,6 +112,27 @@ GetZScoreAndDirection <- function(DataSources1) {
 	return(ZScore);
 }
 
+CheckForInfiniteZScores <- function(DataSources1_ZScores) {
+	returnValue <- FALSE
+	CheckValues <- is.infinite(DataSources1_ZScores)
+	if (TRUE %in% CheckValues) {
+		returnValue <- TRUE
+	}
+	return(returnValue)
+}
+
+ReplaceInfiniteZScoresWithMax <- function(DataSources1_ZScores) {
+	CheckValues <- is.infinite(DataSources1_ZScores)
+	if (TRUE %in% CheckValues) {
+		CheckValues_positive <- is.infinite(DataSources1_ZScores) & DataSources1_ZScores > 0
+		CheckValues_negative <- is.infinite(DataSources1_ZScores) & DataSources1_ZScores < 0
+		maxZScore <- max(DataSources1_ZScores[!CheckValues])
+		minZScore <- min(DataSources1_ZScores[!CheckValues])
+		DataSources1_ZScores[CheckValues_positive] <- maxZScore
+		DataSources1_ZScores[CheckValues_negative] <- minZScore
+	}
+	return(DataSources1_ZScores)	
+}
 
 #~~~
 #> read.table("../data/TestData1.txt")
@@ -243,34 +267,34 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	LogFile1 <- c()
 	bmassOutput <- list()
 
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning bmass."))
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
 
 	#Loading and checking data
 	#~~~~~~
 
 	if (is.null(MergedDataSources)) {
 
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks.", sep=""))
 		
 		if (!is.vector(DataSources)) {
 			stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
 		}
 		
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed vector check."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed vector check.", sep=""))
 
 		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterFormat)	
 		if (FALSE %in% DataSourcesCheckCharacters) {
 			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckCharacters])
 		}
 		
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed string check."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed string check.", sep=""))
 
 		DataSourcesCheckExists <- sapply(DataSources, CheckVariableExists)
 		if (FALSE %in% DataSourcesCheckExists) {
 			stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckExists])
 		}
 
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed exists check."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed exists check.", sep=""))
 		
 		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
 		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
@@ -278,7 +302,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDataFrames])
 		}
 
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed data.frame check."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed data.frame check.", sep=""))
 
 		#Check DataSources headers for proper names
 
@@ -288,19 +312,25 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are \"", paste(ExpectedColumnNames, collapse=" "), "\". Please fix and rerun bmass: ", DataSources[!DataSourcesCheckHeaderNames])
 		}
 
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
 	
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
 			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDirectionColumn])
 		}
 		
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed Direction column check."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed Direction column check.", sep=""))
+
+		###### do thissssss
+		#
+		#Check for 'X' chromosomes and convert to 23 & print warning/logfile statement
+		#
+		###### do thissssss
 
 	}
 	else {
 		
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- MergedDataSources file provided, going through data checks."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- MergedDataSources file provided, going through data checks.", sep=""))
 
 		###### do thissssss
 		#
@@ -315,7 +345,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	#Preparing and merging data
 	#~~~~~~
 	
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Beginning DataSources merging."))
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Beginning DataSources merging.", sep=""))
 
 	###### do thissssss
 	#
@@ -385,11 +415,11 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	#~~~~~~
 
 	if (is.null(GWASsnps)) {
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
 		MergedDataSources$GWASannot <- 0
 	}
 	else {
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources."))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
 		MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateMergedDataWithGWASsnps, GWASsnps1=GWASsnps, BPWindow=500000) 
 	}
 
@@ -398,7 +428,8 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	#Calculating RSS0 and subsetting down to marginally significant SNPs
 	#~~~~~~
 
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Determining Z-score correlation matrix."))
+	#Getting ZScore matrix
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Determining Z-score correlation matrix.", sep=""))
 	
 	ZScoresFull_CommandText <- ""
 	for (DataSource in DataSources) {
@@ -414,63 +445,64 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 	ZScoresFullNames_CommandText <- c()
 	for (DataSource in DataSources) {
-		if (length(strsplit(ZScoresFullNames_CommandText, "")[[1]]) == 0) {
-			ZScoresFullNames_CommandText <- paste(ZScoresFullNames_CommandText, "c(", DataSource, "_ZScore", sep="")
-		}
-		else {
-			ZScoresFullNames_CommandText <- paste(ZScoresFullNames_CommandText, ",", DataSource, "_ZScore", sep="")
-		}
+		ZScoresFullNames_CommandText <- c(ZScoresFullNames_CommandText, paste(DataSource, "_ZScore", sep=""))
 	}
-	ZScoresFullNames_CommandText <- paste(ZScoresFullNames_CommandText, ")", sep="")
-	names(ZScoresFull) <- ZScoresFullNames_CommandText
+	colnames(ZScoresFull) <- ZScoresFullNames_CommandText
 	print(ZScoresFull)
 
+	#Checking ZScore matrix for infinites and replacing with appropriate max/min values
+	ZScoresFull_InfiniteCheck <- apply(ZScoresFull, 2, CheckForInfiniteZScores)
+	if (TRUE %in% ZScoresFull_InfiniteCheck) {	
+		warning(paste(format(Sys.time()), " -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.", sep=""))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.", sep=""))
+		ZScoresFull <- apply(ZScoresFull, 2, ReplaceInfiniteZScoresWithMax)
+		for (ZScoresFull_colName in colnames(ZScoresFull)) {
+			print(ZScoresFull_colName)
+			eval(parse(text=paste("MergedDataSources$", ZScoresFull_colName, " <- ZScoresFull[,\"", ZScoresFull_colName, "\"]", sep="")))
+		}
+	}
+#	print(ZScoresFull)
+
+	#Getting ZScore null subset matrix, calculating correlation matrix, and associated naive multivariate statistics
 	ZScoresNullSetSelection_CommandText <- ""
 	for (DataSource in DataSources) {
 		if (length(strsplit(ZScoresNullSetSelection_CommandText, "")[[1]]) == 0) {
-			ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, "(abs(MergedDataSources$", DataSource, "_ZScore)<2)", sep="")
+			ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, "(abs(ZScoresFull[,\"", DataSource, "_ZScore\"])<2)", sep="")
 		}
 		else {
-			ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, " & (abs(MergedDataSources$", DataSource, "_ZScore)<2)", sep="") 
+			ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, " & (abs(ZScoresFull[,\"", DataSource, "_ZScore\"])<2)", sep="") 
 		}
 	}
 	ZScoresNullSetSelection <- eval(parse(text=ZScoresNullSetSelection_CommandText))
-#	ZScoresNullset <- Merged
+	ZScoresNullset <- ZScoresFull[ZScoresNullSetSelection,]
+#	print(ZScoresNullset)
 
-#	bmassOutput$ZScoreCorMatrix <- ZScoreCor
+	ZScoresCorMatrix <- cor(ZScoresNullset)
+#	print(ZScoresCorMatrix)
+	bmassOutput$ZScoresCorMatrix <- ZScoresCorMatrix
+	
+	ZScoresCorMatrix_Inverse <- chol2inv(chol(ZScoresCorMatrix))
+	ZScoresFull_mvstat <- rowSums(ZScoresFull * (ZScoresFull %*% ZScoresCorMatrix_Inverse))
+	MergedDataSources$mvstat <- ZScoresFull_mvstat
+	ZScoresFull_mvstat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_mvstat, df=ncol(ZScoresFull), log.p=TRUE, lower.tail=FALSE)
+	MergedDataSources$mvstat_log10pVal <- ZScoresFull_mvstat_log10pVal
 
-#	nullset = (abs(dt3$Z.tc)<2) & (abs(dt3$Z.tg)<2) & (abs(dt3$Z.hdl)<2) & (abs(dt3$Z.ldl)<2) #extract null Z values
-#Z = cbind(Z.tc,Z.tg,Z.hdl,Z.ldl)
+	ZScoresFull_unistat <- apply(ZScoresFull^2, 1, max)
+	MergedDataSources$unistat <- ZScoresFull_unistat
+	ZScoresFull_unistat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_unistat, df=1, log.p=TRUE, lower.tail=FALSE)
+	MergedDataSources$unistat_log10pVal <- ZScoresFull_unistat_log10pVal
 
-#compute correlation based only on "null" results
-#Znull = Z[nullset,]
-#RSS0 =cor(Znull)
-#RSS0inv = chol2inv(chol(RSS0))
+#	print(bmassOutput)
+	print(MergedDataSources)
 
-#mvstat =  rowSums(Z * (Z %*% RSS0inv)) # comptues Z RSS0^-1 Z'
-#dt3$mvstat = mvstat
-#statchi = -log10(exp(1))*pchisq(mvstat,df=4,log.p=TRUE,lower.tail=FALSE)
-#dt3$mvp = statchi
-
-#maxZ2 = apply(Z^2,1,max)
-#max.unip = -log10(exp(1))*pchisq(maxZ2,df=1,log.p=TRUE, lower.tail=FALSE)
-#dt3$unip = max.unip
-
-#dtsignif = dt3[dt3$mvp>-log10(5e-8) | dt3$unip>-log10(5e-8),]
-#dtlesssignif = dt3[dt3$mvp>-log10(1e-6) | dt3$unip>-log10(1e-6),]
-
-
-#write.table(file="dtsignif.txt",dtsignif,sep=",",row.names=F,quote=F)
-#write.table(file="dtsignif.rs.txt",dtsignif$rs,sep=",",row.names=F,quote=F)
-#write.table(file="dtlesssignif.txt",dtlesssignif,sep=",",row.names=F,quote=F)
-#write.table(file="dtlesssignif.rs.txt",dtlesssignif$rs,sep=",",row.names=F,quote=F)
-#write.table(file="dtlesssignif.rs.txt",paste(dtlesssignif$rs,"[[:space:]]",sep=""),row.names=F,quote=F)
-
-
+	#Creating subset of marginally significant SNPs using SNPMarginalpValThreshold
+	MergedDataSources_MarginalHits <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalpValThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalpValThreshold),] 
+	
+	print(MergedDataSources_MarginalHits)
 
 
 	
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on threshold: ", as.character(SNPMarginalpValThreshold) ,"."))
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on threshold: ", as.character(SNPMarginalpValThreshold) ,".", sep=""))
 
 
 }
@@ -729,6 +761,66 @@ if (FALSE) {
 #3    0.4958503               +       0.3100    2761    0.4958503         1
 #4    2.5363960               +       0.0056    2310    2.5363960         0
 #5    0.5828415               -       0.7200    2632    0.5828415         0
+#TimeTag 20160822
+#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
+#[1] "Data1" "Data2"
+#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
+#1 1_1000   1 1000        A      0.20               -       0.0100    2500
+#2 1_2000   1 2000        G      0.10               -       0.0760    2467
+#3 2_3000   2 3000        T      0.06               +       0.3100    2761
+#4 3_4000   3 4000        C      0.40               +       0.0056    2310
+#5 4_5000   4 5000        C      0.35               -       0.7200    2632
+#  Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
+#1   -2.5758293               -       0.0100    2500   -2.5758293         1
+#2   -1.7743819               -       0.0760    2467   -1.7743819         2
+#3    1.0152220               +       0.3100    2761    1.0152220         1
+#4    2.7703272               +       0.0056    2310    2.7703272         0
+#5   -0.3584588               -       0.7200    2632   -0.3584588         0
+#     Data1_ZScore Data2_ZScore
+#[1,]   -2.5758293   -2.5758293
+#[2,]   -1.7743819   -1.7743819
+#[3,]    1.0152220    1.0152220
+#[4,]    2.7703272    2.7703272
+#[5,]   -0.3584588   -0.3584588
+#     Data1_ZScore Data2_ZScore
+#[1,]   -1.7743819   -1.7743819
+#[2,]    1.0152220    1.0152220
+#[3,]   -0.3584588   -0.3584588
+#             Data1_ZScore Data2_ZScore
+#Data1_ZScore    1.0000000    0.5016039
+#Data2_ZScore    0.5016039    1.0000000
+#.
+#.
+#.
+#  Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
+#1   -2.5758293               -       0.0020    2500   -3.0902323         1
+#2   -1.7743819               -       0.8600    2467   -0.1763742         2
+#3    1.0152220               +       0.2100    2761    1.2535654         1
+#4    2.7703272               +       0.0076    2310    2.6693421         0
+#5   -0.3584588               -       0.1200    2632   -1.5547736         0
+#6          Inf               -       0.0000    2514         -Inf         0
+#     Data1_ZScore Data2_ZScore
+#[1,]   -2.5758293   -3.0902323
+#[2,]   -1.7743819   -0.1763742
+#[3,]    1.0152220    1.2535654
+#[4,]    2.7703272    2.6693421
+#[5,]   -0.3584588   -1.5547736
+#[6,]          Inf         -Inf
+#[1] FALSE FALSE FALSE FALSE FALSE FALSE
+#[1] FALSE FALSE FALSE FALSE FALSE  TRUE
+#     Data1_ZScore Data2_ZScore
+#[1,]   -2.5758293   -3.0902323
+#[2,]   -1.7743819   -0.1763742
+#[3,]    1.0152220    1.2535654
+#[4,]    2.7703272    2.6693421
+#[5,]   -0.3584588   -1.5547736
+#[6,]    2.7703272   -3.0902323
+#             Data1_ZScore Data2_ZScore
+#Data1_ZScore    1.0000000    0.5016039
+#Data2_ZScore    0.5016039    1.0000000
+#Warning message:
+#In bmass(c("Data1", "Data2"), GWASsnps = SigSNPs) :
+#  2016-08-22 13:22:29 -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.
 }
 
 

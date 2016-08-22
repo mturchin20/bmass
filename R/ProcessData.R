@@ -17,8 +17,11 @@
 #20160812 NOTE -- main file for running, applying, and organizing use of bmass code on prepped data
 
 
-Data1 <- read.table("../data/TestData1.txt")
-Data1
-ExpectedColumnNames1 <- c("Chr", "BP", "A1", "MAF", "Direction", "p_Value", "N")
-Data2 <- as.matrix(Data1)
-Data2
+#Data1 <- read.table("../data/TestData1.txt")
+#Data1
+#ExpectedColumnNames1 <- c("Chr", "BP", "A1", "MAF", "Direction", "p_Value", "N")
+#Data2 <- as.matrix(Data1)
+#Data2
+
+
+
