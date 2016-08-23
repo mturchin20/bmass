@@ -292,6 +292,8 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 	LogFile1 <- c()
 	bmassOutput <- list()
+	PrevHits <- list()
+	NewHits <- list()
 
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
 
@@ -604,7 +606,14 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		
 		GWASHits_EBprior <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nModels*nSigmaAlphas entries
 		#20160823 CHECK_0: Prob -- double check use of em.priorprobs here too with runif prior starting point
+		#20160823 CHECK_0: Prob -- Do multiple runs of em.priorprobs and figure out way to compare them for consistency?
 		GWASHits_EBprior_check2 <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior*runif(length(MarginalHits_logBFs$prior)), 100)
+	
+		###### do thissssss
+		#
+		# Run multiple EMs to check/test for convergence? 
+		#
+		###### do thissssss
 
 		GWASHits_EBprior_Collapsed <- CollapseSigmaAlphasTogether(GWASHits_EBprior, length(SigmaAlphas))
 		GWASHits_EBprior_check2_Collapsed <- CollapseSigmaAlphasTogether(GWASHits_EBprior_check2, length(SigmaAlphas))
@@ -613,7 +622,12 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		GWASHits_PosteriorProbs_Collapsed <- apply(GWASHits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
 
 #		print(GWASHits_PosteriorProbs)
-		print(GWASHits_PosteriorProbs_Collapsed)
+#		print(GWASHits_PosteriorProbs_Collapsed)
+		
+		PrevHits$BestModels <- apply(MarginalHits_logBFs$gamma[apply(GWASHits_PosteriorProbs_Collapsed, 2, which.max),], 1, paste, collapse="_")
+		GWASHits$BestModel <- apply(MarginalHits_logBFs$gamma[apply(GWASHits_PosteriorProbs_Collapsed, 2, which.max),], 1, paste, collapse="_")	
+#		print(PrevHits$BestModels)
+		print(GWASHits)
 
 		## this returns a list with elements  pU pD and pI
 		#marginal.glhits = marginal.postprobs(pp.glhits, lbf$gamma,length(sigmaa))
@@ -622,29 +636,28 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		GWASHits_EBprior_ModelMatrix <- data.frame(cbind(GWASHits_EBprior_ModelMatrix, cumsum(GWASHits_EBprior_ModelMatrix[,ncol(GWASHits_EBprior_ModelMatrix)])))
 		colnames(GWASHits_EBprior_ModelMatrix) <- c(DataSources, "pValue", "Cumm_pValue")
 
-#		print(GWASHits_EBprior_ModelMatrix)
+		print(GWASHits_EBprior_ModelMatrix)
 
-		##looking at which models are favored by the prior
-		#cumsum(sort(ebprior.glhits.collapse,decreasing=TRUE))
-		#lbf$gamma[order(ebprior.glhits.collapse,decreasing=TRUE),]
-		#modelmatrix = cbind(lbf$gamma,ebprior.glhits.collapse)[order(ebprior.glhits.collapse,decreasing=TRUE),]
-		#modelmatrix = data.frame(cbind(modelmatrix,cumsum(modelmatrix[,5])))
-		#colnames(modelmatrix)= c("Sat","Hb","Pulse","LvBrth","p","cump")
+		GWASHits_EBprior_ModelMatrix_AllAssoc <- apply((GWASHits_EBprior_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)
+		GWASHits_EBprior_ModelMatrix_AllAssoc_pValSum <- sum(GWASHits_EBprior_ModelMatrix[GWASHits_EBprior_ModelMatrix_AllAssoc,ncol(GWASHits_EBprior_ModelMatrix)-1])
+		GWASHits_EBprior_ModelMatrix_AllBut1Assoc <- apply((GWASHits_EBprior_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)-1
+		GWASHits_EBprior_ModelMatrix_AllBut1Assoc_pValSum <- sum(GWASHits_EBprior_ModelMatrix[GWASHits_EBprior_ModelMatrix_AllBut1Assoc,ncol(GWASHits_EBprior_ModelMatrix)-1])
 
-		#allassoc=(apply((modelmatrix[,1:4]>0),1,sum)==4) #vector of which represent situations in which all 4 phenotypes are associated
-		#allbut1assoc=(apply((modelmatrix[,1:4]>0),1,sum)==3) #vector of which represent situations in which 3 phenotypes are associated
-				
+		GWASHits_EBprior_ModelMatrix_pValSupport <- c(GWASHits_EBprior_ModelMatrix_AllAssoc_pValSum, GWASHits_EBprior_ModelMatrix_AllBut1Assoc_pValSum)
+		GWASHits_EBprior_ModelMatrix_pValSupport_Names <- c("AllAssoc", "AllBut1Assoc")
+		for (DataSource in DataSources) {
+			eval(parse(text=paste("GWASHits_EBprior_ModelMatrix_pValSupport <- c(GWASHits_EBprior_ModelMatrix_pValSupport, sum(GWASHits_EBprior_ModelMatrix[GWASHits_EBprior_ModelMatrix_AllBut1Assoc & GWASHits_EBprior_ModelMatrix[,\"", DataSource, "\"] == 0, ncol(GWASHits_EBprior_ModelMatrix)-1]))", sep="")))
+			GWASHits_EBprior_ModelMatrix_pValSupport_Names <- c(GWASHits_EBprior_ModelMatrix_pValSupport_Names, paste("AllBut", DataSource, "Assoc", sep=""))
+		}
+		names(GWASHits_EBprior_ModelMatrix_pValSupport) <- GWASHits_EBprior_ModelMatrix_pValSupport_Names
+	
+		PrevHits$ModelCategories_CummpValues <- GWASHits_EBprior_ModelMatrix_pValSupport
+#		print(GWASHits_EBprior_ModelMatrix_pValSupport)
+		print(PrevHits$ModelCategories_CummpValues)
 				 
-		#20160822 CHECK_0 -- Prob: Do GWAS hit analysis/work here
-		#20160822 NOTE -- put output of this section into bmassOutput list so it can exist the else{} block 
+		#20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
 	}
 	
-	###### do thissssss
-	#
-	# Run multiple EMs to check/test for convergence? 
-	#
-	###### do thissssss
-
 #SigmaAlphas
 #CollapseSigmaAlphasTogether(x, nSigmaAlphas)
 
@@ -1085,7 +1098,32 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 # [7,]  0.000000e+00  0.000000e+00
 # [8,] 3.359480e-145 6.197017e-144
 # [9,]  0.000000e+00  0.000000e+00
-
+#.
+#.
+#.
+#[1] "1_1" "1_1"
+#   ChrBP Chr   BP A1  MAF Data1_Direction Data1_pValue Data1_N Data1_ZScore
+#2 1_1000   1 1000  A 0.20               -        6e-13    2500    -7.200482
+#4 2_3000   2 3000  T 0.06               +        3e-09    2761     5.931598
+#  Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot   mvstat
+#2               -        2e-13    2500    -7.348796         1 66.29230
+#4               +        5e-09    2761     5.847172         1 43.43998
+#  mvstat_log10pVal  unistat unistat_log10pVal Nmin BestModel
+#2        14.395191 54.00480         12.698970 2500       1_1
+#4         9.432873 35.18386          8.522879 2761       1_1
+#  Data1 Data2        pValue Cumm_pValue
+#1     1     1  1.000000e+00           1
+#2     1     2 8.553556e-143           1
+#3     2     1 6.643107e-155           1
+#4     0     0  0.000000e+00           1
+#5     1     0  0.000000e+00           1
+#6     2     0  0.000000e+00           1
+#7     0     1  0.000000e+00           1
+#8     0     2  0.000000e+00           1
+#9     2     2  0.000000e+00           1
+#        AllAssoc     AllBut1Assoc AllButData1Assoc AllButData2Assoc 
+#               1                0                0                0 
+#
 #}
 
 
