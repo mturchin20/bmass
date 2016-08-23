@@ -593,42 +593,36 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	#lbf=compute.allBFs.fromZscores(Z,VYY,gl$nmin,gl$maf,sigmaa)
 	#lbf.bigmat=do.call(rbind,lbf$lbf) #lbf$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
 
-	MarginalHits_GWAShits_EBprior <- NULL
+	GWASHits_EBprior <- NULL
 	if (is.null(GWASsnps)) {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping GWAS hit analysis.", sep=""))
 	}
 	else {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Analyzing GWAS hits since GWASsnps provided.", sep=""))
-		MarginalHits_GWAShits <- MarginalHits[MarginalHits$GWASannot==1,]
-		MarginalHits_GWAShits_logBFs_Stacked <- as.matrix(MarginalHits_logBFs_Stacked[,MarginalHits$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+		GWASHits <- MarginalHits[MarginalHits$GWASannot==1,]
+		GWASHits_logBFs_Stacked <- as.matrix(MarginalHits_logBFs_Stacked[,MarginalHits$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
 		
-#		print(MarginalHits_logBFs_Stacked)
-#		print(MarginalHits_GWAShits_logBFs_Stacked)
-	
-		MarginalHits_GWAShits_EBprior <- em.priorprobs(MarginalHits_GWAShits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nmodels*nSigmaAlphas entries
+		GWASHits_EBprior <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nModels*nSigmaAlphas entries
 		#20160823 CHECK_0: Prob -- double check use of em.priorprobs here too with runif prior starting point
-		MarginalHits_GWAShits_EBprior_check2 <- em.priorprobs(MarginalHits_GWAShits_logBFs_Stacked, MarginalHits_logBFs$prior*runif(length(MarginalHits_logBFs$prior)), 100)
+		GWASHits_EBprior_check2 <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior*runif(length(MarginalHits_logBFs$prior)), 100)
 
-#		print(MarginalHits_GWAShits_EBprior)
-#		print(MarginalHits_logBFs$gamma)
+		GWASHits_EBprior_Collapsed <- CollapseSigmaAlphasTogether(GWASHits_EBprior, length(SigmaAlphas))
+		GWASHits_EBprior_check2_Collapsed <- CollapseSigmaAlphasTogether(GWASHits_EBprior_check2, length(SigmaAlphas))
 
-		MarginalHits_GWAShits_EBprior_Collapsed <- CollapseSigmaAlphasTogether(MarginalHits_GWAShits_EBprior, length(SigmaAlphas))
-		MarginalHits_GWAShits_EBprior_check2_Collapsed <- CollapseSigmaAlphasTogether(MarginalHits_GWAShits_EBprior_check2, length(SigmaAlphas))
+		GWASHits_PosteriorProbs <- posteriorprob(GWASHits_logBFs_Stacked, GWASHits_EBprior) #Matrix of nModels*nSigmaAlphas x nSNPs 
+		GWASHits_PosteriorProbs_Collapsed <- apply(GWASHits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
 
-#		print(MarginalHits_GWAShits_EBprior_Collapsed)
-#		print(MarginalHits_GWAShits_EBprior_check2_Collapsed)
-
-		MarginalHits_GWAShits_PosteriorProbs <- posteriorprob(MarginalHits_GWAShits_logBFs_Stacked, MarginalHits_GWAShits_EBprior) #Matrix of nmodels*nSigmaAlphas x nSNPs 
-		MarginalHits_GWAShits_PosteriorProbs_Collapsed <- apply(MarginalHits_GWAShits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
-
-#		print(MarginalHits_GWAShits_PosteriorProbs)
-#		print(MarginalHits_GWAShits_PosteriorProbs_Collapsed)
-
-		#pp.glhits = posteriorprob(lbf.glhits,ebprior.glhits) #posterior prob on models for gl hits
-		#pp.glhits.collapse =  apply(pp.glhits,2,collapse, nsigmaa=length(sigmaa))
+#		print(GWASHits_PosteriorProbs)
+		print(GWASHits_PosteriorProbs_Collapsed)
 
 		## this returns a list with elements  pU pD and pI
 		#marginal.glhits = marginal.postprobs(pp.glhits, lbf$gamma,length(sigmaa))
+
+		GWASHits_EBprior_ModelMatrix <- cbind(MarginalHits_logBFs$gamma, GWASHits_EBprior_Collapsed)[order(GWASHits_EBprior_Collapsed, decreasing=TRUE),]
+		GWASHits_EBprior_ModelMatrix <- data.frame(cbind(GWASHits_EBprior_ModelMatrix, cumsum(GWASHits_EBprior_ModelMatrix[,ncol(GWASHits_EBprior_ModelMatrix)])))
+		colnames(GWASHits_EBprior_ModelMatrix) <- c(DataSources, "pValue", "Cumm_pValue")
+
+#		print(GWASHits_EBprior_ModelMatrix)
 
 		##looking at which models are favored by the prior
 		#cumsum(sort(ebprior.glhits.collapse,decreasing=TRUE))
@@ -684,7 +678,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #' @param DataFileLocations Comma-separated list of all the datafile locations being analyzed. This should be in the same order as PhenotypeList.
 #' @param ExpectedColumnNames Comma-separ
 
-if (FALSE) {
+#if (FALSE) {
 #~~~
 #> stop("nana", "nana3")
 #Error: nananana3
@@ -1078,6 +1072,20 @@ if (FALSE) {
 # [8,] 2.021358e-282 1.714936e-247 1.085214e-219 6.197017e-144
 # [9,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
 #
-}
+#.
+#.
+#.
+#               [,1]          [,2]
+# [1,]  0.000000e+00  0.000000e+00
+# [2,]  0.000000e+00  0.000000e+00
+# [3,]  0.000000e+00  0.000000e+00
+# [4,]  0.000000e+00  0.000000e+00
+# [5,]  1.000000e+00  1.000000e+00
+# [6,] 7.404466e-157 3.099810e-156
+# [7,]  0.000000e+00  0.000000e+00
+# [8,] 3.359480e-145 6.197017e-144
+# [9,]  0.000000e+00  0.000000e+00
+
+#}
 
 

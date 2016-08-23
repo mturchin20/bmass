@@ -4,9 +4,20 @@ Version: 0.0.2.9000
 Authors@R: c(
     person("Michael", "Turchin", email = "mturchin20@uchicago.edu", role = c("aut", "cre")),
     person("Matthew", "Stephens", email = "mstephens@uchicago.edu", role = c("aut")))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.3.0)
+Description: Bayesian multivariate analysis of summary statistics (bmass) is a
+    multivariate tool for analyzing Genome-Wide Association Study (GWAS)
+    results in the form of summary statistics. The goal of bmass is to
+    comprehensively test all possible multivariate models given the phenotypes
+    & datasets provided to bmass. Multivariate models are determined by
+    assigning each phenotype to being either Unassociated (U), Directly
+    associated (D) or Indirectly associated (I) with the SNP of interest. Test
+    results for each model are presented in the form of Bayes factors, thereby
+    allowing direct comparison between models. 
+Depends:
+    R (>= 3.3.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Suggests: testthat
+Suggests:
+    testthat
+RoxygenNote: 5.0.1
