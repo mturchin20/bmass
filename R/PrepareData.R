@@ -84,14 +84,14 @@ CheckDataSourceDirectionColumn <- function (DataSources1) {
 #~~~~~~
 
 AnnotateMergedDataWithGWASsnps <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
-	annot1 <- 0
+	GWASannot1 <- 0
 	for (snpIndex in 1:nrow(GWASsnps1)) {
 		if (GWASsnps1[snpIndex,]$Chr == as.numeric(as.character(MergedDataSource1["Chr"]))) {
 			if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
-				annot1 <- 1
+				GWASannot1 <- 1
 			}
-			else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (annot1 != 1)) {
-				annot1 <- 2	
+			else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (GWASannot1 != 1)) {
+				GWASannot1 <- 2	
 			}
 			else {
 				PH <- NULL
@@ -101,7 +101,7 @@ AnnotateMergedDataWithGWASsnps <- function (MergedDataSource1, GWASsnps1, BPWind
 			print(as.numeric(as.character(MergedDataSource1["Chr"])))
 			print(GWASsnps1[snpIndex,]$Chr)
 	}
-	return(annot1)
+	return(GWASannot1)
 }
 #val1 <- qnorm(log(abs(x)/2), lower.tail=FALSE, log.p=TRUE
 GetZScoreAndDirection <- function(DataSources1) {
@@ -146,6 +146,7 @@ ReplaceInfiniteZScoresWithMax <- function(DataSources1_ZScores) {
 ##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
 #20160822 CHECK_0 -- Prob: Double-check logic and go-through here
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) { 
+#	print(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE))
 	CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
 	return(CollapsedInputs)
 }
@@ -528,9 +529,9 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 	#Creating subset of marginally significant SNPs using SNPMarginalpValThreshold
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on threshold: ", as.character(SNPMarginalpValThreshold) ,".", sep=""))
-	MergedDataSources_MarginalHits <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalpValThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalpValThreshold),] 
+	MarginalHits <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalpValThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalpValThreshold),] 
 	
-	print(MergedDataSources_MarginalHits)
+	print(MarginalHits)
 
 
 	#Conducting main bmass analyses and first-level results presentation
@@ -549,10 +550,10 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	ZScoresMarginal_CommandText <- ""
 	for (DataSource in DataSources) {
 		if (length(strsplit(ZScoresMarginal_CommandText, "")[[1]]) == 0) {
-			ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, "cbind(MergedDataSources_MarginalHits$", DataSource, "_ZScore", sep="")
+			ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, "cbind(MarginalHits$", DataSource, "_ZScore", sep="")
 		}
 		else {
-			ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, ",MergedDataSources_MarginalHits$", DataSource, "_ZScore", sep="")
+			ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, ",MarginalHits$", DataSource, "_ZScore", sep="")
 		}
 	}
 	ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, ")", sep="")
@@ -567,61 +568,61 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	NsMarginal_CommandText <- ""
 	for (DataSource in DataSources) {
 		if (length(strsplit(NsMarginal_CommandText, "")[[1]]) == 0) {
-			NsMarginal_CommandText <- paste(NsMarginal_CommandText, "cbind(MergedDataSources_MarginalHits$", DataSource, "_N", sep="")
+			NsMarginal_CommandText <- paste(NsMarginal_CommandText, "cbind(MarginalHits$", DataSource, "_N", sep="")
 		}
 		else {
-			NsMarginal_CommandText <- paste(NsMarginal_CommandText, ",MergedDataSources_MarginalHits$", DataSource, "_N", sep="")
+			NsMarginal_CommandText <- paste(NsMarginal_CommandText, ",MarginalHits$", DataSource, "_N", sep="")
 		}
 	}
 	NsMarginal_CommandText <- paste(NsMarginal_CommandText, ")", sep="")
 	NsMarginal <- eval(parse(text=NsMarginal_CommandText))
 	NsMarginal_RowMins <- apply(NsMarginal, 1, min)
-	MergedDataSources_MarginalHits$Nmin <- NsMarginal_RowMins
+	MarginalHits$Nmin <- NsMarginal_RowMins
 	
 	#20160822 CHECK_0 -- Prob: Go through use of 'do.call(rbind...etc...' and double-check logic
 	#20160822 CHECK_0 -- Prob: Change output of Matthew's code to use logBFs vs. lbf
 	#20160822 CHECK_0 -- Prob: Change output of Matthew's code to match styles developed here
 
-	print(MergedDataSources_MarginalHits)
+	print(MarginalHits)
 	print(ZScoresMarginal)
 	
-	MergedDataSources_MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MergedDataSources_MarginalHits$Nmin, MergedDataSources_MarginalHits$MAF, SigmaAlphas) 
-	#MergedDataSources_MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
-	MergedDataSources_MarginalHits_logBFs_stackedMatrix <- do.call(rbind, MergedDataSources_MarginalHits_logBFs$lbf)
+	MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
+	#MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
+	MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
 
-
-	#set.seed(100)
-	#VYY = as.matrix(read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/Choongwon2016/Vs2/Choongwon2016.4Phenos_1.RSS0.vs2.SignCrrct.vs1.txt",header=T,sep=","))
-	#gl = read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/Choongwon2016/Vs2/Choongwon2016.4Phenos_1.dtlesslesssignif.vs2.SignCrrct.vs1.annot.vs1.MAF.txt.gz", header=T)
-	#Z = cbind(gl$Z.Sat,gl$Z.Hb,gl$Z.Pulse,gl$Z.LvBrth)
-	#n = cbind(gl$n_Sat, gl$n_Hb, gl$n_Pulse, gl$n_LvBrth)
-	#n = apply(n,1,min)
-	#gl$nmin=n
 	#lbf=compute.allBFs.fromZscores(Z,VYY,gl$nmin,gl$maf,sigmaa)
 	#lbf.bigmat=do.call(rbind,lbf$lbf) #lbf$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
 
-	#gl.glhits = gl[gl$annot==1,] # subset of GWAS SNPs
-
-
-	MergedDataSources_MarginalHits_GWAShits_EBprior <- NULL
+	MarginalHits_GWAShits_EBprior <- NULL
 	if (is.null(GWASsnps)) {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping GWAS hit analysis.", sep=""))
 	}
 	else {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Analyzing GWAS hits since GWASsnps provided.", sep=""))
-		MergedDataSources_MarginalHits_GWAShits <- MergedDataSources_MarginalHits[MergedDataSources_MarginalHits$annot==1,]
-		MergedDataSources_MarginalHits_GWAShits_logBFs_stackedMatrix <- as.matrix(MergedDataSources_MarginalHits_logBFs_stackedMatrix[,MergedDataSources_MarginalHits$annot==1])
-			
-		MergedDataSources_MarginalHits_GWAShits_EBprior <- em.priorprobs(MergedDataSources_MarginalHits_GWAShits_logBFs_stackedMatrix, MergedDataSources_MarginalHits_logBFs$prior, 100)
+		MarginalHits_GWAShits <- MarginalHits[MarginalHits$GWASannot==1,]
+		MarginalHits_GWAShits_logBFs_Stacked <- as.matrix(MarginalHits_logBFs_Stacked[,MarginalHits$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+		
+#		print(MarginalHits_logBFs_Stacked)
+#		print(MarginalHits_GWAShits_logBFs_Stacked)
+	
+		MarginalHits_GWAShits_EBprior <- em.priorprobs(MarginalHits_GWAShits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nmodels*nSigmaAlphas entries
 		#20160823 CHECK_0: Prob -- double check use of em.priorprobs here too with runif prior starting point
-		MergedDataSources_MarginalHits_GWAShits_EBprior_check2 <- em.priorprobs(MergedDataSources_MarginalHits_GWAShits_logBFs_stackedMatrix, MergedDataSources_MarginalHits_logBFs$prior*runif(length(MergedDataSources_MarginalHits_logBFs$prior)), 100)
+		MarginalHits_GWAShits_EBprior_check2 <- em.priorprobs(MarginalHits_GWAShits_logBFs_Stacked, MarginalHits_logBFs$prior*runif(length(MarginalHits_logBFs$prior)), 100)
 
-		#lbf.glhits = as.matrix(lbf.bigmat[,gl$annot==1])
-		#ebprior.glhits = em.priorprobs(lbf.glhits,lbf$prior,100)
-		#ebprior.glhits2 = em.priorprobs(lbf.glhits,lbf$prior*runif(length(lbf$prior)),100)
+#		print(MarginalHits_GWAShits_EBprior)
+#		print(MarginalHits_logBFs$gamma)
 
-		#ebprior.glhits.collapse =collapse(ebprior.glhits,length(sigmaa))
-		#ebprior.glhits.collapse2 =collapse(ebprior.glhits2,length(sigmaa))
+		MarginalHits_GWAShits_EBprior_Collapsed <- CollapseSigmaAlphasTogether(MarginalHits_GWAShits_EBprior, length(SigmaAlphas))
+		MarginalHits_GWAShits_EBprior_check2_Collapsed <- CollapseSigmaAlphasTogether(MarginalHits_GWAShits_EBprior_check2, length(SigmaAlphas))
+
+#		print(MarginalHits_GWAShits_EBprior_Collapsed)
+#		print(MarginalHits_GWAShits_EBprior_check2_Collapsed)
+
+		MarginalHits_GWAShits_PosteriorProbs <- posteriorprob(MarginalHits_GWAShits_logBFs_Stacked, MarginalHits_GWAShits_EBprior) #Matrix of nmodels*nSigmaAlphas x nSNPs 
+		MarginalHits_GWAShits_PosteriorProbs_Collapsed <- apply(MarginalHits_GWAShits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
+
+#		print(MarginalHits_GWAShits_PosteriorProbs)
+#		print(MarginalHits_GWAShits_PosteriorProbs_Collapsed)
 
 		#pp.glhits = posteriorprob(lbf.glhits,ebprior.glhits) #posterior prob on models for gl hits
 		#pp.glhits.collapse =  apply(pp.glhits,2,collapse, nsigmaa=length(sigmaa))
@@ -1009,6 +1010,74 @@ if (FALSE) {
 #[2,]     5.931598     5.847172
 #[3,]     5.326724     5.068958
 #[4,]     5.931598    -7.348796
+#.
+#.
+#.
+#     Data1_ZScore Data2_ZScore
+#[1,]    -7.200482    -7.348796
+#[2,]     5.931598     5.847172
+#[3,]     5.326724     5.068958
+#[4,]     5.931598    -7.348796
+#  [1]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+#  [6]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [11]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [16]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [21]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [26]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [31]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [36]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [41]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [46]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [51]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [56]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [61]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [66]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [71]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [76]  0.000000e+00 2.174811e-249  0.000000e+00  0.000000e+00  0.000000e+00
+# [81]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [86] 4.286876e-181  0.000000e+00  0.000000e+00 1.976263e-323  0.000000e+00
+# [91]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00 2.748118e-131
+# [96] 1.697393e-283  0.000000e+00 7.016425e-280  0.000000e+00  0.000000e+00
+#[101]  0.000000e+00  0.000000e+00  0.000000e+00  1.385787e-94 2.543654e-250
+#[106]  0.000000e+00 2.648805e-245  0.000000e+00  0.000000e+00  0.000000e+00
+#[111]  0.000000e+00  0.000000e+00  4.003715e-67 2.564460e-224  0.000000e+00
+#[116] 8.773175e-218  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+#[121]  0.000000e+00  1.000000e+00 6.643107e-155  0.000000e+00 8.553556e-143
+#[126]  0.000000e+00
+#      [,1] [,2]
+# [1,]    0    0
+# [2,]    1    0
+# [3,]    2    0
+# [4,]    0    1
+# [5,]    1    1
+# [6,]    2    1
+# [7,]    0    2
+# [8,]    1    2
+# [9,]    2    2
+#.
+#.
+#.
+#      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]          [,9]         [,10]
+# [1,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [2,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [3,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [4,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [5,]    0    0    0    0    0    0    0    0 4.051983e-252 3.515167e-183
+# [6,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [7,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [8,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+# [9,]    0    0    0    0    0    0    0    0  0.000000e+00  0.000000e+00
+#              [,11]         [,12]         [,13]         [,14]
+# [1,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [2,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [3,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [4,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [5,] 7.379923e-133  9.528172e-96  5.782491e-68  1.000000e+00
+# [6,] 3.501874e-286 1.149775e-252 2.169352e-226 3.099810e-156
+# [7,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+# [8,] 2.021358e-282 1.714936e-247 1.085214e-219 6.197017e-144
+# [9,]  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+#
 }
 
 
