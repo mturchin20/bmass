@@ -17,7 +17,7 @@
 #Data2 <- read.table("../data/TestData2.txt", header=T)
 #SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
 #source("PrepareData.R")
-#bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
+#bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, bmassSeedValue=NULL)
 #ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 #DataList <- c("Data1", "Data2")
 
@@ -133,6 +133,31 @@ ReplaceInfiniteZScoresWithMax <- function(DataSources1_ZScores) {
 	}
 	return(DataSources1_ZScores)	
 }
+
+
+
+
+
+
+
+#Conducting main bmass analyses and first-level results presentation
+#~~~~~~
+
+##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
+#20160822 CHECK_0 -- Prob: Double-check logic and go-through here
+CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) { 
+	CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
+	return(CollapsedInputs)
+}
+
+
+
+
+
+
+
+
+
 
 #~~~
 #> read.table("../data/TestData1.txt")
@@ -260,7 +285,7 @@ ReplaceInfiniteZScoresWithMax <- function(DataSources1_ZScores) {
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(), MergedDataSources=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, bmassSeedValue=NULL) {
 
 	print(DataSources)
 
@@ -347,12 +372,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Beginning DataSources merging.", sep=""))
 
-	###### do thissssss
-	#
-	#Change p-values based on direction of effect?
-	#
-	###### do thissssss
-	
 	#Merge different data sources into main file with all *$pValue & *$n entries for each pheno
 	
 	MergedDataSources <- data.frame()
@@ -403,6 +422,12 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #			print(MergedDataSources)	
 #			print(CurrentDataSource_temp)
 			
+			###### do thissssss
+			#
+			# Test performances of merge function here in varying circumstances
+			#
+			###### do thissssss
+			
 			MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 		
 			rm(CurrentDataSource_temp)
@@ -415,11 +440,11 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	#~~~~~~
 
 	if (is.null(GWASsnps)) {
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
 		MergedDataSources$GWASannot <- 0
 	}
 	else {
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
 		MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateMergedDataWithGWASsnps, GWASsnps1=GWASsnps, BPWindow=500000) 
 	}
 
@@ -481,6 +506,8 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #	print(ZScoresCorMatrix)
 	bmassOutput$ZScoresCorMatrix <- ZScoresCorMatrix
 	
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Determining initial threshold statistics.", sep=""))
+	
 	ZScoresCorMatrix_Inverse <- chol2inv(chol(ZScoresCorMatrix))
 	ZScoresFull_mvstat <- rowSums(ZScoresFull * (ZScoresFull %*% ZScoresCorMatrix_Inverse))
 	MergedDataSources$mvstat <- ZScoresFull_mvstat
@@ -496,16 +523,145 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	print(MergedDataSources)
 
 	#Creating subset of marginally significant SNPs using SNPMarginalpValThreshold
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on threshold: ", as.character(SNPMarginalpValThreshold) ,".", sep=""))
 	MergedDataSources_MarginalHits <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalpValThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalpValThreshold),] 
+	ZScoresMarginal <- ZScoresFull[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalpValThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalpValThreshold),] 
 	
 	print(MergedDataSources_MarginalHits)
 
 
+	#Conducting main bmass analyses and first-level results presentation
+	#~~~~~~
+
+	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Conducting main bmass analysis and first-level results formatting.", sep=""))
+
+	if (!is.null(bmassSeedValue)) {
+		set.seed(bmassSeedValue)
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- setting seed with the following value: ", bmassSeedValue, ".", sep=""))	
+	}
+	else {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- no seed value via bmassSeedValue provided.", sep=""))	
+	}
 	
-	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on threshold: ", as.character(SNPMarginalpValThreshold) ,".", sep=""))
+	ZScoresMarginal_CommandText <- ""
+	for (DataSource in DataSources) {
+		if (length(strsplit(ZScoresMarginal_CommandText, "")[[1]]) == 0) {
+			ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, "cbind(MergedDataSources_MarginalHits$", DataSource, "_ZScore", sep="")
+		}
+		else {
+			ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, ",MergedDataSources_MarginalHits$", DataSource, "_ZScore", sep="")
+		}
+	}
+	ZScoresMarginal_CommandText <- paste(ZScoresMarginal_CommandText, ")", sep="")
+	ZScoresMarginal <- eval(parse(text=ZScoresMarginal_CommandText))
+
+	NsMarginal_CommandText <- ""
+	for (DataSource in DataSources) {
+		if (length(strsplit(NsMarginal_CommandText, "")[[1]]) == 0) {
+			NsMarginal_CommandText <- paste(NsMarginal_CommandText, "cbind(MergedDataSources_MarginalHits$", DataSource, "_N", sep="")
+		}
+		else {
+			NsMarginal_CommandText <- paste(NsMarginal_CommandText, ",MergedDataSources_MarginalHits$", DataSource, "_N", sep="")
+		}
+	}
+	NsMarginal_CommandText <- paste(NsMarginal_CommandText, ")", sep="")
+	NsMarginal <- eval(parse(text=NsMarginal_CommandText))
+	NsMarginal_RowMins <- apply(NsMarginal, 1, min)
+	MergedDataSources_MarginalHits$Nmin <- NsMarginal_RowMins
+	
+	#20160822 CHECK_0 -- Prob: Go through use of 'do.call(rbind...etc...' and double-check logic
+	#20160822 CHECK_0 -- Prob: Change output of Matthew's code to use logBFs vs. lbf
+	#20160822 CHECK_0 -- Prob: Change output of Matthew's code to match styles developed here
+
+	print(ZScoresMarginal)
+	
+	MergedDataSources_MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MergedDataSources_MarginalHits$Nmin, MergedDataSources_MarginalHits$MAF, SigmaAlphas) 
+	#MergedDataSources_MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
+	MergedDataSources_MarginalHits_logBFs_stackedMatrix <- do.call(rbind, MergedDataSources_MarginalHits_logBFs$lbf)
+
+	MergedDataSources_MarginalHits_GWAShits_EBprior <- NULL
+	if (is.null(GWASsnps)) {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping GWAS hit analysis.", sep=""))
+	}
+	else {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Analyzing GWAS hits since GWASsnps provided.", sep=""))
+		MergedDataSources_MarginalHits_GWAShits <- MergedDataSources_MarginalHits[MergedDataSources_MarginalHits$annot==1,]
+		 
+	}
+	
+	###### do thissssss
+	#
+	# Run multiple EMs to check/test for convergence? 
+	#
+	###### do thissssss
+
+#SigmaAlphas
+#CollapseSigmaAlphasTogether(x, nSigmaAlphas)
+
+#set.seed(100)
+#source("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/multivariate/test.funcs.R")
+#source("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/multivariate/globallipids/GLCfuncs.R")
+#VYY = as.matrix(read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/Choongwon2016/Vs2/Choongwon2016.4Phenos_1.RSS0.vs2.SignCrrct.vs1.txt",header=T,sep=","))
+#gl = read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/Choongwon2016/Vs2/Choongwon2016.4Phenos_1.dtlesslesssignif.vs2.SignCrrct.vs1.annot.vs1.MAF.txt.gz", header=T)
+#gl <- gl[!is.na(gl$maf) & gl$maf > 0,]
+
+#Z = cbind(gl$Z.Sat,gl$Z.Hb,gl$Z.Pulse,gl$Z.LvBrth)
+
+#n = cbind(gl$n_Sat, gl$n_Hb, gl$n_Pulse, gl$n_LvBrth)
+#n = apply(n,1,min)
+#gl$nmin=n
+#sigmaa=c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15)
+#lbf=compute.allBFs.fromZscores(Z,VYY,gl$nmin,gl$maf,sigmaa)
+#lbf.bigmat=do.call(rbind,lbf$lbf) #lbf$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
+
+##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
+#collapse = function(x,nsigmaa){return(apply(matrix(x,ncol=nsigmaa),1,sum))}
+
+#gl.glhits = gl[gl$annot==1,] # subset of GWAS SNPs
+
+#lbf.glhits = as.matrix(lbf.bigmat[,gl$annot==1])
+#ebprior.glhits = em.priorprobs(lbf.glhits,lbf$prior,100)
+#ebprior.glhits2 = em.priorprobs(lbf.glhits,lbf$prior*runif(length(lbf$prior)),100)
+#ebprior.glhits3 = em.priorprobs(lbf.glhits,lbf$prior*runif(length(lbf$prior)),100)
+#ebprior.glhits4 = em.priorprobs(lbf.glhits,lbf$prior*runif(length(lbf$prior)),100)
+
+#ebprior.glhits.collapse =collapse(ebprior.glhits,length(sigmaa))
+#ebprior.glhits.collapse2 =collapse(ebprior.glhits2,length(sigmaa))
+#ebprior.glhits.collapse3 =collapse(ebprior.glhits3,length(sigmaa))
+#ebprior.glhits.collapse4 =collapse(ebprior.glhits4,length(sigmaa))
+
+#pp.glhits = posteriorprob(lbf.glhits,ebprior.glhits) #posterior prob on models for gl hits
+#pp.glhits.collapse =  apply(pp.glhits,2,collapse, nsigmaa=length(sigmaa))
+
+## this returns a list with elements  pU pD and pI
+#marginal.glhits = marginal.postprobs(pp.glhits, lbf$gamma,length(sigmaa))
+
+##looking at which models are favored by the prior
+#cumsum(sort(ebprior.glhits.collapse,decreasing=TRUE))
+#lbf$gamma[order(ebprior.glhits.collapse,decreasing=TRUE),]
+#modelmatrix = cbind(lbf$gamma,ebprior.glhits.collapse)[order(ebprior.glhits.collapse,decreasing=TRUE),]
+#modelmatrix = data.frame(cbind(modelmatrix,cumsum(modelmatrix[,5])))
+#colnames(modelmatrix)= c("Sat","Hb","Pulse","LvBrth","p","cump")
+
+#allassoc=(apply((modelmatrix[,1:4]>0),1,sum)==4) #vector of which represent situations in which all 4 phenotypes are associated
+#allbut1assoc=(apply((modelmatrix[,1:4]>0),1,sum)==3) #vector of which represent situations in which 3 phenotypes are associated
+
+
+
+
 
 
 }
+
+
+
+
+
+
+
+
+
+
 
 #Expectation
 #Vector input of data.frame data sources 
