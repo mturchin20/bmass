@@ -16,7 +16,9 @@
 #Data1 <- read.table("../data/TestData1.txt", header=T)
 #Data2 <- read.table("../data/TestData2.txt", header=T)
 #SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
-#source("PrepareData.R")
+##source("PrepareData.R")
+#library("devtools")
+#devtools::load_all()
 #bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, bmassSeedValue=NULL)
 #ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 #DataList <- c("Data1", "Data2")
@@ -151,96 +153,6 @@ CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
 	return(CollapsedInputs)
 }
 
-
-
-
-
-
-
-
-
-
-#~~~
-#> read.table("../data/TestData1.txt")
-#   V1   V2 V3  V4        V5      V6   V7
-#1 Chr   BP A1 MAF Direction pValue    N
-#2   1 1000  A  .2         -     .01 2500
-#3   1 2000  G  .1         -    .076 2467
-#4   2 3000  T .06         +     .31 2761
-#5   3 4000  C  .4         +   .0056 2310
-#6   4 5000  C .35         -     .72 2632
-#> Data1 <- read.table("../data/TestData1.txt")
-#> CheckDataframeFormat <- function (DataFileName) {
-#+         returnValue <- 0
-#+
-#+         if (!is.data.frame(eval(parse(text=DataFileName)))) {
-#+                         returnValue <- 1
-#+         }
-#+
-#+         return(returnValue)
-#+ }
-#> CheckDataframeFormat("Data1")
-#[1] 0
-#> Data2 <- as.matrix(Data1)
-#> Data2
-#     V1    V2     V3   V4    V5          V6        V7
-#[1,] "Chr" "BP"   "A1" "MAF" "Direction" "pValue" "N"
-#[2,] "1"   "1000" "A"  ".2"  "-"         ".01"     "2500"
-#[3,] "1"   "2000" "G"  ".1"  "-"         ".076"    "2467"
-#[4,] "2"   "3000" "T"  ".06" "+"         ".31"     "2761"
-#[5,] "3"   "4000" "C"  ".4"  "+"         ".0056"   "2310"
-#[6,] "4"   "5000" "C"  ".35" "-"         ".72"     "2632"
-#> CheckDataframeFormat("Data2")
-#[1] 1
-#> DataList <- c("Data1", "Data2")
-#> sapply(DataList, CheckDataframeFormat)
-#Data1 Data2
-#    0     1
-#> sum(sapply(sapply(DataList, CheckDataframeFormat), as.numeric))
-#[1] 1
-#> sapply(DataList, CheckDataframeFormat, USE.NAMES=FALSE)
-#[1] 0 1
-#> sum(sapply(DataList, CheckDataframeFormat, USE.NAMES=FALSE))
-#[1] 1
-#
-#~~~
-
-#From http://stackoverflow.com/questions/22843775/how-to-create-periodically-send-text-to-a-log-file-while-printing-normal-outpu
-#~~~
-#> log_con <- file("test.log")
-#> cat("write to log", file = log_con)
-#> cat("write to console")
-#write to console
-# cat(... , file = "", sep = " ", fill = FALSE, labels = NULL,
-#         append = FALSE)
-#> file.create("nana2.out")
-#[1] TRUE
-#> FileName2 <- "nana2.out"
-#> file.create(FileName2)
-#[1] TRUE
-#> cat("nana4\n", file = FileName2, append=TRUE)
-#> cat("nana4\n", file = FileName2, append=TRUE)
-#20160812 NOTE -- cat will include newlines only if I add them myself. Using write() or write.table() does automatically include newlines
-#> cat("nana4\n", file = FileName3, append=TRUE)
-#> write(OutputData, file=FileNameLog, append=TRUE)
-#Error in cat(x, file = file, sep = c(rep.int(sep, ncolumns - 1), "\n"),  : 
-#  object 'FileNameLog' not found
-#> write(c(1,2,3,4), file=FileName3, append=TRUE)
-#> write.table(c(1,2,3,4), file=FileName3, append=TRUE)
-#Warning message:
-#In write.table(c(1, 2, 3, 4), file = FileName3, append = TRUE) :
-#  appending column names to file
-#[  mturchin21@Michaels-MacBook-Air  ~/Documents/Work/LabMisc/StephensLab/bmass/R]$cat nana3.out 
-#nana4
-#nana4nana4nana4nana4
-#1 2 3 4
-#"x"
-#"1" 1
-#"2" 2
-#"3" 3
-#"4" 4
-#~~~
-
 #Convert a comma-separated string of data file locations into a vector
 #20160812 20160814 CHECK_1 -- Prob: Come up with way to send off log message and then immediately leave program due to an error. Eg, here in this instance, if there are no commas the program should exit -- either the person has inputted things incorrectly or the person has supplied only a single datafile. The former should be obvious and in the latter bmass presumably cannot run on just one file/one phenotype. Soln: Found/used stop().
 
@@ -286,7 +198,7 @@ CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, bmassSeedValue=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, UseFlatPriors=FALSE, bmassSeedValue=NULL) {
 
 	print(DataSources)
 
@@ -336,9 +248,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed data.frame check.", sep=""))
 
-		#Check DataSources headers for proper names
-
-#		CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 		DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
 		if (FALSE %in% DataSourcesCheckHeaderNames) {
 			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are \"", paste(ExpectedColumnNames, collapse=" "), "\". Please fix and rerun bmass: ", DataSources[!DataSourcesCheckHeaderNames])
@@ -379,8 +288,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Beginning DataSources merging.", sep=""))
 
-	#Merge different data sources into main file with all *$pValue & *$n entries for each pheno
-	
 	MergedDataSources <- data.frame()
 	for (CurrentDataSource in DataSources) {
 	
@@ -398,7 +305,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 			MergedDataSources_namesCurrent <- names(MergedDataSources)
 			MergedDataSources_namesNew <- c()
 			for (columnHeader1 in MergedDataSources_namesCurrent) {
-				#ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 				if (columnHeader1 %in% c("Chr", "BP", "A1", "MAF")) {
 					MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
 				}
@@ -421,7 +327,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 				CurrentDataSource_temp_namesNew <- c(CurrentDataSource_temp_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))
 			}
 			names(CurrentDataSource_temp) <- CurrentDataSource_temp_namesNew
-#			CurrentDataSource_temp$ChrBP <- paste(CurrentDataSource_temp$Chr, CurrentDataSource_temp$BP, sep="_")
 			CurrentDataSource_temp$ChrBP <- paste(eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP", sep=""))), sep="_")		
 			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))		
 			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))		
@@ -487,9 +392,9 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	if (TRUE %in% ZScoresFull_InfiniteCheck) {	
 		warning(paste(format(Sys.time()), " -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.", sep=""))
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.", sep=""))
+		##UNIT TEST CANDIDATE?
 		ZScoresFull <- apply(ZScoresFull, 2, ReplaceInfiniteZScoresWithMax)
 		for (ZScoresFull_colName in colnames(ZScoresFull)) {
-			print(ZScoresFull_colName)
 			eval(parse(text=paste("MergedDataSources$", ZScoresFull_colName, " <- ZScoresFull[,\"", ZScoresFull_colName, "\"]", sep="")))
 		}
 	}
@@ -510,7 +415,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #	print(ZScoresNullset)
 
 	ZScoresCorMatrix <- cor(ZScoresNullset)
-#	print(ZScoresCorMatrix)
 	bmassOutput$ZScoresCorMatrix <- ZScoresCorMatrix
 	
 	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Determining initial threshold statistics.", sep=""))
@@ -581,7 +485,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	NsMarginal_RowMins <- apply(NsMarginal, 1, min)
 	MarginalHits$Nmin <- NsMarginal_RowMins
 	
-	#20160822 CHECK_0 -- Prob: Go through use of 'do.call(rbind...etc...' and double-check logic
+	#20160822 20160823 CHECK_1 -- Prob: Go through use of 'do.call(rbind...etc...' and double-check logic Soln: Reminder, do.call is for applying a function to a given list of arguments. Eg the contents of do.call are treated as the full set of arguments to be used, versus say an 'apply' version where the function is applied individually to each set of arguments/vectors.
 	#20160822 CHECK_0 -- Prob: Change output of Matthew's code to use logBFs vs. lbf
 	#20160822 CHECK_0 -- Prob: Change output of Matthew's code to match styles developed here
 
@@ -591,18 +495,26 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
 	#MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
 	MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
-
-	#lbf=compute.allBFs.fromZscores(Z,VYY,gl$nmin,gl$maf,sigmaa)
-	#lbf.bigmat=do.call(rbind,lbf$lbf) #lbf$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
+		
+#	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up priors.", sep=""))
 
 	GWASHits_EBprior <- NULL
-	if (is.null(GWASsnps)) {
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping GWAS hit analysis.", sep=""))
+	FlatUnif_EBprior <- NULL
+	logBF_min	
+	if (is.null(GWASsnps) || is.true(UseFlatPriors)) {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
+	
+		FlatUnif_EBprior <- normalize(rep(c(0,MarginalHits_logBFs$prior[-1]),length(SigmaAlphas)))
+		#nsigma=length(sigmaa)
+		#origprior = rep(c(0,lbf$prior[-1]),nsigma)
+		#origprior = normalize(origprior)
 	}
 	else {
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Analyzing GWAS hits since GWASsnps provided.", sep=""))
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up GWAS trained priors and analyzing GWAS hits since GWASsnps provided.", sep=""))
 		GWASHits <- MarginalHits[MarginalHits$GWASannot==1,]
 		GWASHits_logBFs_Stacked <- as.matrix(MarginalHits_logBFs_Stacked[,MarginalHits$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+		
+		#20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
 		
 		GWASHits_EBprior <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nModels*nSigmaAlphas entries
 		#20160823 CHECK_0: Prob -- double check use of em.priorprobs here too with runif prior starting point
@@ -620,7 +532,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 		GWASHits_PosteriorProbs <- posteriorprob(GWASHits_logBFs_Stacked, GWASHits_EBprior) #Matrix of nModels*nSigmaAlphas x nSNPs 
 		GWASHits_PosteriorProbs_Collapsed <- apply(GWASHits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
-
 #		print(GWASHits_PosteriorProbs)
 #		print(GWASHits_PosteriorProbs_Collapsed)
 		
@@ -635,7 +546,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		GWASHits_EBprior_ModelMatrix <- cbind(MarginalHits_logBFs$gamma, GWASHits_EBprior_Collapsed)[order(GWASHits_EBprior_Collapsed, decreasing=TRUE),]
 		GWASHits_EBprior_ModelMatrix <- data.frame(cbind(GWASHits_EBprior_ModelMatrix, cumsum(GWASHits_EBprior_ModelMatrix[,ncol(GWASHits_EBprior_ModelMatrix)])))
 		colnames(GWASHits_EBprior_ModelMatrix) <- c(DataSources, "pValue", "Cumm_pValue")
-
 		print(GWASHits_EBprior_ModelMatrix)
 
 		GWASHits_EBprior_ModelMatrix_AllAssoc <- apply((GWASHits_EBprior_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)
@@ -654,19 +564,69 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		PrevHits$ModelCategories_CummpValues <- GWASHits_EBprior_ModelMatrix_pValSupport
 #		print(GWASHits_EBprior_ModelMatrix_pValSupport)
 		print(PrevHits$ModelCategories_CummpValues)
-				 
-		#20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
 	}
+
 	
-#SigmaAlphas
-#CollapseSigmaAlphasTogether(x, nSigmaAlphas)
+#	MarginalHits_logBFs
+#	MarginalHits_logBFs_Stacked
 
+	MarginalHits_logBFs_Stacked_AvgwPrior <- ()
+	if (is.null(GWASsnps) || is.true(UseFlatPriors)) {
+		#FlatUnif_EBprior 
+	
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and flat-tiered priors.", sep=""))
+	
+		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, FlatUnif_EBprior) 
+		
+		#lbf.av.origprior.glhits = lbf.av(lbf.glhits,origprior)
 
+	}
+	else {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and trained priors.", sep=""))
+		
+		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, GWASHits_EBprior) 
 
+		MarginalHits_logBFs_Stacked_AvgwPrior_Min <- min(MarginalHits_logBFs_Stacked_AvgwPrior)
 
+	}
 
-
-
+	#lbf.av.glhits= lbf.av(lbf.glhits,ebprior.glhits)
+	#nsigma=length(sigmaa)
+	#origprior = rep(c(0,lbf$prior[-1]),nsigma)
+	#origprior = normalize(origprior)
+	#lbf.av.origprior.glhits = lbf.av(lbf.glhits,origprior)
+	#lbf.uni.glhits = lbf.uni(lbf.glhits,lbf$gamma)
+	#lbf.all.glhits = lbf.all(lbf.glhits,lbf$gamma)
+	#
+	#min(lbf.av.glhits)
+	#min(lbf.av.origprior.glhits)
+	##~~~
+	#> min(lbf.av.glhits)
+	#[1] 6.496187
+	#> min(lbf.av.origprior.glhits)
+	#[1] 4.723453
+	#
+	#lbf.av.all = lbf.av(lbf.bigmat,ebprior.glhits)
+	#gl$lbfav = lbf.av.all
+	##o = order(gl$chr, gl$pos)
+	##gl = gl[o,]
+	#
+	#sub = gl[gl$nmin>20000,]
+	#l=indephits(sub$lbfav,sub$chr,sub$pos)
+	#sub=sub[l==1,]
+	#newhits = sub[sub$annot==0 & sub$lbfav>5.083439 & sub$nmin>20000,c(1:4,17:28)]
+	#
+	##extract lbfs for all the new hits
+	#lbf.newhits= lbf.bigmat[,gl$nmin>20000]
+	#lbf.newhits= lbf.newhits[,l==1]
+	#lbf.newhits= lbf.newhits[,sub$annot==0 & sub$lbfav>5.083439 & sub$nmin>20000]
+	#pp.newhits = posteriorprob(lbf.newhits,ebprior.glhits) #posterior prob on models for new hits
+	#pp.newhits.collapse =  apply(pp.newhits,2,collapse, nsigmaa=length(sigmaa))
+	#
+	#ppmatrix.newhits = cbind(pp.newhits.collapse)[order(ebprior.glhits.collapse,decreasing=TRUE),]
+	#pp.newhits.classmatrix = rbind(colSums(ppmatrix.newhits[allassoc,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,6]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,5]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,4]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,3]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,2]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,1]==0,]))
+	#bestclass= apply(pp.newhits.classmatrix, 2,which.max)
+	#cbind(as.character(newhits$snp),bestclass,apply(pp.newhits.classmatrix,2,max))
 
 }
 
@@ -693,247 +653,6 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 #if (FALSE) {
 #~~~
-#> stop("nana", "nana3")
-#Error: nananana3
-#> stop("nana", " nana3")
-#Error: nana nana3
-#> val1 <- "shoop"
-#> stop("nana", val1, " nana3")
-#Error: nanashoop nana3
-#> stop("nana ", val1, " nana3")
-#Error: nana shoop nana3
-#> val2 <- rbind(c("nanana"), c("nanananana"))
-#> val2
-#     [,1]        
-#[1,] "nanana"    
-#[2,] "nanananana"
-#> stop("nana ", val1, " nana3 ", val2)
-#Error: nana shoop nana3 nananananananana
-#> print(val2)
-#     [,1]        
-#[1,] "nanana"    
-#[2,] "nanananana"
-#> time()
-#Error in time.default() : argument "x" is missing, with no default
-#> sys.time()
-#Error: could not find function "sys.time"
-#> Sys.time()
-#[1] "2016-08-14 01:11:17 CDT"
-#> Sys.time()
-#[1] "2016-08-14 01:11:18 CDT"
-#> paste(Sys.time(), " nanana"))
-#Error: unexpected ')' in "paste(Sys.time(), " nanana"))"
-#> paste(Sys.time(), " nanana")
-#[1] "2016-08-14 01:11:34  nanana"
-#> paste(Sys.time(), "nanana")
-#[1] "2016-08-14 01:11:39 nanana"
-#> paste(Sys.time(), " -- nanana")
-#[1] "2016-08-14 01:11:44  -- nanana"
-#> rbind(paste(Sys.time(), " -- nanana"), paste(Sys.time(), " -- nanana2"))
-#     [,1]                             
-#[1,] "2016-08-14 01:11:59  -- nanana" 
-#[2,] "2016-08-14 01:11:59  -- nanana2"
-#> rbind(paste(Sys.time(), " -- nanana"), paste(Sys.time(), " -- nanana2"))
-#     [,1]                             
-#[1,] "2016-08-14 01:12:04  -- nanana" 
-#[2,] "2016-08-14 01:12:04  -- nanana2"
-#> stop(Sys.time())
-#Error: 2016-08-14 01:18:16
-#> stop(Sys.time(), " -- blahlbah")
-#Error: 2016-08-14 01:18:21 -- blahlbah
-#> myfunc <- function(v1) {
-#+   deparse(substitute(v1))
-#+ }
-#> deparse(substitute(val1))
-#[1] "val1"
-#> substitute(val1) 
-#val1
-#> val1
-#[1] "shoop"
-#> val1 <- c(1,2,3,4,5)
-#> val1[c(TRUE,FALSE,FALSE,TRUE,FALSE)]
-#[1] 1 4
-#> TRUE %in% c(FALSE, FALSE, FALSE)
-#[1] FALSE
-#> TRUE %in% c(FALSE, FALSE, TRUE)
-#[1] TRUE
-#> FALSE %in% c(TRUE, TRUE, TRUE)
-#[1] FALSE
-#> FALSE %in% c(TRUE, TRUE, FALSE)
-#[1] TRUE
-#> blah <- data.frame()
-#> blah
-#data frame with 0 columns and 0 rows
-#> nrow(blah)
-#[1] 0
-#> Data1
-#  Chr   BP A1  MAF Direction pValue    N
-#1   1 1000  A 0.20         -  0.0100 2500
-#2   1 2000  G 0.10         -  0.0760 2467
-#3   2 3000  T 0.06         +  0.3100 2761
-#4   3 4000  C 0.40         +  0.0056 2310
-#5   4 5000  C 0.35         -  0.7200 2632
-#> blah1 <- data.frame()
-#> blah1 <- Data1
-#> blah1
-#  Chr   BP A1  MAF Direction pValue    N
-#1   1 1000  A 0.20         -  0.0100 2500
-#2   1 2000  G 0.10         -  0.0760 2467
-#3   2 3000  T 0.06         +  0.3100 2761
-#4   3 4000  C 0.40         +  0.0056 2310
-#5   4 5000  C 0.35         -  0.7200 2632
-#> eval(parse(text="blah1$nana1 <- c(1,2,3,4,5)"))
-#> blah1
-#  Chr   BP A1  MAF Direction pValue    N nana1
-#1   1 1000  A 0.20         -  0.0100 2500     1
-#2   1 2000  G 0.10         -  0.0760 2467     2
-#3   2 3000  T 0.06         +  0.3100 2761     3
-#4   3 4000  C 0.40         +  0.0056 2310     4
-#5   4 5000  C 0.35         -  0.7200 2632     5
-#> eval(parse(text=paste("blah1", "$nana2 <- c(1,2,3,4,5)", sep="")))
-#> blah1
-#  Chr   BP A1  MAF Direction pValue    N nana1 nana2
-#1   1 1000  A 0.20         -  0.0100 2500     1     1
-#2   1 2000  G 0.10         -  0.0760 2467     2     2
-#3   2 3000  T 0.06         +  0.3100 2761     3     3
-#4   3 4000  C 0.40         +  0.0056 2310     4     4
-#5   4 5000  C 0.35         -  0.7200 2632     5     5
-#> val2 <- "shana"
-#> paste(val2, " haha ", paste("blahblah", val2), sep="")
-#[1] "shana haha blahblah shana"
-#> paste(val2, " haha ", paste("blahblah", val2, sep="_"), sep="")
-#[1] "shana haha blahblah_shana"
-#> blah1$ChrBP <- paste(blah1$Chr, blah1$BP, sep="_")
-#> blah1
-#  Chr   BP A1  MAF Direction pValue    N nana1 nana2  ChrBP
-#1   1 1000  A 0.20         -  0.0100 2500     1     1 1_1000
-#2   1 2000  G 0.10         -  0.0760 2467     2     2 1_2000
-#3   2 3000  T 0.06         +  0.3100 2761     3     3 2_3000
-#4   3 4000  C 0.40         +  0.0056 2310     4     4 3_4000
-#5   4 5000  C 0.35         -  0.7200 2632     5     5 4_5000
-#~~~
-#20160815 -- program runs up to merge
-#> source("PrepareData.R")
-#> bmass(c("Data1", "Data2"))
-#[1] "Data1" "Data2"
-#   ChrBP Data1_Chr Data1_BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue
-#1 1_1000         1     1000        A      0.20               -       0.0100
-#2 1_2000         1     2000        G      0.10               -       0.0760
-#3 2_3000         2     3000        T      0.06               +       0.3100
-#4 3_4000         3     4000        C      0.40               +       0.0056
-#5 4_5000         4     5000        C      0.35               -       0.7200
-#  Data1_N Data2_pValue Data2_N
-#1    2500       0.0100    2500
-#2    2467       0.0760    2467
-#3    2761       0.3100    2761
-#4    2310       0.0056    2310
-#5    2632       0.7200    2632
-#> bmass(c("Data1", "Data2", "Data3"))
-#[1] "Data1" "Data2" "Data3"
-#   ChrBP Data1_Chr Data1_BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue
-#1 1_1000         1     1000        A      0.20               -       0.0100
-#2 1_2000         1     2000        G      0.10               -       0.0760
-#3 2_3000         2     3000        T      0.06               +       0.3100
-#4 3_4000         3     4000        C      0.40               +       0.0056
-#5 4_5000         4     5000        C      0.35               -       0.7200
-#  Data1_N Data2_pValue Data2_N Data3_pValue Data3_N
-#1    2500       0.0100    2500       0.0100    2500
-#2    2467       0.0760    2467       0.0760    2467
-#3    2761       0.3100    2761       0.3100    2761
-#4    2310       0.0056    2310       0.0056    2310
-#5    2632       0.7200    2632       0.7200    2632
-#
-#> bmass(c("Data1", "Data2"))
-#[1] "Data1" "Data2"
-#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
-#1 1_1000   1 1000        A      0.20               -       0.0100    2500
-#2 1_2000   1 2000        G      0.10               -       0.0760    2467
-#3 2_3000   2 3000        T      0.06               +       0.3100    2761
-#4 3_4000   3 4000        C      0.40               +       0.0056    2310
-#5 4_5000   4 5000        C      0.35               -       0.7200    2632
-#  Data2_pValue Data2_N
-#1       0.0100    2500
-#2       0.0760    2467
-#3       0.3100    2761
-#4       0.0056    2310
-#5       0.7200    2632
-#> SigSNPs
-#  Chr   BP
-#1   1 1000
-#2   2 3000
-#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
-#[1] "Data1" "Data2"
-#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
-#1 1_1000   1 1000        A      0.20               -       0.0100    2500
-#2 1_2000   1 2000        G      0.10               -       0.0760    2467
-#3 2_3000   2 3000        T      0.06               +       0.3100    2761
-#4 3_4000   3 4000        C      0.40               +       0.0056    2310
-#5 4_5000   4 5000        C      0.35               -       0.7200    2632
-#  Data2_pValue Data2_N GWASannot
-#1       0.0100    2500         1
-#2       0.0760    2467         2
-#3       0.3100    2761         1
-#4       0.0056    2310         0
-#5       0.7200    2632         0
-#> val6
-#list()
-#> val6$bps <- c(1,2,3,4,5)
-#> val6
-#$bps
-#[1] 1 2 3 4 5
-#
-#> val6$yal1 <- matrix(c(1,2,3,4), nrow=2) 
-#> val6
-#$bps
-#[1] 1 2 3 4 5
-#
-#$yal1
-#     [,1] [,2]
-#[1,]    1    3
-#[2,]    2    4
-#
-#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
-#[1] "Data1" "Data2"
-#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_N Data1_ZScore Data2_N Data2_ZScore
-#1 1_1000   1 1000        A      0.20    2500    2.3263479    2500    2.3263479
-#2 1_2000   1 2000        G      0.10    2467    1.4325027    2467    1.4325027
-#3 2_3000   2 3000        T      0.06    2761   -0.4958503    2761   -0.4958503
-#4 3_4000   3 4000        C      0.40    2310   -2.5363960    2310   -2.5363960
-#5 4_5000   4 5000        C      0.35    2632   -0.5828415    2632   -0.5828415
-#  GWASannot
-#1         1
-#2         2
-#3         1
-#4         0
-#5         0
-#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
-#[1] "Data1" "Data2"
-#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
-#1 1_1000   1 1000        A      0.20               -       0.0100    2500
-#2 1_2000   1 2000        G      0.10               -       0.0760    2467
-#3 2_3000   2 3000        T      0.06               +       0.3100    2761
-#4 3_4000   3 4000        C      0.40               +       0.0056    2310
-#5 4_5000   4 5000        C      0.35               -       0.7200    2632
-#  Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
-#1    2.3263479               -       0.0100    2500    2.3263479         1
-#2    1.4325027               -       0.0760    2467    1.4325027         2
-#3   -0.4958503               +       0.3100    2761   -0.4958503         1
-#4   -2.5363960               +       0.0056    2310   -2.5363960         0
-#5   -0.5828415               -       0.7200    2632   -0.5828415         0
-#> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
-#[1] "Data1" "Data2"
-#   ChrBP Chr   BP Data1_A1 Data1_MAF Data1_Direction Data1_pValue Data1_N
-#1 1_1000   1 1000        A      0.20               -       0.0100    2500
-#2 1_2000   1 2000        G      0.10               -       0.0760    2467
-#3 2_3000   2 3000        T      0.06               +       0.3100    2761
-#4 3_4000   3 4000        C      0.40               +       0.0056    2310
-#5 4_5000   4 5000        C      0.35               -       0.7200    2632
-#  Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
-#1   -2.3263479               -       0.0100    2500   -2.3263479         1
-#2   -1.4325027               -       0.0760    2467   -1.4325027         2
-#3    0.4958503               +       0.3100    2761    0.4958503         1
-#4    2.5363960               +       0.0056    2310    2.5363960         0
-#5    0.5828415               -       0.7200    2632    0.5828415         0
 #TimeTag 20160822
 #> bmass(c("Data1", "Data2"), GWASsnps=SigSNPs)
 #[1] "Data1" "Data2"
@@ -1123,6 +842,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #9     2     2  0.000000e+00           1
 #        AllAssoc     AllBut1Assoc AllButData1Assoc AllButData2Assoc 
 #               1                0                0                0 
+#TimeTag 20160823 -- Program runs up to end of GWAS/prev hit analyses, moved to version 0.0.3.9000
 #
 #}
 
