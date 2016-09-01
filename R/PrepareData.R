@@ -198,7 +198,7 @@ CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, UseFlatPriors=FALSE, bmassSeedValue=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, bmassSeedValue=NULL) {
 
 	print(DataSources)
 
@@ -220,12 +220,14 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks.", sep=""))
 		
+		####Candidate For Unit Tests####
 		if (!is.vector(DataSources)) {
 			stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
 		}
 		
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed vector check.", sep=""))
 
+		####Candidate For Unit Tests####
 		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterFormat)	
 		if (FALSE %in% DataSourcesCheckCharacters) {
 			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckCharacters])
@@ -233,6 +235,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed string check.", sep=""))
 
+		####Candidate For Unit Tests####
 		DataSourcesCheckExists <- sapply(DataSources, CheckVariableExists)
 		if (FALSE %in% DataSourcesCheckExists) {
 			stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckExists])
@@ -241,6 +244,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed exists check.", sep=""))
 		
 		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
+		####Candidate For Unit Tests####
 		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
 		if (FALSE %in% DataSourcesCheckDataFrames) {
 			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDataFrames])
@@ -248,6 +252,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed data.frame check.", sep=""))
 
+		####Candidate For Unit Tests####
 		DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
 		if (FALSE %in% DataSourcesCheckHeaderNames) {
 			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are \"", paste(ExpectedColumnNames, collapse=" "), "\". Please fix and rerun bmass: ", DataSources[!DataSourcesCheckHeaderNames])
@@ -255,12 +260,29 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
 	
+		####Candidate For Unit Tests####
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
 			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDirectionColumn])
 		}
 		
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed Direction column check.", sep=""))
+
+		###### do thissssss below
+		#
+		#Check that if ProvidedPriors is non-NULL then it has the correct length and that all entries are numeric. 
+		#
+		###### do thissssss below
+		####Candidate For Unit Tests####
+		if (!is.null(ProvidedPriors)) {
+			if (!is.vector(ProvidedPriors)) {
+				stop(Sys.time(), " -- ProvidedPriors input is not in vector format. Please fix and rerun bmass.")
+			}
+			if (length(ProvidedPriors) != 3^length(DataSources)) { 
+				stop(Sys.time(), " -- The number of entries in ProvidedPriors does not equal 3 ^ the number of datasets passed to DataSources (ie ", as.character(3^length(DataSources)), "). Please fix and rerun bmass.")
+			}
+			LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- ProvidedPriors was provided and passed checks.", sep=""))
+		}
 
 		###### do thissssss
 		#
@@ -495,19 +517,36 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
 	#MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
 	MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
-		
+	
+	if (!is.null(ProvidedPriors)) {
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- ProvidedPriors is not NULL, replacing original priors with submitted values.", sep=""))
+		MarginalHits_logBFs$prior <- ProvidedPriors
+	}
+
 #	LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up priors.", sep=""))
 
-	GWASHits_EBprior <- NULL
-	FlatUnif_EBprior <- NULL
-	logBF_min	
-	if (is.null(GWASsnps) || is.true(UseFlatPriors)) {
+#	GWASHits_EBprior <- NULL
+#	FlatUnif_EBprior <- NULL
+#	logBF_min	
+	if (is.null(GWASsnps) || UseFlatPriors == TRUE) {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
 	
 		FlatUnif_EBprior <- normalize(rep(c(0,MarginalHits_logBFs$prior[-1]),length(SigmaAlphas)))
 		#nsigma=length(sigmaa)
 		#origprior = rep(c(0,lbf$prior[-1]),nsigma)
 		#origprior = normalize(origprior)
+		
+		#FlatUnif_EBprior 
+	
+		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and flat-tiered priors.", sep=""))
+	
+		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, FlatUnif_EBprior) 
+		
+		#lbf.av.origprior.glhits = lbf.av(lbf.glhits,origprior)
+
+		#Add summary stats to marginal SNPs
+		#Add SNPs x Model matrix with prior*logBFs as entries, summed (or avg'd??) across SigmaAlphas
+	
 	}
 	else {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up GWAS trained priors and analyzing GWAS hits since GWASsnps provided.", sep=""))
@@ -564,24 +603,8 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		PrevHits$ModelCategories_CummpValues <- GWASHits_EBprior_ModelMatrix_pValSupport
 #		print(GWASHits_EBprior_ModelMatrix_pValSupport)
 		print(PrevHits$ModelCategories_CummpValues)
-	}
-
 	
-#	MarginalHits_logBFs
-#	MarginalHits_logBFs_Stacked
-
-	MarginalHits_logBFs_Stacked_AvgwPrior <- ()
-	if (is.null(GWASsnps) || is.true(UseFlatPriors)) {
-		#FlatUnif_EBprior 
-	
-		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and flat-tiered priors.", sep=""))
-	
-		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, FlatUnif_EBprior) 
-		
-		#lbf.av.origprior.glhits = lbf.av(lbf.glhits,origprior)
-
-	}
-	else {
+###?		MarginalHits_logBFs_Stacked_AvgwPrior <- ()
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and trained priors.", sep=""))
 		
 		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, GWASHits_EBprior) 
@@ -589,6 +612,10 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		MarginalHits_logBFs_Stacked_AvgwPrior_Min <- min(MarginalHits_logBFs_Stacked_AvgwPrior)
 
 	}
+
+	
+#	MarginalHits_logBFs
+#	MarginalHits_logBFs_Stacked
 
 	#lbf.av.glhits= lbf.av(lbf.glhits,ebprior.glhits)
 	#nsigma=length(sigmaa)
