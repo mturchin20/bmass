@@ -259,7 +259,16 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		}
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
+		
+		
+		#20160901 CHECK_0 -- Prob: Do X/23 chr column conversion stuff first here
+		###### do thissssss
+		#
+		#Check for 'X' chromosomes and convert to 23 & print warning/logfile statement
+		#
+		###### do thissssss
 	
+		#20160901 CHECK_0 -- Prob: Check multiple columns in entries to make sure input types/classes are as what's exepected? Eg chr/bp numeric, alleles chars, N and pvals numeric? Do X/23 conversion stuff before ondividual data column class/type checks first
 		####Candidate For Unit Tests####
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
@@ -278,23 +287,21 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 			if (!is.vector(ProvidedPriors)) {
 				stop(Sys.time(), " -- ProvidedPriors input is not in vector format. Please fix and rerun bmass.")
 			}
+			#20160901 CHECK_0 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too?
+			if (!is.numeric(ProvidedPriors)) {
+				stop(Sys.time(), " -- ProvidedPriors input is returning false for is.numeric(). Please ensure all entries are numeric and then rerun bmass.")
+			}
 			if (length(ProvidedPriors) != 3^length(DataSources)) { 
-				stop(Sys.time(), " -- The number of entries in ProvidedPriors does not equal 3 ^ the number of datasets passed to DataSources (ie ", as.character(3^length(DataSources)), "). Please fix and rerun bmass.")
+				stop(Sys.time(), " -- The number of entries in ProvidedPriors does not equal 3 ^ the number of datasets passed to DataSources (ie 3 ^ ", as.character(length(DataSources)), " = ", as.character(3^length(DataSources)), "). Please fix and rerun bmass.")
 			}
 			LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- ProvidedPriors was provided and passed checks.", sep=""))
 		}
-
-		###### do thissssss
-		#
-		#Check for 'X' chromosomes and convert to 23 & print warning/logfile statement
-		#
-		###### do thissssss
-
 	}
 	else {
 		
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- MergedDataSources file provided, going through data checks.", sep=""))
 
+		#20160901 CHECK_0 -- Prob: Get this done at some point soon'ish, not soon after first rough draft completed for everything
 		###### do thissssss
 		#
 		#Routine for checks if MergedDataSources file provided?
