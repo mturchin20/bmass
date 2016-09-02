@@ -153,6 +153,57 @@ CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
 	return(CollapsedInputs)
 }
 
+CheckForAndReplaceOnes <- function(x) {
+	returnValue1 <- x
+	if (x == 1) {
+		returnValue1 <- 0
+	}
+	return(returnValue1)
+}
+
+CheckForAndReplaceZeroes <- function(x) {
+	returnValue1 <- x
+	if (x == 0) {
+		returnValue1 <- 1
+	}
+	return(returnValue1)
+}
+
+#GetMeanAcrossAlphaSigmas <- function(LogBFs1, nGammas, nSigmaAlphas) {
+#        MeanAcrossAlphaSigmas <- matrix(0, ncol=ncol(LogBFs1), nrow=nGammas)
+#        for (i in 1:nGammas) {
+#                SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
+#                max <- apply(LogBFs1[SigmaAlpha_Coordinates,], 2, max)
+#                LogBFs1[SigmaAlpha_Coordinates,] <- LogBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(LogBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(LogBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
+#                MeanAcrossAlphaSigmas[i,] <- log10(apply(10^LogBFs1[SigmaAlpha_Coordinates,], 2, mean)) + max
+#        }
+#        return(MeanAcrossAlphaSigmas)
+#}
+
+####Candidate For Unit Tests####
+#GetSumAcrossSigmaAlphas_withPriors(matrix(1, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
+#GetSumAcrossSigmaAlphas_withPriors(matrix(0, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
+#apply(10^matrix(0, ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
+#apply(10^matrix(c(0,1), ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
+#log10(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes))
+#log10(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum))
+#log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes))
+#matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE) - matrix(apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max), ncol=2, nrow=2, byrow=TRUE)
+#log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max)
+#matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)[seq.int(1, by=2, length.out=3),]
+#Test removing matrix of max values too? What about SigmaAlpa_Coordinates part?
+GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nSigmaAlphas) {
+        WeightedSumAcrossAlphaSigmas <- matrix(0, ncol=ncol(LogBFs1), nrow=nGammas)
+        for (i in 1:nGammas) {
+                SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
+                max <- apply(LogBFs1[SigmaAlpha_Coordinates,], 2, max)
+                LogBFs1[SigmaAlpha_Coordinates,] <- LogBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(LogBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(LogBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
+                WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors[SigmaAlpha_Coordinates,] * apply(10^LogBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max
+        }
+        return(WeightedSumAcrossAlphaSigmas)
+}
+
+
 #Convert a comma-separated string of data file locations into a vector
 #20160812 20160814 CHECK_1 -- Prob: Come up with way to send off log message and then immediately leave program due to an error. Eg, here in this instance, if there are no commas the program should exit -- either the person has inputted things incorrectly or the person has supplied only a single datafile. The former should be obvious and in the latter bmass presumably cannot run on just one file/one phenotype. Soln: Found/used stop().
 
@@ -535,6 +586,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #	GWASHits_EBprior <- NULL
 #	FlatUnif_EBprior <- NULL
 #	logBF_min	
+	MarginalHits_logBFs_Stacked_AvgwPrior <- NULL
 	if (is.null(GWASsnps) || UseFlatPriors == TRUE) {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
 	
@@ -619,6 +671,29 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		MarginalHits_logBFs_Stacked_AvgwPrior_Min <- min(MarginalHits_logBFs_Stacked_AvgwPrior)
 
 	}
+
+	if (is.null(MarginalHits_logBFs_Stacked_AvgwPrior)) {
+		#20160901 CHECK_0 -- Prob: Do something more substantive here? A better error message, or give just a warning instead? Don't exist program?
+		stop(Sys.time(), " -- No average log BFs were returned from method. Check if all input variables are as the method expects.") 
+	}
+
+	MarginalHits$LogBFWeightedAvg <- MarginalHits_logBFs_Stacked_AvgwPrior
+
+
+	MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
+	#MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
+	MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
+
+	#lbf.gl <- MeanAcrossSigmaas(lbf.bigmat, 81, 14)
+	#lbf.gl.format <- cbind(lbf$gamma, log10(apply(10^lbf.gl, 1, sum)), lbf.gl)[order(log10(apply(10^lbf.gl, 1, sum))),]
+	#lbf.gl.prior <- MeanAcrossSigmaas.wPriorAvg(lbf.bigmat, matrix(normalize(rep(c(0,lbf$prior[-1]),nsigma)), nrow = nrow(lbf.bigmat), ncol=ncol(lbf.bigmat), byrow=FALSE), 81, 14)
+	#lbf.gl.prior.format <- cbind(lbf$gamma, log10(apply(10^lbf.gl.prior, 1, sum)), lbf.gl.prior)[order(log10(apply(10^lbf.gl.prior, 1, sum))),]
+
+	GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nSigmaAlphas) {
+
+	bmassOutput$MarginalSNPs <- MarginalHits
+#	bmassOutput$logBFs <- 
+
 
 	
 #	MarginalHits_logBFs
@@ -877,7 +952,67 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #        AllAssoc     AllBut1Assoc AllButData1Assoc AllButData2Assoc 
 #               1                0                0                0 
 #TimeTag 20160823 -- Program runs up to end of GWAS/prev hit analyses, moved to version 0.0.3.9000
-#
+#> GetSumAcrossSigmaAlphas_withPriors(matrix(1, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
+#     [,1] [,2]
+#[1,]    1    1
+#> GetSumAcrossSigmaAlphas_withPriors(matrix(0, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
+#     [,1] [,2]
+#[1,]    0    0
+#> apply(10^matrix(0, ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
+#     [,1] [,2]
+#[1,]    0    0
+#[2,]    0    0
+#> 10^matrix(0, ncol=2, nrow=2)
+#     [,1] [,2]
+#[1,]    1    1
+#[2,]    1    1
+#> 10^matrix(c(0,1), ncol=2, nrow=2)
+#     [,1] [,2]
+#[1,]    1    1
+#[2,]   10   10
+#> apply(10^matrix(c(0,1), ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
+#     [,1] [,2]
+#[1,]    0    0
+#[2,]   10   10
+#> log10(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes))
+#     [,1] [,2]
+#[1,] -Inf    1
+#[2,] -Inf    1
+#> log10(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum))
+#[1]    -Inf 1.30103
+#> log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes))
+#[1] 0.00000 1.30103
+#> apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum) 
+#[1]  0 20
+#> sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes) 
+#[1]  1 20
+#> matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE) - matrix(apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max), ncol=2, nrow=2, byrow=TRUE)
+#     [,1] [,2]
+#[1,]    0    0
+#[2,]    0    0
+#> apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max)
+#[1] 0 1
+#> matrix(apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max), ncol=2, nrow=2, byrow=TRUE)
+#     [,1] [,2]
+#[1,]    0    1
+#[2,]    0    1
+#> log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max)
+#[1] 0.00000 2.30103
+#> seq.int(1, by=2, length.out=3)
+#[1] 1 3 5
+#> matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)
+#     [,1] [,2]
+#[1,]    1    7
+#[2,]    2    8
+#[3,]    3    9
+#[4,]    4   10
+#[5,]    5   11
+#[6,]    6   12
+#> matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)[seq.int(1, by=2, length.out=3),]
+#     [,1] [,2]
+#[1,]    1    7
+#[2,]    3    9
+#[3,]    5   11
 #}
 
 
