@@ -13,23 +13,24 @@ Version updates will be tracked and explained here. Major updates & releases wil
 * Created `logBFs` and `PosteriorProbabilities` output matrices
   * Initialized `GetSumAcrossSigmaAlphas_withPriors()`
 * Created `NewSNPs` output variable, in conjunction with `GWASlogBFMinThreshold`
+* Added current desired, associated variables to `bmassOutput`
 
 ###### Notes
 * Current content associated with `bmassOutput`:
-  *`MarginalSNPs` 
-  *`ModelPriors`
-  *`logBFs`
-  *`PosteriorProbabilities`
-  *`GWASlogBFMinThreshold`
-  *`NewSNPs`
+  * `MarginalSNPs` 
+  * `ModelPriors`
+  * `logBFs`
+  * `PosteriorProbabilities`
+  * `GWASlogBFMinThreshold`
+  * `NewSNPs`
 
 ###### Next steps (if applicable)
 * Next steps include:
-  *cleaning up code (eg superfluous comments, print statements, etc...)
-  *moving to a return() ending for the code via `bmassOutput`
-  *beginning to map out breaking up code into more definable subsections for better organized .R file subsets
-  *reviewing, updating, and changing (if/as necessary), `bmassOutput` associated variables
-    *any other additions? include both logBFs and PosteriorProbabilities?
-  *begin considering downstream helper functions for follow-up analyses/plots of `bmassOutput` results
+  * cleaning up code (eg superfluous comments, print statements, etc...)
+  * moving to a return() ending for the code via `bmassOutput`
+  * beginning to map out breaking up code into more definable subsections for better organized .R file subsets
+  * reviewing, updating, and changing (if/as necessary), `bmassOutput` associated variables
+    * any other additions? include both logBFs and PosteriorProbabilities?
+  * begin considering downstream helper functions for follow-up analyses/plots of `bmassOutput` results
  
 
