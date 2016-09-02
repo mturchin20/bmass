@@ -59,6 +59,11 @@ d = dim(Z)[2]
 p = dim(Z)[1]
 if(m==0){m = d-1}
 VXX = 2*f *(1-f)
+#print("nana1")
+#print(VXX)
+#print(Z)
+#print(n)
+#print("nana2")
 VYX = t(sqrt(VXX)*Z/sqrt(n))
 
 prior = rep(0,3^d)

@@ -81,7 +81,7 @@ CheckDataSourceDirectionColumn <- function (DataSources1) {
 
 
 
-
+#
 #Annotating merged data with, if provided, GWAS SNPs
 #~~~~~~
 
@@ -249,7 +249,7 @@ GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nS
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, bmassSeedValue=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, bmassSeedValue=NULL) {
 
 	print(DataSources)
 
@@ -679,17 +679,27 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 	MarginalHits$LogBFWeightedAvg <- MarginalHits_logBFs_Stacked_AvgwPrior
 
+	#print(MarginalHits)
 
-	MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
-	#MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
-	MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
+	if (PruneMarginalHits == TRUE) {
+		#20160901 CHECK_0 -- Prob: Go over indepthits function, rewrite, or just lightly edit? redo names, double-check functionality? def get some unit testing in there
+		#l=indephits(sub$lbfavflat,sub$chr,sub$pos)
+		#sub=sub[l==1,]
+		MarginalHits <- MarginalHits[indephits(MarginalHits$LogBFWeightedAvg, MarginalHits$Chr, MarginalHits$BP, T=PruneMarginalHits_bpWindow)==1,]
+	}
+	
+	print(MarginalHits)
+
+	#MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
+	##MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
+	#MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
 
 	#lbf.gl <- MeanAcrossSigmaas(lbf.bigmat, 81, 14)
 	#lbf.gl.format <- cbind(lbf$gamma, log10(apply(10^lbf.gl, 1, sum)), lbf.gl)[order(log10(apply(10^lbf.gl, 1, sum))),]
 	#lbf.gl.prior <- MeanAcrossSigmaas.wPriorAvg(lbf.bigmat, matrix(normalize(rep(c(0,lbf$prior[-1]),nsigma)), nrow = nrow(lbf.bigmat), ncol=ncol(lbf.bigmat), byrow=FALSE), 81, 14)
 	#lbf.gl.prior.format <- cbind(lbf$gamma, log10(apply(10^lbf.gl.prior, 1, sum)), lbf.gl.prior)[order(log10(apply(10^lbf.gl.prior, 1, sum))),]
 
-	GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nSigmaAlphas) {
+#	GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nSigmaAlphas) {
 
 	bmassOutput$MarginalSNPs <- MarginalHits
 #	bmassOutput$logBFs <- 
@@ -1013,6 +1023,93 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #[1,]    1    7
 #[2,]    3    9
 #[3,]    5   11
+#    ChrBP Chr    BP A1  MAF Data1_Direction Data1_pValue Data1_N Data1_ZScore
+#2  1_1000   1  1000  A 0.20               -        6e-13    2500    -7.200482
+#4  2_3000   2  3000  T 0.06               +        3e-09    2761     5.931598
+#5 3_15000   3 15000  C 0.40               +        1e-07    2410     5.326724
+#8  4_7000   4  7000  G 0.15               +        0e+00    2514     5.931598
+#  Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot    mvstat
+#2               -        2e-13    2500    -7.348796         1  66.29230
+#4               +        5e-09    2761     5.847172         1  43.43998
+#5               +        4e-07    2410     5.068958         0  33.91289
+#8               -        0e+00    2514    -7.348796         0 219.57617
+#  mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
+#2        14.395191 54.00480         12.698970 2500        12.538541
+#4         9.432873 35.18386          8.522879 2761         7.411730
+#5         7.364091 28.37399          7.000000 2410         5.711266
+#8        47.680359 54.00480         12.698970 2514        45.346014
+#       ChrBP Chr      BP A1  MAF Data1_Direction Data1_pValue Data1_N
+#2     1_1000   1    1000  A 0.20               -        6e-13    2500
+#4     2_3000   2    3000  T 0.06               +        3e-09    2761
+#5    3_15000   3   15000  C 0.40               +        1e-07    2410
+#8     4_7000   4    7000  G 0.15               +        0e+00    2514
+#11 9_1038000   9 1038000  C 0.31               +        9e-23    2617
+#12 9_1058000   9 1058000  C 0.29               +        5e-20    2589
+#   Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
+#2     -7.200482               -        2e-13    2500    -7.348796         1
+#4      5.931598               +        5e-09    2761     5.847172         1
+#5      5.326724               +        4e-07    2410     5.068958         0
+#8      9.822591               -        0e+00    2514    -7.348796         0
+#11     9.822591               +        6e-23    2617     9.863372         0
+#12     9.164018               +        2e-20    2589     9.262340         0
+#      mvstat mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
+#2   66.29230        14.395191 54.00480         12.698970 2500        12.538541
+#4   43.43998         9.432873 35.18386          8.522879 2761         7.411730
+#5   33.91289         7.364091 28.37399          7.000000 2410         5.711266
+#8  367.95583        79.900593 96.48330         22.045757 2514        79.198156
+#11 121.31709        26.343671 97.28610         22.221849 2617        24.511816
+#12 106.29904        23.082543 85.79094         19.698970 2589        21.218324
+#       ChrBP Chr      BP A1  MAF Data1_Direction Data1_pValue Data1_N
+#2     1_1000   1    1000  A 0.20               -        6e-13    2500
+#4     2_3000   2    3000  T 0.06               +        3e-09    2761
+#5    3_15000   3   15000  C 0.40               +        1e-07    2410
+#8     4_7000   4    7000  G 0.15               +        0e+00    2514
+#11 9_1038000   9 1038000  C 0.31               +        9e-23    2617
+#   Data1_ZScore Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot
+#2     -7.200482               -        2e-13    2500    -7.348796         1
+#4      5.931598               +        5e-09    2761     5.847172         1
+#5      5.326724               +        4e-07    2410     5.068958         0
+#8      9.822591               -        0e+00    2514    -7.348796         0
+#11     9.822591               +        6e-23    2617     9.863372         0
+#      mvstat mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
+#2   66.29230        14.395191 54.00480         12.698970 2500        12.538541
+#4   43.43998         9.432873 35.18386          8.522879 2761         7.411730
+#5   33.91289         7.364091 28.37399          7.000000 2410         5.711266
+#8  367.95583        79.900593 96.48330         22.045757 2514        79.198156
+#11 121.31709        26.343671 97.28610         22.221849 2617        24.511816
+#    ChrBP Chr    BP A1  MAF Data1_Direction Data1_pValue Data1_N Data1_ZScore
+#2  1_1000   1  1000  A 0.20               -        6e-13    2500    -7.200482
+#4  2_3000   2  3000  T 0.06               +        3e-09    2761     5.931598
+#5 3_15000   3 15000  C 0.40               +        1e-07    2410     5.326724
+#6 3_21000   3 21000  G 0.37               +        5e-08    2582     5.451310
+#9  4_7000   4  7000  G 0.15               +        0e+00    2514     5.931598
+#  Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot    mvstat
+#2               -        2e-13    2500    -7.348796         1  66.29230
+#4               +        5e-09    2761     5.847172         1  43.43998
+#5               +        4e-07    2410     5.068958         0  33.91289
+#6               +        9e-08    2510     5.345837         0  36.50763
+#9               -        0e+00    2514    -7.348796         0 219.57617
+#  mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
+#2        14.395191 54.00480         12.698970 2500        12.538541
+#4         9.432873 35.18386          8.522879 2761         7.411730
+#5         7.364091 28.37399          7.000000 2410         5.711266
+#6         7.927532 29.71679          7.301030 2510         6.257912
+#9        47.680359 54.00480         12.698970 2514        45.346014
+#    ChrBP Chr    BP A1  MAF Data1_Direction Data1_pValue Data1_N Data1_ZScore
+#2  1_1000   1  1000  A 0.20               -        6e-13    2500    -7.200482
+#4  2_3000   2  3000  T 0.06               +        3e-09    2761     5.931598
+#6 3_21000   3 21000  G 0.37               +        5e-08    2582     5.451310
+#9  4_7000   4  7000  G 0.15               +        0e+00    2514     5.931598
+#  Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot    mvstat
+#2               -        2e-13    2500    -7.348796         1  66.29230
+#4               +        5e-09    2761     5.847172         1  43.43998
+#6               +        9e-08    2510     5.345837         0  36.50763
+#9               -        0e+00    2514    -7.348796         0 219.57617
+#  mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
+#2        14.395191 54.00480         12.698970 2500        12.538541
+#4         9.432873 35.18386          8.522879 2761         7.411730
+#6         7.927532 29.71679          7.301030 2510         6.257912
+#9        47.680359 54.00480         12.698970 2514        45.346014
 #}
 
 
