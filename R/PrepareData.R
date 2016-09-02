@@ -19,7 +19,8 @@
 ##source("PrepareData.R")
 #library("devtools")
 #devtools::load_all()
-#bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, bmassSeedValue=NULL)
+#bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
+#bmassOutput1 <- bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, bmassSeedValue=NULL)
 #ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 #DataList <- c("Data1", "Data2")
 
@@ -198,7 +199,8 @@ GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nS
                 SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
                 max <- apply(LogBFs1[SigmaAlpha_Coordinates,], 2, max)
                 LogBFs1[SigmaAlpha_Coordinates,] <- LogBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(LogBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(LogBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
-                WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors[SigmaAlpha_Coordinates,] * apply(10^LogBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max
+                #20160902 CHECK_0 -- Prob: Check use of max*nSigmaAlphas at end below...point is subtracting max nSigmaAlpha number of times and then summing across those rows, so shouldn't add back that max nSigmaAlpha number of times too?
+		WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors[SigmaAlpha_Coordinates,] * apply(10^LogBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max*nSigmaAlphas
         }
         return(WeightedSumAcrossAlphaSigmas)
 }
@@ -249,7 +251,7 @@ GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nS
 
 #This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
 #PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, bmassSeedValue=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, NminThreshold = 0, bmassSeedValue=NULL) {
 
 	print(DataSources)
 
@@ -270,7 +272,7 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 	if (is.null(MergedDataSources)) {
 
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning DataSources checks.", sep=""))
-		
+	
 		####Candidate For Unit Tests####
 		if (!is.vector(DataSources)) {
 			stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
@@ -347,6 +349,14 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 			}
 			LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- ProvidedPriors was provided and passed checks.", sep=""))
 		}
+	
+		#20160902 CHECK_0 -- Prob: Go through all other input variables and make sure they are the expected formats/inputs, eg numeric, character, etcetc
+		#bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, NminThreshold = 0, bmassSeedValue=NULL) {
+
+		if (!is.numeric(NminThreshold)) {
+			stop(Sys.time(), " -- .")
+		}
+
 	}
 	else {
 		
@@ -587,20 +597,23 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #	FlatUnif_EBprior <- NULL
 #	logBF_min	
 	MarginalHits_logBFs_Stacked_AvgwPrior <- NULL
+	MarginalHits_logBFs_Stacked_AvgwPrior_Min <- NULL
+	Priors_Used <- NULL
 	if (is.null(GWASsnps) || UseFlatPriors == TRUE) {
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
 	
-		FlatUnif_EBprior <- normalize(rep(c(0,MarginalHits_logBFs$prior[-1]),length(SigmaAlphas)))
+		Prior_FlatUnif <- normalize(rep(c(0,MarginalHits_logBFs$prior[-1]),length(SigmaAlphas)))
 		#nsigma=length(sigmaa)
 		#origprior = rep(c(0,lbf$prior[-1]),nsigma)
 		#origprior = normalize(origprior)
 		
-		#FlatUnif_EBprior 
+		#Prior_FlatUnif 
 	
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and flat-tiered priors.", sep=""))
 	
-		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, FlatUnif_EBprior) 
-		
+		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, Prior_FlatUnif) 
+		Priors_Used <- Prior_FlatUnif	
+	
 		#lbf.av.origprior.glhits = lbf.av(lbf.glhits,origprior)
 
 		#Add summary stats to marginal SNPs
@@ -614,10 +627,10 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		
 		#20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
 		
-		GWASHits_EBprior <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nModels*nSigmaAlphas entries
+		Prior_GWAShitsEB <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior, 100) #Vector with nModels*nSigmaAlphas entries
 		#20160823 CHECK_0: Prob -- double check use of em.priorprobs here too with runif prior starting point
 		#20160823 CHECK_0: Prob -- Do multiple runs of em.priorprobs and figure out way to compare them for consistency?
-		GWASHits_EBprior_check2 <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior*runif(length(MarginalHits_logBFs$prior)), 100)
+		Prior_GWAShitsEB_check2 <- em.priorprobs(GWASHits_logBFs_Stacked, MarginalHits_logBFs$prior*runif(length(MarginalHits_logBFs$prior)), 100)
 	
 		###### do thissssss
 		#
@@ -625,10 +638,10 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		#
 		###### do thissssss
 
-		GWASHits_EBprior_Collapsed <- CollapseSigmaAlphasTogether(GWASHits_EBprior, length(SigmaAlphas))
-		GWASHits_EBprior_check2_Collapsed <- CollapseSigmaAlphasTogether(GWASHits_EBprior_check2, length(SigmaAlphas))
+		Prior_GWAShitsEB_Collapsed <- CollapseSigmaAlphasTogether(Prior_GWAShitsEB, length(SigmaAlphas))
+		Prior_GWAShitsEB_check2_Collapsed <- CollapseSigmaAlphasTogether(Prior_GWAShitsEB_check2, length(SigmaAlphas))
 
-		GWASHits_PosteriorProbs <- posteriorprob(GWASHits_logBFs_Stacked, GWASHits_EBprior) #Matrix of nModels*nSigmaAlphas x nSNPs 
+		GWASHits_PosteriorProbs <- posteriorprob(GWASHits_logBFs_Stacked, Prior_GWAShitsEB) #Matrix of nModels*nSigmaAlphas x nSNPs 
 		GWASHits_PosteriorProbs_Collapsed <- apply(GWASHits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
 #		print(GWASHits_PosteriorProbs)
 #		print(GWASHits_PosteriorProbs_Collapsed)
@@ -641,55 +654,93 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 		## this returns a list with elements  pU pD and pI
 		#marginal.glhits = marginal.postprobs(pp.glhits, lbf$gamma,length(sigmaa))
 
-		GWASHits_EBprior_ModelMatrix <- cbind(MarginalHits_logBFs$gamma, GWASHits_EBprior_Collapsed)[order(GWASHits_EBprior_Collapsed, decreasing=TRUE),]
-		GWASHits_EBprior_ModelMatrix <- data.frame(cbind(GWASHits_EBprior_ModelMatrix, cumsum(GWASHits_EBprior_ModelMatrix[,ncol(GWASHits_EBprior_ModelMatrix)])))
-		colnames(GWASHits_EBprior_ModelMatrix) <- c(DataSources, "pValue", "Cumm_pValue")
-		print(GWASHits_EBprior_ModelMatrix)
+		Prior_GWAShitsEB_ModelMatrix <- cbind(MarginalHits_logBFs$gamma, Prior_GWAShitsEB_Collapsed)[order(Prior_GWAShitsEB_Collapsed, decreasing=TRUE),]
+		Prior_GWAShitsEB_ModelMatrix <- data.frame(cbind(Prior_GWAShitsEB_ModelMatrix, cumsum(Prior_GWAShitsEB_ModelMatrix[,ncol(Prior_GWAShitsEB_ModelMatrix)])))
+		colnames(Prior_GWAShitsEB_ModelMatrix) <- c(DataSources, "pValue", "Cumm_pValue")
+		print(Prior_GWAShitsEB_ModelMatrix)
 
-		GWASHits_EBprior_ModelMatrix_AllAssoc <- apply((GWASHits_EBprior_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)
-		GWASHits_EBprior_ModelMatrix_AllAssoc_pValSum <- sum(GWASHits_EBprior_ModelMatrix[GWASHits_EBprior_ModelMatrix_AllAssoc,ncol(GWASHits_EBprior_ModelMatrix)-1])
-		GWASHits_EBprior_ModelMatrix_AllBut1Assoc <- apply((GWASHits_EBprior_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)-1
-		GWASHits_EBprior_ModelMatrix_AllBut1Assoc_pValSum <- sum(GWASHits_EBprior_ModelMatrix[GWASHits_EBprior_ModelMatrix_AllBut1Assoc,ncol(GWASHits_EBprior_ModelMatrix)-1])
+		Prior_GWAShitsEB_ModelMatrix_AllAssoc <- apply((Prior_GWAShitsEB_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)
+		Prior_GWAShitsEB_ModelMatrix_AllAssoc_pValSum <- sum(Prior_GWAShitsEB_ModelMatrix[Prior_GWAShitsEB_ModelMatrix_AllAssoc,ncol(Prior_GWAShitsEB_ModelMatrix)-1])
+		Prior_GWAShitsEB_ModelMatrix_AllBut1Assoc <- apply((Prior_GWAShitsEB_ModelMatrix[,1:length(DataSources)]>0), 1, sum) == length(DataSources)-1
+		Prior_GWAShitsEB_ModelMatrix_AllBut1Assoc_pValSum <- sum(Prior_GWAShitsEB_ModelMatrix[Prior_GWAShitsEB_ModelMatrix_AllBut1Assoc,ncol(Prior_GWAShitsEB_ModelMatrix)-1])
 
-		GWASHits_EBprior_ModelMatrix_pValSupport <- c(GWASHits_EBprior_ModelMatrix_AllAssoc_pValSum, GWASHits_EBprior_ModelMatrix_AllBut1Assoc_pValSum)
-		GWASHits_EBprior_ModelMatrix_pValSupport_Names <- c("AllAssoc", "AllBut1Assoc")
+		Prior_GWAShitsEB_ModelMatrix_pValSupport <- c(Prior_GWAShitsEB_ModelMatrix_AllAssoc_pValSum, Prior_GWAShitsEB_ModelMatrix_AllBut1Assoc_pValSum)
+		Prior_GWAShitsEB_ModelMatrix_pValSupport_Names <- c("AllAssoc", "AllBut1Assoc")
 		for (DataSource in DataSources) {
-			eval(parse(text=paste("GWASHits_EBprior_ModelMatrix_pValSupport <- c(GWASHits_EBprior_ModelMatrix_pValSupport, sum(GWASHits_EBprior_ModelMatrix[GWASHits_EBprior_ModelMatrix_AllBut1Assoc & GWASHits_EBprior_ModelMatrix[,\"", DataSource, "\"] == 0, ncol(GWASHits_EBprior_ModelMatrix)-1]))", sep="")))
-			GWASHits_EBprior_ModelMatrix_pValSupport_Names <- c(GWASHits_EBprior_ModelMatrix_pValSupport_Names, paste("AllBut", DataSource, "Assoc", sep=""))
+			eval(parse(text=paste("Prior_GWAShitsEB_ModelMatrix_pValSupport <- c(Prior_GWAShitsEB_ModelMatrix_pValSupport, sum(Prior_GWAShitsEB_ModelMatrix[Prior_GWAShitsEB_ModelMatrix_AllBut1Assoc & Prior_GWAShitsEB_ModelMatrix[,\"", DataSource, "\"] == 0, ncol(Prior_GWAShitsEB_ModelMatrix)-1]))", sep="")))
+			Prior_GWAShitsEB_ModelMatrix_pValSupport_Names <- c(Prior_GWAShitsEB_ModelMatrix_pValSupport_Names, paste("AllBut", DataSource, "Assoc", sep=""))
 		}
-		names(GWASHits_EBprior_ModelMatrix_pValSupport) <- GWASHits_EBprior_ModelMatrix_pValSupport_Names
+		names(Prior_GWAShitsEB_ModelMatrix_pValSupport) <- Prior_GWAShitsEB_ModelMatrix_pValSupport_Names
 	
-		PrevHits$ModelCategories_CummpValues <- GWASHits_EBprior_ModelMatrix_pValSupport
-#		print(GWASHits_EBprior_ModelMatrix_pValSupport)
+		PrevHits$ModelCategories_CummpValues <- Prior_GWAShitsEB_ModelMatrix_pValSupport
+#		print(Prior_GWAShitsEB_ModelMatrix_pValSupport)
 		print(PrevHits$ModelCategories_CummpValues)
 	
 ###?		MarginalHits_logBFs_Stacked_AvgwPrior <- ()
 		LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and trained priors.", sep=""))
 		
-		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, GWASHits_EBprior) 
-
+		MarginalHits_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalHits_logBFs_Stacked, Prior_GWAShitsEB) 
 		MarginalHits_logBFs_Stacked_AvgwPrior_Min <- min(MarginalHits_logBFs_Stacked_AvgwPrior)
-
+		Priors_Used <- Prior_GWAShitsEB
 	}
 
+	#20160901 CHECK_0 -- Prob: Do something more substantive here? A better error message, or give just a warning instead? Don't exist program?
+	####Candidate For Unit Tests####
 	if (is.null(MarginalHits_logBFs_Stacked_AvgwPrior)) {
-		#20160901 CHECK_0 -- Prob: Do something more substantive here? A better error message, or give just a warning instead? Don't exist program?
 		stop(Sys.time(), " -- No average log BFs were returned from method. Check if all input variables are as the method expects.") 
 	}
 
 	MarginalHits$LogBFWeightedAvg <- MarginalHits_logBFs_Stacked_AvgwPrior
 
-	#print(MarginalHits)
-
+	#Pruning marginal hits by LogBFWeightedAvg if requested
 	if (PruneMarginalHits == TRUE) {
 		#20160901 CHECK_0 -- Prob: Go over indepthits function, rewrite, or just lightly edit? redo names, double-check functionality? def get some unit testing in there
-		#l=indephits(sub$lbfavflat,sub$chr,sub$pos)
-		#sub=sub[l==1,]
-		MarginalHits <- MarginalHits[indephits(MarginalHits$LogBFWeightedAvg, MarginalHits$Chr, MarginalHits$BP, T=PruneMarginalHits_bpWindow)==1,]
+		#MarginalHits <- MarginalHits[indephits(MarginalHits$LogBFWeightedAvg, MarginalHits$Chr, MarginalHits$BP, T=PruneMarginalHits_bpWindow)==1,]
+		MarginalHits_PrunedList <- indephits(MarginalHits$LogBFWeightedAvg, MarginalHits$Chr, MarginalHits$BP, T=PruneMarginalHits_bpWindow)
+		MarginalHits <- MarginalHits[MarginalHits_PrunedList==1,]	
+		MarginalHits_logBFs$lbf <- lapply(MarginalHits_logBFs$lbf, function(x) { return(x[,MarginalHits_PrunedList==1]) })
+		MarginalHits_logBFs_Stacked <- MarginalHits_logBFs_Stacked[,MarginalHits_PrunedList==1]	
+	}
+
+	NewHits <- NULL	
+
+	print(MarginalHits_logBFs_Stacked_AvgwPrior_Min)
+	
+	#Determining new hits if GWASsnps were provided to determine minimum MarginalHits_logBFs_Stacked_AvgwPrior value threshold	
+	#20160902 CHECK_0 -- Prob: Check that MarginalHits_logBFs_Stacked_AvgwPrior_Min is non null here?
+	if (!is.null(GWASsnps)) {
+		if (is.null(MarginalHits_logBFs_Stacked_AvgwPrior_Min)) {
+			stop(Sys.time(), " -- MarginalHits_logBFs_Stacked_AvgwPrior_Min is NULL despite GWASsnps being provided. Unexpected error.")
+		}
+		NewHits <- MarginalHits[MarginalHits$GWASannot == 0 & MarginalHits$LogBFWeightedAvg >= MarginalHits_logBFs_Stacked_AvgwPrior_Min & MarginalHits$Nmin >= NminThreshold,]
 	}
 	
 	print(MarginalHits)
+#	print(summary(MarginalHits_logBFs$lbf))
 
+	#Preparing log Bayes factors matrix, Gammas x SNPs	
+	#bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalHits_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE), nrow(MarginalHits_logBFs$gamma), length(SigmaAlphas))
+	MarginalHits_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalHits_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE), nrow(MarginalHits_logBFs$gamma), length(SigmaAlphas))
+	MarginalHits_logBFs_Stacked_SigmaAlphasSummed <- cbind(MarginalHits_logBFs$gamma, MarginalHits_logBFs_Stacked_SigmaAlphasSummed)
+	colnames(MarginalHits_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalHits$ChrBP)
+
+	print(MarginalHits_logBFs_Stacked_SigmaAlphasSummed)
+	print(Priors_Used)
+	print(MarginalHits_logBFs_Stacked)
+
+	#Preparing posterior probabilities, Gammas x SNPs
+	MarginalHits_logBFs_Stacked_PosteriorProbabilities <- posteriorprob(MarginalHits_logBFs_Stacked, Priors_Used)
+	MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed <- apply(MarginalHits_logBFs_Stacked_PosteriorProbabilities, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)
+)
+	MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed <- cbind(MarginalHits_logBFs$gamma, MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed)
+	colnames(MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed) <- c(DataSources, MarginalHits$ChrBP)
+	#MarginalHits_PosteriorProbabilities <- apply(posteriorprob(MarginalHits_logBFs_Stacked, Priors_Used), 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
+	
+	print(MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed)
+	
+	#GWASHits_PosteriorProbs <- posteriorprob(GWASHits_logBFs_Stacked, Prior_GWAShitsEB) #Matrix of nModels*nSigmaAlphas x nSNPs 
+	#GWASHits_PosteriorProbs_Collapsed <- apply(GWASHits_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
+	
 	#MarginalHits_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalHits$Nmin, MarginalHits$MAF, SigmaAlphas) 
 	##MarginalHits_logBFs$lbf is a list of matrices, with one element (a matrix) for each sigma; this stacks these matrices together into a big matrix with nsnp columns, and nsigma*nmodels rows
 	#MarginalHits_logBFs_Stacked <- do.call(rbind, MarginalHits_logBFs$lbf)
@@ -701,13 +752,29 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 
 #	GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nSigmaAlphas) {
 
+	#Preparing final return variable bmassOutput
 	bmassOutput$MarginalSNPs <- MarginalHits
-#	bmassOutput$logBFs <- 
+	print(dim(MarginalHits_logBFs_Stacked))
+	print(length(Priors_Used))
+	bmassOutput$ModelPriors <- Priors_Used
+	####Candidate For Unit Tests####
+	print(dim(matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE)))
+	#bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalHits_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE), nrow(MarginalHits_logBFs$gamma), length(SigmaAlphas)) 
+	bmassOutput$logBFs <- MarginalHits_logBFs_Stacked_SigmaAlphasSummed 
+	print(dim(bmassOutput$logBFs))
+	print(bmassOutput$logBFs)
+	bmassOutput$PosteriorProbabilities <- MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed
+	bmassOutput$GWASlogBFMinThreshold <- MarginalHits_logBFs_Stacked_AvgwPrior_Min
+	bmassOutput$NewSNPs <- NewHits
+	print(MarginalHits_logBFs_Stacked_AvgwPrior_Min)
+	print(bmassOutput$NewSNPs)
 
-
-	
 #	MarginalHits_logBFs
 #	MarginalHits_logBFs_Stacked
+
+	#Returning final output variable, bmassOutput
+
+	#return(bmassOutput)
 
 	#lbf.av.glhits= lbf.av(lbf.glhits,ebprior.glhits)
 	#nsigma=length(sigmaa)
@@ -1110,6 +1177,74 @@ bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, Ex
 #4         9.432873 35.18386          8.522879 2761         7.411730
 #6         7.927532 29.71679          7.301030 2510         6.257912
 #9        47.680359 54.00480         12.698970 2514        45.346014
+#      Length Class  Mode   
+# [1,] 45     -none- numeric
+# [2,] 45     -none- numeric
+# [3,] 45     -none- numeric
+# [4,] 45     -none- numeric
+# [5,] 45     -none- numeric
+# [6,] 45     -none- numeric
+# [7,] 45     -none- numeric
+# [8,] 45     -none- numeric
+# [9,] 45     -none- numeric
+#[10,] 45     -none- numeric
+#[11,] 45     -none- numeric
+#[12,] 45     -none- numeric
+#[13,] 45     -none- numeric
+#[14,] 45     -none- numeric
+#      Length Class  Mode   
+# [1,] 36     -none- numeric
+# [2,] 36     -none- numeric
+# [3,] 36     -none- numeric
+# [4,] 36     -none- numeric
+# [5,] 36     -none- numeric
+# [6,] 36     -none- numeric
+# [7,] 36     -none- numeric
+# [8,] 36     -none- numeric
+# [9,] 36     -none- numeric
+#[10,] 36     -none- numeric
+#[11,] 36     -none- numeric
+#[12,] 36     -none- numeric
+#[13,] 36     -none- numeric
+#[14,] 36     -none- numeric
+#[1] 126   5
+#[1] 126
+#[1] 126   5
+#[1] 9 5
+#             [,1]        [,2]        [,3]         [,4]       [,5]
+# [1,]    0.000000    0.000000    0.000000    0.0000000    0.00000
+# [2,]    1.952878    1.331036    1.130067    1.0750168   34.86177
+# [3,]    0.000000    0.000000    0.000000    0.0000000    0.00000
+# [4,]    2.405875    1.139964    0.626045    0.8584684   38.74820
+# [5,]  -54.397661  -59.826155    5.711266  -60.1456968  -24.36255
+# [6,] -213.542751 -218.251940 -218.979761 -218.3956795 -213.78594
+# [7,]    0.000000    0.000000    0.000000    0.0000000    0.00000
+# [8,] -207.433088 -211.552755 -211.904431 -211.6312350 -210.84231
+# [9,]    0.000000    0.000000    0.000000    0.0000000    0.00000
+#[1] 126   4
+#[1] 126
+#[1] 126   4
+#[1] 9 4
+#             [,1]        [,2]         [,3]       [,4]
+# [1,]    0.000000    0.000000    0.0000000    0.00000
+# [2,]    1.952878    1.331036    1.0750168   34.86177
+# [3,]    0.000000    0.000000    0.0000000    0.00000
+# [4,]    2.405875    1.139964    0.8584684   38.74820
+# [5,]  -54.397661  -59.826155  -60.1456968  -24.36255
+# [6,] -213.542751 -218.251940 -218.3956795 -213.78594
+# [7,]    0.000000    0.000000    0.0000000    0.00000
+# [8,] -207.433088 -211.552755 -211.6312350 -210.84231
+# [9,]    0.000000    0.000000    0.0000000    0.00000
+#[1] 5.711266
+#    ChrBP Chr    BP A1  MAF Data1_Direction Data1_pValue Data1_N Data1_ZScore
+#6 3_21000   3 21000  G 0.37               +        5e-08    2582     5.451310
+#9  4_7000   4  7000  G 0.15               +        0e+00    2514     5.931598
+#  Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot    mvstat
+#6               +        9e-08    2510     5.345837         0  36.50763
+#9               -        0e+00    2514    -7.348796         0 219.57617
+#  mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
+#6         7.927532 29.71679           7.30103 2510         6.257912
+#9        47.680359 54.00480          12.69897 2514        45.346014
 #}
 
 
