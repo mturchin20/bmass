@@ -1,6 +1,6 @@
 Package: bmass
 Title: Bayesian multivariate analysis of summary statistics
-Version: 0.0.4
+Version: 0.1.0
 Authors@R: c(
     person("Michael", "Turchin", email = "mturchin20@uchicago.edu", role = c("aut", "cre")),
     person("Matthew", "Stephens", email = "mstephens@uchicago.edu", role = c("aut")))
