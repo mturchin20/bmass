@@ -14,14 +14,25 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#20160812 NOTE -- main file for running, applying, and organizing use of bmass code on prepped data
-
+#20160812 NOTE -- main file for collecting functions that operate on organized, finished bmass output
 
 #Data1 <- read.table("../data/TestData1.txt")
 #Data1
 #ExpectedColumnNames1 <- c("Chr", "BP", "A1", "MAF", "Direction", "p_Value", "N")
 #Data2 <- as.matrix(Data1)
 #Data2
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

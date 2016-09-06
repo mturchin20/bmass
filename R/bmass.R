@@ -23,7 +23,7 @@ bmass <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP"
 
         print(DataSources)
 
-        LogFile1 <- c()
+        LogFile <- c()
         bmassOutput <- list()
         bmassOutput$ModelPriors <- NULL
         bmassOutput$MarginalSNPs <- list()
@@ -40,7 +40,7 @@ bmass <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP"
         bmassOutput$PreviousSNPs$logBFs <- NULL
         bmassOutput$PreviousSNPs$Posteriors <- NULL
 
-        LogFile1 <- rbind(LogFile1, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
+        LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
 
         #20160823 CHECK_0: Prob -- list of Matthew functions specifically to double-check, go through, go over
         #       collapse
@@ -49,7 +49,18 @@ bmass <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP"
         #Loading and checking data
         #~~~~~~
 
-	LogFile1 <- DataChecks(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile1)
+	LogFile <- CheckIndividualDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+
+#	MergeDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+
+#	AnnotateMergedDataWithGWASSNPs(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+
+#	ProcessMergedAndAnnotatedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+
+#	GetlogBFsFromData(
+)
+
+
 
 }
 
