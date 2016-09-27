@@ -84,8 +84,8 @@ GetSumAcrossSigmaAlphas_withPriors <- function(LogBFs1, ModelPriors, nGammas, nS
         return(WeightedSumAcrossAlphaSigmas)
 }
 
-GetlogBFsFromData <- function(
-) {
+GetLogBFsFromData <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThre
+shold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
         
 	#Conducting main bmass analyses and first-level results presentation
         #~~~~~~

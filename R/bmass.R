@@ -57,10 +57,11 @@ bmass <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP"
 
 #	ProcessMergedAndAnnotatedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-#	GetlogBFsFromData(
-)
+#	GetLogBFsFromData(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThre
+shold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-
+#	FinalizeAndFormatResults(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThre
+shold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
 }
 
