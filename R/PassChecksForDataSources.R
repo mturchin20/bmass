@@ -241,6 +241,12 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 
 
+
+
+
+
+
+
 	if (!is.null(ProvidedPriors)) {
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- ProvidedPriors is not NULL, replacing original priors with submitted values.", sep=""))
 		MarginalHits_logBFs$prior <- ProvidedPriors
@@ -354,6 +360,24 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 	}
 
 	MarginalHits$LogBFWeightedAvg <- MarginalHits_logBFs_Stacked_AvgwPrior
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	#Pruning marginal hits by LogBFWeightedAvg if requested
 	if (PruneMarginalHits == TRUE) {
