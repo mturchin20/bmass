@@ -13,7 +13,7 @@
 #' func(1, 1)
 #' func(10, 1)
 
-CheckCharacterFormat <- function (DataSource1) {
+CheckCharacterClass <- function (DataSource1) {
 	returnValue <- FALSE
 	
 	if (is.character(DataSource1)) {
@@ -82,7 +82,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- beginning DataSources checks.", sep=""))
 	
-		####Candidate For Unit Tests####
 		if (!is.vector(DataSources)) {
 			stop(Sys.time(), " -- input variable DataSources not in vector format. bmass expects DataSources to be a vector of strings. Please fix and rerun bmass.") 
 		}
@@ -90,7 +89,7 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed vector check.", sep=""))
 
 		####Candidate For Unit Tests####
-		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterFormat)	
+		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterClass)	
 		if (FALSE %in% DataSourcesCheckCharacters) {
 			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckCharacters])
 		}
