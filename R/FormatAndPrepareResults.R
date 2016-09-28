@@ -22,8 +22,7 @@
 #Data2
 
 
-FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThre
-shold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
+FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
 
         #Pruning marginal hits by LogBFWeightedAvg if requested
         if (PruneMarginalHits == TRUE) {

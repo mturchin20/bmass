@@ -9,8 +9,17 @@
 #' func(1, 1)
 #' func(10, 1)
 
-
-
+##Data1 <- read.table("../data/TestData1.txt", header=T)
+##Data2 <- read.table("../data/TestData2.txt", header=T)
+##SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
+##source("PrepareData.R")
+#library("devtools")
+#devtools::load_all()
+#data(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs)
+##bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
+#bmassOutput1 <- bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
+##ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
+##DataList <- c("Data1", "Data2")
 
 
 #bmass <- function(ExpectedColumnNames, DataFileNames, DataFileLocations, OutputFileBase) {
@@ -51,26 +60,29 @@ bmass <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP"
 
 	LogFile <- CheckIndividualDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-#	MergeDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+#	<- MergeDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-#	AnnotateMergedDataWithGWASSNPs(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+#	<- AnnotateMergedDataWithGWASSNPs(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-#	ProcessMergedAndAnnotatedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+#	<- ProcessMergedAndAnnotatedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-#	GetLogBFsFromData(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThre
-shold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+#	<- GetLogBFsFromData(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
 
-#	FinalizeAndFormatResults(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThre
-shold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+#	<- FinalizeAndFormatResults(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile)
+
+	bmassOutput$LogFile <- LogFile
+
+	return(bmassOutput)
 
 }
 
 
 
 
+#if (FALSE) {
+#~~~
+#TimeTag 20160927 -- Starting to develop and connect pieces of new, subdivided .R code files
 
 
-
-
-
+#}
 

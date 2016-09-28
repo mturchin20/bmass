@@ -13,17 +13,6 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#Data1 <- read.table("../data/TestData1.txt", header=T)
-#Data2 <- read.table("../data/TestData2.txt", header=T)
-#SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
-##source("PrepareData.R")
-#library("devtools")
-#devtools::load_all()
-#bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
-#bmassOutput1 <- bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, bmassSeedValue=NULL)
-#ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
-#DataList <- c("Data1", "Data2")
-
 CheckCharacterFormat <- function (DataSource1) {
 	returnValue <- FALSE
 	
@@ -80,51 +69,7 @@ CheckDataSourceDirectionColumn <- function (DataSources1) {
 	return(returnValue)
 }
 
-#~~~
-#> txt3 <- "nana,nana2"
-#> grep(",", txt3)
-#[1] 1
-#> ?grep
-#> txt3 <- "nana,nana2,nana3"
-#> grep(",", txt3)
-#[1] 1
-#> ?grep
-#> grep(",", c(txt3,txt3))
-#[1] 1 2
-#> grep(",", c(txt3,txt3,txt3))
-#[1] 1 2 3
-#> grep(",", c(txt3,txt3,txt3,txt2))
-#[1] 1 2 3
-#> grep(",", c(txt3,txt3,txt2,txt3))
-#[1] 1 2 4
-#~~~
-#~~~
-#> txt1 <- "nana"
-#> txt2 <- "nana/nan2"
-#> strsplit(txt1, "/")
-#[[1]]
-#[1] "nana"
-#
-#> strsplit(txt2, "/")
-#[[1]]
-#[1] "nana" "nan2"
-#
-#> strsplit(txt2, "/")[[1]][1]
-#[1] "nana"
-#> strsplit(txt2, "/")[[1]][2]
-#[1] "nan2"
-#> length(strsplit(txt2, "/")[[1]])  
-#[1] 2
-#> strsplit(txt2, "/")[[1]][length(strsplit(txt2, "/")[[1]])]
-#[1] "nan2"
-#~~~
-
-#This is going to be the main function that goes through each of the steps from beginning to end. Hypothetically, all the other functions presented here should be used through the PrepareData process (or as a subfunction of one of the functions being used in PrepareData)
-#PrepareData <- function (ExpectedColumnNames, DataFileLocations, OutputFileBase) { #20160814 NOTE -- Changing direction and just assuming input is a single vector that contains all the proper data.frame datasources and working from there. Final output will be a list that has all the output. 'Logfile' will just be a variable included in final list output, developed by continula 'rbind' calls with text output additions. Also deciding to move 'PrepareData' to just a 'MainWorkFlow' or 'Main' that I'll dev in each sub R package and then eventually move to a main source.  
-#bmass <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, NminThreshold = 0, bmassSeedValue=NULL) {
 CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
-
-	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
 
 	#20160823 CHECK_0: Prob -- list of Matthew functions specifically to double-check, go through, go over
 	#	collapse
@@ -216,6 +161,9 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 	
 		#20160902 CHECK_0 -- Prob: Go through all other input variables and make sure they are the expected formats/inputs, eg numeric, character, etcetc
 		#bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, NminThreshold = 0, bmassSeedValue=NULL) 
+		#CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
+
+
 
 		if (!is.numeric(NminThreshold)) {
 			stop(Sys.time(), " -- .")
@@ -235,18 +183,9 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 	}
 
-
-
+	return(LogFile)
 
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -260,81 +199,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 #' @param DataFileNames Comma-separated list of all the phenotypes (ie names associated with each datafile) being analyzed. This should be in the same order as DataFileLocations.
 #' @param DataFileLocations Comma-separated list of all the datafile locations being analyzed. This should be in the same order as PhenotypeList.
 #' @param ExpectedColumnNames Comma-separ
-
-#if (FALSE) {
-#~~~
-#TimeTag 20160902 -- Right above is dealing with looking at pruning subsection output being correct, below is having to do with NewHits section and making sure pruning is extending into the expected places of logBFs and PosteriorProbabilities 
-#      Length Class  Mode   
-# [1,] 45     -none- numeric
-# [2,] 45     -none- numeric
-# [3,] 45     -none- numeric
-# [4,] 45     -none- numeric
-# [5,] 45     -none- numeric
-# [6,] 45     -none- numeric
-# [7,] 45     -none- numeric
-# [8,] 45     -none- numeric
-# [9,] 45     -none- numeric
-#[10,] 45     -none- numeric
-#[11,] 45     -none- numeric
-#[12,] 45     -none- numeric
-#[13,] 45     -none- numeric
-#[14,] 45     -none- numeric
-#      Length Class  Mode   
-# [1,] 36     -none- numeric
-# [2,] 36     -none- numeric
-# [3,] 36     -none- numeric
-# [4,] 36     -none- numeric
-# [5,] 36     -none- numeric
-# [6,] 36     -none- numeric
-# [7,] 36     -none- numeric
-# [8,] 36     -none- numeric
-# [9,] 36     -none- numeric
-#[10,] 36     -none- numeric
-#[11,] 36     -none- numeric
-#[12,] 36     -none- numeric
-#[13,] 36     -none- numeric
-#[14,] 36     -none- numeric
-#[1] 126   5
-#[1] 126
-#[1] 126   5
-#[1] 9 5
-#             [,1]        [,2]        [,3]         [,4]       [,5]
-# [1,]    0.000000    0.000000    0.000000    0.0000000    0.00000
-# [2,]    1.952878    1.331036    1.130067    1.0750168   34.86177
-# [3,]    0.000000    0.000000    0.000000    0.0000000    0.00000
-# [4,]    2.405875    1.139964    0.626045    0.8584684   38.74820
-# [5,]  -54.397661  -59.826155    5.711266  -60.1456968  -24.36255
-# [6,] -213.542751 -218.251940 -218.979761 -218.3956795 -213.78594
-# [7,]    0.000000    0.000000    0.000000    0.0000000    0.00000
-# [8,] -207.433088 -211.552755 -211.904431 -211.6312350 -210.84231
-# [9,]    0.000000    0.000000    0.000000    0.0000000    0.00000
-#[1] 126   4
-#[1] 126
-#[1] 126   4
-#[1] 9 4
-#             [,1]        [,2]         [,3]       [,4]
-# [1,]    0.000000    0.000000    0.0000000    0.00000
-# [2,]    1.952878    1.331036    1.0750168   34.86177
-# [3,]    0.000000    0.000000    0.0000000    0.00000
-# [4,]    2.405875    1.139964    0.8584684   38.74820
-# [5,]  -54.397661  -59.826155  -60.1456968  -24.36255
-# [6,] -213.542751 -218.251940 -218.3956795 -213.78594
-# [7,]    0.000000    0.000000    0.0000000    0.00000
-# [8,] -207.433088 -211.552755 -211.6312350 -210.84231
-# [9,]    0.000000    0.000000    0.0000000    0.00000
-#[1] 5.711266
-#    ChrBP Chr    BP A1  MAF Data1_Direction Data1_pValue Data1_N Data1_ZScore
-#6 3_21000   3 21000  G 0.37               +        5e-08    2582     5.451310
-#9  4_7000   4  7000  G 0.15               +        0e+00    2514     5.931598
-#  Data2_Direction Data2_pValue Data2_N Data2_ZScore GWASannot    mvstat
-#6               +        9e-08    2510     5.345837         0  36.50763
-#9               -        0e+00    2514    -7.348796         0 219.57617
-#  mvstat_log10pVal  unistat unistat_log10pVal Nmin LogBFWeightedAvg
-#6         7.927532 29.71679           7.30103 2510         6.257912
-#9        47.680359 54.00480          12.69897 2514        45.346014
-#}
-
-
 
 
 
