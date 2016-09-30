@@ -59,13 +59,17 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 	return(returnValueVector)
 }
 
+#20160929 CHECK_0: Prob -- Come back and check new functionality version below when running on 2nd version of bmass
 CheckDataSourceDirectionColumn <- function (DataSources1) {
 	returnValue <- TRUE
-	for (DirectionValue in eval(parse(text=paste(DataSources1, "$Direction", sep="")))) {
-		if ((DirectionValue != "+") && (DirectionValue != "-")) {
-			returnValue <- FALSE
-		}
+	if (length(eval(parse(text=paste(DataSources1, "$Direction", sep="")))[eval(parse(text=paste(DataSources1, "$Direction", sep=""))) != "+" & eval(parse(text=paste(DataSources1, "$Direction", sep=""))) != "-"]) > 0) {
+		returnValue <- FALSE
 	}
+#	for (DirectionValue in eval(parse(text=paste(DataSources1, "$Direction", sep="")))) {
+#		if ((DirectionValue != "+") && (DirectionValue != "-")) {
+#			returnValue <- FALSE
+#		}
+#	}
 	return(returnValue)
 }
 
@@ -88,7 +92,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed vector check.", sep=""))
 
-		####Candidate For Unit Tests####
 		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterClass)	
 		if (FALSE %in% DataSourcesCheckCharacters) {
 			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckCharacters])
@@ -96,7 +99,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed string check.", sep=""))
 
-		####Candidate For Unit Tests####
 		DataSourcesCheckExists <- sapply(DataSources, CheckVariableExists)
 		if (FALSE %in% DataSourcesCheckExists) {
 			stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckExists])
@@ -105,7 +107,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed exists check.", sep=""))
 		
 		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
-		####Candidate For Unit Tests####
 		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
 		if (FALSE %in% DataSourcesCheckDataFrames) {
 			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDataFrames])
@@ -113,7 +114,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed data.frame check.", sep=""))
 
-		####Candidate For Unit Tests####
 		DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
 		if (FALSE %in% DataSourcesCheckHeaderNames) {
 			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are \"", paste(ExpectedColumnNames, collapse=" "), "\". Please fix and rerun bmass: ", DataSources[!DataSourcesCheckHeaderNames])
@@ -130,7 +130,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		###### do thissssss
 	
 		#20160901 CHECK_0 -- Prob: Check multiple columns in entries to make sure input types/classes are as what's exepected? Eg chr/bp numeric, alleles chars, N and pvals numeric? Do X/23 conversion stuff before ondividual data column class/type checks first
-		####Candidate For Unit Tests####
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
 			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDirectionColumn])
@@ -138,17 +137,12 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed Direction column check.", sep=""))
 
-		###### do thissssss below
-		#
-		#Check that if ProvidedPriors is non-NULL then it has the correct length and that all entries are numeric. 
-		#
-		###### do thissssss below
-		####Candidate For Unit Tests####
+		#20160901 CHECK_0 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too?
+		#20160930 CHECK_0 -- Prob: Go over this below section and make sure it contains everything wanted for when 'ProvidedPriors' is in fact provided?
 		if (!is.null(ProvidedPriors)) {
 			if (!is.vector(ProvidedPriors)) {
 				stop(Sys.time(), " -- ProvidedPriors input is not in vector format. Please fix and rerun bmass.")
 			}
-			#20160901 CHECK_0 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too?
 			if (!is.numeric(ProvidedPriors)) {
 				stop(Sys.time(), " -- ProvidedPriors input is returning false for is.numeric(). Please ensure all entries are numeric and then rerun bmass.")
 			}
@@ -159,11 +153,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		}
 	
 		#20160902 CHECK_0 -- Prob: Go through all other input variables and make sure they are the expected formats/inputs, eg numeric, character, etcetc
-		#bmass <- function (DataSources, GWASsnps=NULL, SNPMarginalpValThreshold=1e-6, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, NminThreshold = 0, bmassSeedValue=NULL) 
-		#CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
-
-
-
 		if (!is.numeric(NminThreshold)) {
 			stop(Sys.time(), " -- .")
 		}
@@ -183,7 +172,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 	}
 
 	return(LogFile)
-
 }
 
 

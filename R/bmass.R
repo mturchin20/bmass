@@ -15,6 +15,7 @@
 ##source("PrepareData.R")
 #library("devtools")
 #devtools::load_all()
+#devtools::test()
 #data(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs)
 ##bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
 #bmassOutput1 <- bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
