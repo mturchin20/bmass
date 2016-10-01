@@ -13,15 +13,6 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#20160812 NOTE -- main file for running, applying, and organizing use of bmass code on prepped data
-
-#Data1 <- read.table("../data/TestData1.txt")
-#Data1
-#ExpectedColumnNames1 <- c("Chr", "BP", "A1", "MAF", "Direction", "p_Value", "N")
-#Data2 <- as.matrix(Data1)
-#Data2
-
-#
 #Annotating merged data with, if provided, GWAS SNPs
 #~~~~~~
 
@@ -39,13 +30,10 @@ AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500
                                 PH <- NULL
                         }
                 }
-                        print("yaya")
-                        print(as.numeric(as.character(MergedDataSource1["Chr"])))
-                        print(GWASsnps1[snpIndex,]$Chr)
         }
         return(GWASannot1)
 }
-#val1 <- qnorm(log(abs(x)/2), lower.tail=FALSE, log.p=TRUE
+
 GetZScoreAndDirection <- function(DataSources1) {
         ZScore <- qnorm(log(as.numeric(as.character(DataSources1["pValue"]))/2), lower.tail=FALSE, log.p=TRUE);
         if (DataSources1["Direction"] == "-") {
@@ -76,14 +64,9 @@ ReplaceInfiniteZScoresWithMax <- function(DataSources1_ZScores) {
         return(DataSources1_ZScores)
 }
 
+MergeDataSources <- function (DataSources, LogFile) {
 
-
-
-
-
-#MergeDataSources <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, NminThreshold = 0, bmassSeedValue=NULL, LogFile) {
-MergedDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
-        #Preparing and merging data
+	#Preparing and merging data
         #~~~~~~
 
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Beginning DataSources merging.", sep=""))
@@ -91,7 +74,8 @@ MergedDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, Sigma
         MergedDataSources <- data.frame()
         for (CurrentDataSource in DataSources) {
 
-                ###### do thissssss
+                #20160930 CHECK_0 -- Prob: Go over and do this/figure out what want to do?
+		###### do thissssss
                 #
                 #Keep MAF and average across datasets? Check A1 for consistency or not expecting that since differing directions?
                 #
@@ -113,7 +97,6 @@ MergedDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, Sigma
                                 }
                         }
                         names(MergedDataSources) <- MergedDataSources_namesNew
-#                       MergedDataSources$ChrBP <- paste(eval(parse(text=paste("MergedDataSources$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("MergedDataSources$", CurrentDataSource, "_BP", sep=""))), sep="_")
                         MergedDataSources$ChrBP <- paste(MergedDataSources$Chr, MergedDataSources$BP, sep="_")
                 }
                 else {
@@ -131,30 +114,28 @@ MergedDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, Sigma
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
 
-#                       print(MergedDataSources)
-#                       print(CurrentDataSource_temp)
-
+                	#20160930 CHECK_0 -- Prob: Do this/figure this out? If even wanting to do something like this?
                         ###### do thissssss
                         #
                         # Test performances of merge function here in varying circumstances
                         #
                         ###### do thissssss
 
+			###Candidate for unit tests
                         MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 
                         rm(CurrentDataSource_temp)
                 }
         }
 
-#       print(MergedDataSources)
+	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
 
 }
 
-        #Annotating merged data with, if provided, GWAS SNPs
+AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
+        
+	#Annotating merged data with, if provided, GWAS SNPs
         #~~~~~~
-
-#AnnotateMergedDataWithGWASSNPs <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, NminThreshold = 0, bmassSeedValue=NULL, LogFile) {
-AnnotateMergedDataWithGWASSNPs <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
 
         if (is.null(GWASsnps)) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
@@ -162,18 +143,19 @@ AnnotateMergedDataWithGWASSNPs <- function(DataSources, GWASsnps, ExpectedColumn
         }
         else {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
-                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs, GWASsnps1=GWASsnps, BPWindow=500000)
+                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
         }
-        
-	print(MergedDataSources)
+
+	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
 
 }
 
-#ProcessMergedAndAnnotatedDataSources <- function (DataSources, GWASsnps=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), MergedDataSources=NULL, ProvidedPriors=NULL, UseFlatPriors=FALSE, PruneMarginalHits=TRUE, PruneMarginalHits_bpWindow=5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, NminThreshold = 0, bmassSeedValue=NULL, LogFile) {
-ProcessMergedAndAnnotatedDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
+ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, LogFile) {
 
-        #Calculating RSS0 and subsetting down to marginally significant SNPs
+        #Calculating RSS0(eg ZScoreCorMatrix) and subsetting down to marginally significant SNPs
         #~~~~~~
+        
+	MarginalSNPs <- list()
 
         #Getting ZScore matrix
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Determining Z-score correlation matrix.", sep=""))
@@ -195,20 +177,18 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, GWASsnps, Expecte
                 ZScoresFullNames_CommandText <- c(ZScoresFullNames_CommandText, paste(DataSource, "_ZScore", sep=""))
         }
         colnames(ZScoresFull) <- ZScoresFullNames_CommandText
-        print(ZScoresFull)
+#       print(ZScoresFull)
 
         #Checking ZScore matrix for infinites and replacing with appropriate max/min values
         ZScoresFull_InfiniteCheck <- apply(ZScoresFull, 2, CheckForInfiniteZScores)
         if (TRUE %in% ZScoresFull_InfiniteCheck) {
                 warning(paste(format(Sys.time()), " -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.", sep=""))
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- One of your datafiles has p-values less than the threshold which R can properly convert them to log-scale, meaning their log-values return as 'Infinite'. bmass automatically replaces these 'Infinite' values with the max, non-infinite Z-scores available, but it is recommended you self-check this as well.", sep=""))
-                ##UNIT TEST CANDIDATE?
                 ZScoresFull <- apply(ZScoresFull, 2, ReplaceInfiniteZScoresWithMax)
                 for (ZScoresFull_colName in colnames(ZScoresFull)) {
                         eval(parse(text=paste("MergedDataSources$", ZScoresFull_colName, " <- ZScoresFull[,\"", ZScoresFull_colName, "\"]", sep="")))
                 }
         }
-#       print(ZScoresFull)
 
         #Getting ZScore null subset matrix, calculating correlation matrix, and associated naive multivariate statistics
         ZScoresNullSetSelection_CommandText <- ""
@@ -222,10 +202,8 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, GWASsnps, Expecte
         }
         ZScoresNullSetSelection <- eval(parse(text=ZScoresNullSetSelection_CommandText))
         ZScoresNullset <- ZScoresFull[ZScoresNullSetSelection,]
-#       print(ZScoresNullset)
 
         ZScoresCorMatrix <- cor(ZScoresNullset)
-        bmassOutput$ZScoresCorMatrix <- ZScoresCorMatrix
 
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Determining initial threshold statistics.", sep=""))
 
@@ -235,26 +213,22 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, GWASsnps, Expecte
         ZScoresFull_mvstat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_mvstat, df=ncol(ZScoresFull), log.p=TRUE, lower.tail=FALSE)
         MergedDataSources$mvstat_log10pVal <- ZScoresFull_mvstat_log10pVal
 
-
         ZScoresFull_unistat <- apply(ZScoresFull^2, 1, max)
         MergedDataSources$unistat <- ZScoresFull_unistat
         ZScoresFull_unistat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_unistat, df=1, log.p=TRUE, lower.tail=FALSE)
         MergedDataSources$unistat_log10pVal <- ZScoresFull_unistat_log10pVal
 
-#       print(bmassOutput)
-        print(MergedDataSources)
+#       print(MergedDataSources)
 
         #Creating subset of marginally significant SNPs using SNPMarginalUnivariateThreshold and SNPMarginalMultivariateThreshold
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on univariate and multivariate thresholds: ", as.character(SNPMarginalUnivariateThreshold) ," & ", as.character(SNPMarginalMultivariateThreshold) ,".", sep=""))
-        MarginalHits <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold),]
+	MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold),]
 
-        print(MarginalHits)
+#       print(MarginalSNPs)
+	
+	return(list(MarginalSNPs=MarginalSNPs, ZScoresCorMatrix=ZScoresCorMatrix, LogFile=LogFile))
 
 }
-
-
-
-
 
 
 

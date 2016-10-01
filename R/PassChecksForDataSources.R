@@ -94,14 +94,14 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		DataSourcesCheckCharacters <- sapply(DataSources, CheckCharacterClass)	
 		if (FALSE %in% DataSourcesCheckCharacters) {
-			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckCharacters])
+			stop(Sys.time(), " -- the following entries in DataSources were not found as characters. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckCharacters], collapse=" "))
 		}
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed string check.", sep=""))
 
 		DataSourcesCheckExists <- sapply(DataSources, CheckVariableExists)
 		if (FALSE %in% DataSourcesCheckExists) {
-			stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckExists])
+			stop(Sys.time(), " -- the variables associated with the following entries in DataSources were not found to exist. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckExists], collapse=" "))
 		}
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed exists check.", sep=""))
@@ -109,14 +109,14 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
 		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
 		if (FALSE %in% DataSourcesCheckDataFrames) {
-			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDataFrames])
+			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckDataFrames], collapse=" "))
 		}
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed data.frame check.", sep=""))
 
 		DataSourcesCheckHeaderNames <- CheckDataSourceHeaders(DataSources, ExpectedColumnNames)
 		if (FALSE %in% DataSourcesCheckHeaderNames) {
-			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are \"", paste(ExpectedColumnNames, collapse=" "), "\". Please fix and rerun bmass: ", DataSources[!DataSourcesCheckHeaderNames])
+			stop(Sys.time(), " -- the following data sources do not have all the expected column headers. The expected column headers are \"", paste(ExpectedColumnNames, collapse=" "), "\". Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckHeaderNames], collapse=" "))
 		}
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
@@ -132,7 +132,7 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		#20160901 CHECK_0 -- Prob: Check multiple columns in entries to make sure input types/classes are as what's exepected? Eg chr/bp numeric, alleles chars, N and pvals numeric? Do X/23 conversion stuff before ondividual data column class/type checks first
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
-			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", DataSources[!DataSourcesCheckDirectionColumn])
+			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckDirectionColumn], collapse=" "))
 		}
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed Direction column check.", sep=""))

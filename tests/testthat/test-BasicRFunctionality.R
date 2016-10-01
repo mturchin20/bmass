@@ -33,7 +33,9 @@ test_that("Check basic R functionality", {
 
 	expect_error(stop("StopMessage"), "StopMessage")
 	expect_error(stop(paste(LogTest1, "StopMessage", sep="")), "Test1StopMessage")
-	
+	expect_error(stop(paste(DataSources, sep=" ")), "bmass_TestData1bmass_TestData2")
+	expect_error(stop(paste(DataSources, collapse=" ")), "bmass_TestData1 bmass_TestData2")
+
 	expect_equal(eval(parse(text="bmass_TestData1")), bmass_TestData1)
 	expect_equal(eval(parse(text=paste("bmass_TestData1", "$Direction", sep=""))), bmass_TestData1$Direction)
 	expect_equal(eval(parse(text=paste("bmass_TestData1", "$Direction", sep="")))[eval(parse(text=paste("bmass_TestData1", "$Direction", sep=""))) == "+"], bmass_TestData1$Direction[bmass_TestData1$Direction == "+"])

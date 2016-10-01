@@ -13,58 +13,51 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#20160812 NOTE -- main file for collecting functions that operate on organized, finished bmass output
+FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
 
-#Data1 <- read.table("../data/TestData1.txt")
-#Data1
-#ExpectedColumnNames1 <- c("Chr", "BP", "A1", "MAF", "Direction", "p_Value", "N")
-#Data2 <- as.matrix(Data1)
-#Data2
-
-
-FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
+	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and trained priors.", sep=""))
 
         #Pruning marginal hits by LogBFWeightedAvg if requested
-        if (PruneMarginalHits == TRUE) {
+        if (PruneMarginalSNPs == TRUE) {
                 #20160901 CHECK_0 -- Prob: Go over indepthits function, rewrite, or just lightly edit? redo names, double-check functionality? def get some unit testing in there
-                #MarginalHits <- MarginalHits[indephits(MarginalHits$LogBFWeightedAvg, MarginalHits$Chr, MarginalHits$BP, T=PruneMarginalHits_bpWindow)==1,]
-                MarginalHits_PrunedList <- indephits(MarginalHits$LogBFWeightedAvg, MarginalHits$Chr, MarginalHits$BP, T=PruneMarginalHits_bpWindow)
-                MarginalHits <- MarginalHits[MarginalHits_PrunedList==1,]
-                MarginalHits_logBFs$lbf <- lapply(MarginalHits_logBFs$lbf, function(x) { return(x[,MarginalHits_PrunedList==1]) })
-                MarginalHits_logBFs_Stacked <- MarginalHits_logBFs_Stacked[,MarginalHits_PrunedList==1]
+                #MarginalSNPs <- MarginalSNPs[indephits(MarginalSNPs$LogBFWeightedAvg, MarginalSNPs$Chr, MarginalSNPs$BP, T=PruneMarginalSNPs_bpWindow)==1,]
+                MarginalSNPs_PrunedList <- indephits(MarginalSNPs$LogBFWeightedAvg, MarginalSNPs$Chr, MarginalSNPs$BP, T=PruneMarginalSNPs_bpWindow)
+                MarginalSNPs <- MarginalSNPs[MarginalSNPs_PrunedList==1,]
+                MarginalSNPs_logBFs$lbf <- lapply(MarginalSNPs_logBFs$lbf, function(x) { return(x[,MarginalSNPs_PrunedList==1]) })
+                MarginalSNPs_logBFs_Stacked <- MarginalSNPs_logBFs_Stacked[,MarginalSNPs_PrunedList==1]
         }
 
-        print(MarginalHits)
-#       print(summary(MarginalHits_logBFs$lbf))
+        print(MarginalSNPs)
+#       print(summary(MarginalSNPs_logBFs$lbf))
 
         #Preparing log Bayes factors matrix, Gammas x SNPs
-        #bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalHits_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE), nrow(MarginalHits_logBFs$gamma), length(SigmaAlphas))
-        MarginalHits_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalHits_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE), nrow(MarginalHits_logBFs$gamma), length(SigmaAlphas))
-        MarginalHits_logBFs_Stacked_SigmaAlphasSummed <- cbind(MarginalHits_logBFs$gamma, MarginalHits_logBFs_Stacked_SigmaAlphasSummed)
-        colnames(MarginalHits_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalHits$ChrBP)
+        #bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(MarginalSNPs_logBFs$gamma), length(SigmaAlphas))
+        MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(MarginalSNPs_logBFs$gamma), length(SigmaAlphas))
+        MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(MarginalSNPs_logBFs$gamma, MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
+        colnames(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalSNPs$ChrBP)
 
-        print(MarginalHits_logBFs_Stacked_SigmaAlphasSummed)
+        print(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
         print(Priors_Used)
-        print(MarginalHits_logBFs_Stacked)
+        print(MarginalSNPs_logBFs_Stacked)
 
         #Preparing posterior probabilities, Gammas x SNPs
-        MarginalHits_logBFs_Stacked_PosteriorProbabilities <- posteriorprob(MarginalHits_logBFs_Stacked, Priors_Used)
-        MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed <- apply(MarginalHits_logBFs_Stacked_PosteriorProbabilities, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
-        MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed <- cbind(MarginalHits_logBFs$gamma, MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed)
-        colnames(MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed) <- c(DataSources, MarginalHits$ChrBP)
-        #MarginalHits_PosteriorProbabilities <- apply(posteriorprob(MarginalHits_logBFs_Stacked, Priors_Used), 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
+        MarginalSNPs_logBFs_Stacked_PosteriorProbabilities <- posteriorprob(MarginalSNPs_logBFs_Stacked, Priors_Used)
+        MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed <- apply(MarginalSNPs_logBFs_Stacked_PosteriorProbabilities, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
+        MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed <- cbind(MarginalSNPs_logBFs$gamma, MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed)
+        colnames(MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed) <- c(DataSources, MarginalSNPs$ChrBP)
+        #MarginalSNPs_PosteriorProbabilities <- apply(posteriorprob(MarginalSNPs_logBFs_Stacked, Priors_Used), 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas))
 
-        print(MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed)
+        print(MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed)
 
-        #20160905 CHECK_0 -- Prob: Convert either 'MarginalHits_logBFs_Stacked_PosteriorProbabilities' to 'PosteriorProbs' or 'PreviousSNPs_PosteriorProbs' to 'PreviousSNPs_PosteriorProbabilities'
-        #20160905 CHECK_0 -- Prob: Change 'MarginalHits' to 'MarginalSNPs' probably?
+        #20160905 CHECK_0 -- Prob: Convert either 'MarginalSNPs_logBFs_Stacked_PosteriorProbabilities' to 'PosteriorProbs' or 'PreviousSNPs_PosteriorProbs' to 'PreviousSNPs_PosteriorProbabilities'
+        #20160905 CHECK_0 -- Prob: Change 'MarginalSNPs' to 'MarginalSNPs' probably?
         #20160905 NOTE -- Below code was not tested yet, just typing it out now to be included/tested later. This was something I wanted to start including anyways.
-        #MarginalHits$BestModel <- apply(MarginalHits_logBFs$gamma[apply(MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed, 2, which.max),], 1, paste, collapse="_")
-        #MarginalHits$BestModel_Posterior <- apply(MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed, 2, max)
+        #MarginalSNPs$BestModel <- apply(MarginalSNPs_logBFs$gamma[apply(MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed, 2, which.max),], 1, paste, collapse="_")
+        #MarginalSNPs$BestModel_Posterior <- apply(MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed, 2, max)
 
         #PreviousSNPs_PosteriorProbs <- posteriorprob(PreviousSNPs_logBFs_Stacked, Prior_PreviousSNPsEB) #Matrix of nModels*nSigmaAlphas x nSNPs
         #PreviousSNPs_PosteriorProbs_Collapsed <- apply(PreviousSNPs_PosteriorProbs, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
-        #PreviousSNPs$BestModel <- apply(MarginalHits_logBFs$gamma[apply(PreviousSNPs_PosteriorProbs_Collapsed, 2, which.max),], 1, paste, collapse="_")
+        #PreviousSNPs$BestModel <- apply(MarginalSNPs_logBFs$gamma[apply(PreviousSNPs_PosteriorProbs_Collapsed, 2, which.max),], 1, paste, collapse="_")
         #PreviousSNPs$BestModel_Posterior <- apply(PreviousSNPs_PosteriorProbs_Collapsed, 2, max)
 
         #lbf.gl <- MeanAcrossSigmaas(lbf.bigmat, 81, 14)
@@ -75,37 +68,37 @@ FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames,
         #20160905 CHECK_0 -- Prob: Move this below intialization section to proper beginning of .R file code as necessary once change/reorganization occurs
         NewSNPs <- NULL
 
-        print(MarginalHits_logBFs_Stacked_AvgwPrior_Min)
+        print(MarginalSNPs_logBFs_Stacked_AvgwPrior_Min)
 
-        #Determining new hits if GWASsnps were provided to determine minimum MarginalHits_logBFs_Stacked_AvgwPrior value threshold
-        #20160902 CHECK_0 -- Prob: Check that MarginalHits_logBFs_Stacked_AvgwPrior_Min is non null here?
+        #Determining new hits if GWASsnps were provided to determine minimum MarginalSNPs_logBFs_Stacked_AvgwPrior value threshold
+        #20160902 CHECK_0 -- Prob: Check that MarginalSNPs_logBFs_Stacked_AvgwPrior_Min is non null here?
         if (!is.null(GWASsnps)) {
-                if (is.null(MarginalHits_logBFs_Stacked_AvgwPrior_Min)) {
-                        stop(Sys.time(), " -- MarginalHits_logBFs_Stacked_AvgwPrior_Min is NULL despite GWASsnps being provided. Unexpected error.")
+                if (is.null(MarginalSNPs_logBFs_Stacked_AvgwPrior_Min)) {
+                        stop(Sys.time(), " -- MarginalSNPs_logBFs_Stacked_AvgwPrior_Min is NULL despite GWASsnps being provided. Unexpected error.")
                 }
-                NewSNPs <- MarginalHits[MarginalHits$GWASannot == 0 & MarginalHits$LogBFWeightedAvg >= MarginalHits_logBFs_Stacked_AvgwPrior_Min & MarginalHits$Nmin >= NminThreshold,]
+                NewSNPs <- MarginalSNPs[MarginalSNPs$GWASannot == 0 & MarginalSNPs$LogBFWeightedAvg >= MarginalSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$Nmin >= NminThreshold,]
         }
 
 
 
         #Preparing final return variable bmassOutput
-        bmassOutput$MarginalSNPs$SNPs <- MarginalHits
-        print(dim(MarginalHits_logBFs_Stacked))
+        bmassOutput$MarginalSNPs$SNPs <- MarginalSNPs
+        print(dim(MarginalSNPs_logBFs_Stacked))
         print(length(Priors_Used))
         bmassOutput$ModelPriors <- Priors_Used
         ####Candidate For Unit Tests####
-        print(dim(matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE)))
-        #bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalHits_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalHits_logBFs_Stacked)), ncol=ncol(MarginalHits_logBFs_Stacked), byrow=FALSE), nrow(MarginalHits_logBFs$gamma), length(SigmaAlphas))
-        bmassOutput$MarginalSNPs$logBFs <- MarginalHits_logBFs_Stacked_SigmaAlphasSummed
+        print(dim(matrix(rep(Priors_Used, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE)))
+        #bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(MarginalSNPs_logBFs$gamma), length(SigmaAlphas))
+        bmassOutput$MarginalSNPs$logBFs <- MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed
         print(dim(bmassOutput$logBFs))
         print(bmassOutput$logBFs)
-        bmassOutput$MarginalSNPs$Posteriors <- MarginalHits_logBFs_Stacked_PosteriorProbabilities_Collapsed
-        bmassOutput$GWASlogBFMinThreshold <- MarginalHits_logBFs_Stacked_AvgwPrior_Min
+        bmassOutput$MarginalSNPs$Posteriors <- MarginalSNPs_logBFs_Stacked_PosteriorProbabilities_Collapsed
+        bmassOutput$GWASlogBFMinThreshold <- MarginalSNPs_logBFs_Stacked_AvgwPrior_Min
         bmassOutput$NewSNPs$SNPs <- NewSNPs
-        print(MarginalHits_logBFs_Stacked_AvgwPrior_Min)
+        print(MarginalSNPs_logBFs_Stacked_AvgwPrior_Min)
         print(bmassOutput$NewSNPs)
 
-        #PreviousSNPs$BestModel <- apply(MarginalHits_logBFs$gamma[apply(PreviousSNPs_PosteriorProbs_Collapsed, 2, which.max),], 1, paste, collapse="_")
+        #PreviousSNPs$BestModel <- apply(MarginalSNPs_logBFs$gamma[apply(PreviousSNPs_PosteriorProbs_Collapsed, 2, which.max),], 1, paste, collapse="_")
         #PreviousSNPs$BestModel_Posterior <- apply(PreviousSNPs_PosteriorProbs_Collapsed, 2, max)
 
         #bmassOutput <- list()
