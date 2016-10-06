@@ -60,14 +60,14 @@ CheckForAndReplaceZeroes <- function(x) {
 #log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max)
 #matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)[seq.int(1, by=2, length.out=3),]
 #Test removing matrix of max values too? What about SigmaAlpa_Coordinates part?
-GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors, nGammas, nSigmaAlphas) {
+GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGammas, nSigmaAlphas) {
         WeightedSumAcrossAlphaSigmas <- matrix(0, ncol=ncol(logBFs1), nrow=nGammas)
         for (i in 1:nGammas) {
                 SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
                 max <- apply(logBFs1[SigmaAlpha_Coordinates,], 2, max)
                 logBFs1[SigmaAlpha_Coordinates,] <- logBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(logBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(logBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
                 #20160902 CHECK_0 -- Prob: Check use of max*nSigmaAlphas at end below...point is subtracting max nSigmaAlpha number of times and then summing across those rows, so shouldn't add back that max nSigmaAlpha number of times too?
-                WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors[SigmaAlpha_Coordinates,] * apply(10^logBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max*nSigmaAlphas
+                WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors_Matrix[SigmaAlpha_Coordinates,] * apply(10^logBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max*nSigmaAlphas
         }
         return(WeightedSumAcrossAlphaSigmas)
 }
@@ -228,12 +228,12 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
         }
 
         #Summing models over all values of SigmaAlphas, weighted by ModelPriors
-	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
+	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
         MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
         colnames(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalSNPs$SNPs$ChrBP)
 	MarginalSNPs$logBF <- MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed
         
-	PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(PreviousSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(PreviousSNPs_logBFs_Stacked)), ncol=ncol(PreviousSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
+	PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(PreviousSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(PreviousSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(PreviousSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
         PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed)
         colnames(PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, PreviousSNPs$SNPs$ChrBP)
 	PreviousSNPs$logBF <- PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed
