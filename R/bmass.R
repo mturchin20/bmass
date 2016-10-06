@@ -25,30 +25,21 @@
 
 bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, bmassSeedValue=NULL) {
 
-        print(DataSources)
+#       print(DataSources)
 
-        #LogFile <- c()
         bmassOutput <- list()
 	bmassOutput$MergedDataSources <- NULL
         if (!is.null(MergedDataSources)) {
 		bmassOutput$MergedDataSources <- MergedDataSources
 	}
 	bmassOutput$ZScoresCorMatrix <- NULL
+        bmassOutput$MarginalSNPs <- list()
 	bmassOutput$Models <- NULL
 	bmassOutput$ModelPriors <- NULL
-#       bmassOutput$MarginalSNPs <- list()
-#       bmassOutput$MarginalSNPs$SNPs <- NULL
-#       bmassOutput$MarginalSNPs$logBFs <- NULL
-#       bmassOutput$MarginalSNPs$Posteriors <- NULL
+        bmassOutput$PreviousSNPs <- list()
         bmassOutput$NewSNPs <- list()
-        bmassOutput$NewSNPs$SNPs <- NULL
-        bmassOutput$NewSNPs$logBFs <- NULL
-        bmassOutput$NewSNPs$Posteriors <- NULL
         bmassOutput$GWASlogBFMinThreshold <- NULL
-#       bmassOutput$PreviousSNPs <- list()
-#       bmassOutput$PreviousSNPs$SNPs <- NULL
-#       bmassOutput$PreviousSNPs$logBFs <- NULL
-#       bmassOutput$PreviousSNPs$Posteriors <- NULL
+        #LogFile <- c()
 	bmassOutput$LogFile <- c()
 
         bmassOutput$LogFile <- rbind(bmassOutput$LogFile, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
@@ -81,23 +72,12 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedC
 
 	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")] <- FinalizeAndFormatResults(DataSources, bmassOutput$MarginalSNPs, bmassOutput$PreviousSNPs, GWASsnps, bmassOutput$GWASlogBFMinThreshold, SigmaAlphas, bmassOutput$Models, bmassOutput$ModelPriors, NminThreshold, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")]
 
+#	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")] <- ExploreBestModelsUsingPosteriors(DataSources, bmassOutput$MarginalSNPs, bmassOutput$PreviousSNPs, bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")]
 
-
-
-
-#	bmassOutput$LogFile <- LogFile
+##	bmassOutput$LogFile <- LogFile
 
 	return(bmassOutput)
 
 }
 
-
-
-
-#if (FALSE) {
-#~~~
-#TimeTag 20160927 -- Starting to develop and connect pieces of new, subdivided .R code files
-
-
-#}
 
