@@ -2,6 +2,49 @@
 
 Version updates will be tracked and explained here. Major updates & releases will be particularly highlighted.
 
+## bmass v0.1.1
+
+###### Summary
+* First revision and reorganization/restructuring of .R files and internal code
+* First steps in setting up unit tests via `testthat`
+
+###### Since previous version (v0.1.0)
+* Began moving chunks of code from `PrepareData.R` to better designated .R files
+* Changed the few leftover instances of `NewHits` to `NewSNPs`
+* Moved `NewSNPs` creation section to after creation of `logBFs` and `PosteriorProbabilities` matrices from MarginalHits; moved `NewHits <- NULL` initialization section of entire code
+* Moved from `LogFile1` to `LogFile`
+* Changed `ProvidedPriors` to be the first option in the if/elseif/else block that also checks `is.null(GWASsnps)...`, etc...
+* Began setting up unit tests via `testthat`, including for basic R functionality, `PassChecksForDataSources.R`, and 
+* Introduced main bmass input variable `GWASsnps_AnnotateWindow`
+* Moved all instances of `MarginalHits` to `MarginalSNPs`, including in variable names, eg `PruneMarginalHits` and `PruneMarginalHits_bpWindow`
+* Split up `GetLogBFsFromData` into `GetLogBFsFromData` and `DetermineAndApplyPriors`
+* Moved `GetResultsFromMarginalSNPs.R` to `GetResultsFromMarginalSNPsAndFormat.R`, moved `FinalizeAndFormatResults()` back to `GetResultsFromMarginalSNPsAndFormat.R`, and removed `FormatAndPrepareResults.R`
+* Created `ExploreBestModelsUsingPosteriors` to put code chunks dealing with posteriors and related analyses such as `BestClass`
+* Moved `FollowupResultsAnalysisFormattingAndPlotting.R` to `ResultsFollowupAnalysisAndPlotting.R`
+* Moved `ExploreBestModelsUsingPosteriors` into `ResultsFollowupAnalysisAndPlotting.R`
+
+###### Notes
+* Moved `TestData1.txt`, `TestData2.txt`, and `TestSigSNPs.txt` to `bmass_TestData1.txt`, `bmass_TestData2.txt`, and `bmass_TestSigSNPs.txt`
+* Currently unclear whether Roxgyen-based .R files describing above test datasets should be in /data or in /R. R CMD check throws warning/error if .R files not in /data, but R won't load datasets via data() properly if .R files not found in /R
+* Changed `CheckCharacterFormat` to `CheckCharacterClass`
+* Changed underlying code for `CheckDataSourceDirectionColumn`, moving from a for loop to use of `...if (length(...[...!= "+" & ... != "-"]) > 0 )...` 
+* Changed `LogFile` to `bmassOutput$LogFile` in main bmass.R file
+* Using `bmassOutput` as a way to hold temp variables since can output and assign multiple variables via the list structure and self-made functions. Eg cannot do `c(var1, var2) <- function(input1)`, but can do `list1[c("var1", "var2")] <- function(input1)` assuming function outputs a list with two entries
+* Reworked order of input variables for main bmass function
+* Included `paste(..., collapse=" ")` at end of `stop()` calls that had `DataSources[!DataSources...]`-type error messages
+  * `stop()` seems to already have some automatic `paste()`-type calls? Eg how it can incorporate my call to `paste()` at the end without any additional specifications
+* Moved `LogBF` to `logBF` in all instances except for function name `GetLogBFsFromData`
+* Moved `if (!is.null(bmassSeedValue)) {...` section to within the `else{...}` portion of the `if (!is.null(ProvidedPriors)) {...` block
+* Changed `Priors_Used` to `ModelPriors_Used`
+* In `GetSumAcrossSigmaAlphas_withPriors` changed `ModelPriors` to `ModelPriors_Matrix`
+* In function call for `GetSumAcrossSigmaAlphas_withPriors` in `FinalizeAndFormatResults`, including `...matrix(...nrow=length(ModelPriors)...)...` to make the number of rows explicit
+
+###### Next steps (if applicable)
+* Finish creating unit tests for all .R files and necessary functions
+* Finish Roxygen commenting
+* Continue revising/reviewing code, including working through remaining CHECK_0 flags
+* Go through R CMD CHECK output?
+
 ## bmass v0.1.0
 
 ###### Summary
