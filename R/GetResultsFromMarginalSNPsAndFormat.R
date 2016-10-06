@@ -250,9 +250,11 @@ if (FALSE) {
 }
 
 
-FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
+FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GWASsnps, SigmaAlphas, Models, ModelPriors, NminThreshold, LogFile) {
 
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and trained priors.", sep=""))
+
+	
 
         #Pruning marginal hits by LogBFWeightedAvg if requested
         if (PruneMarginalSNPs == TRUE) {
@@ -264,11 +266,8 @@ FinalizeAndFormatResults <- function(DataSources, GWASsnps, ExpectedColumnNames,
                 MarginalSNPs_logBFs_Stacked <- MarginalSNPs_logBFs_Stacked[,MarginalSNPs_PrunedList==1]
         }
 
-        print(MarginalSNPs)
-#       print(summary(MarginalSNPs_logBFs$lbf))
+#        print(MarginalSNPs)
 
-        #Preparing log Bayes factors matrix, Gammas x SNPs
-        #bmassOutput$logBFs <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(MarginalSNPs_logBFs$gamma), length(SigmaAlphas))
         MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(Priors_Used, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(MarginalSNPs_logBFs$gamma), length(SigmaAlphas))
         MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(MarginalSNPs_logBFs$gamma, MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
         colnames(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalSNPs$ChrBP)

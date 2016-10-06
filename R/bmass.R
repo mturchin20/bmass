@@ -79,8 +79,11 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedC
 
 	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "ModelPriors", "GWASlogBFMinThreshold", "LogFile")] <- DetermineAndApplyPriors(DataSources, bmassOutput$MarginalSNPs, GWASsnps, SigmaAlphas, bmassOutput$Models, bmassOutput$ModelPriors, ProvidedPriors, UseFlatPriors, bmassSeedValue, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "ModelPriors", "GWASlogBFMinThreshold", "LogFile")]
 
+#	bmassOutput[c("MarginalSNPs", "Models", "ModelPriors", "logBFWeightedAvg_Min", "LogFile")] <- FinalizeAndFormatResults(DataSource, bmassOutput$MarginalSNPs, bmassOutput$PreviousSNPs, GWASsnps, SigmaAlphas, bmassOutput$Models, bmassOutput$ModelPriors, NminThreshold, LogFile)[c("MarginalSNPs", "Models", "ModelPriors", "logBFWeightedAvg_Min", "LogFile")]
 
-#	bmassOutput[c("MarginalSNPs", "Models", "ModelPriors", "logBFWeightedAvg_Min", "LogFile")] <- FinalizeAndFormatResults(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, bmassOutput$MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, bmassOutput$LogFile)[c("MarginalSNPs", "Models", "ModelPriors", "logBFWeightedAvg_Min", "LogFile")]
+
+
+
 
 #	bmassOutput$LogFile <- LogFile
 
