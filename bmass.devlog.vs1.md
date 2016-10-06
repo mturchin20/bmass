@@ -1,10 +1,8 @@
+##General Comments
 
+###Markdown related
 
-
-
-
-~~~~~~~~~
-
+Including spaces/linebreaks: http://stackoverflow.com/questions/24575680/new-lines-inside-paragraph-in-readme-md
 
 ##20160812
 
@@ -18,7 +16,7 @@ cp -p /Users/mturchin20/Documents/Work/LabMisc/StephensLab/Multivariate/multivar
 
 ##20161006
 
-Including tags onto current and past commits
+###Including tags onto current and past commits
 
 ```
 [  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git tag -a v0.1.1 -m "First draft of code reorganization, bmass() runs"
@@ -38,10 +36,47 @@ d7dcc330858aea380e837990ade11cace6820e85 20160930 -- Pushing updates for unit te
 [  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git tag -a v0.1.0 -m "First succesful run of bmass()" fcc9e63df5f5f4dda182bea7a5888ce66556d7bf
 ```
 
-Practicing/working on R CMD BUILD/CHECK functions
+Relevant URLs to the above:
+<br />
+https://git-scm.com/book/en/v2/Git-Basics-Tagging  
+http://stackoverflow.com/questions/18216991/create-a-tag-in-github-repository  
+http://stackoverflow.com/questions/5480258/how-to-delete-a-remote-tag  
+
+<br />
+###Practicing/working on R CMD BUILD/CHECK functions
 
 ```
 
 ```
+
+<br />
+###Changed wrong commit author, following instructions from https://help.github.com/articles/changing-author-info/
+
+TempScript.sh (copy/pasted from above with info below included):
+```
+OLD_EMAIL="mturchin20@uchicago.edu"
+CORRECT_NAME="mturchin20"
+CORRECT_EMAIL="mturchin20@gmail.com"
+```
+
+Command line:
+```
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git clone https://github.com/mturchin20/bmass/
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git log | vi -
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$bash TempScript.sh
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git log | vi -
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git push --force --tags origin 'refs/heads/*'
+##Then on other git repo location
+#[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git pull origin master
+#NOTE -- the above line was actually wrong, it fetched then merged which was a problem. As a result I had double the commit messages, duplicates of every one except for the one I changed. The below line helped me revert back to where I needed to start from again
+#[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git reset --hard master@{"10 minutes ago"}
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git fetch --all
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git reset --hard origin/master
+```
+
+Other websites used to help troubleshoot this:
+<br />
+http://stackoverflow.com/questions/1125968/how-to-force-git-pull-to-overwrite-local-files
+http://stackoverflow.com/questions/1223354/undo-git-pull-how-to-bring-repos-to-old-state
 
 
