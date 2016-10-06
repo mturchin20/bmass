@@ -18,6 +18,8 @@ Depends:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Imports:
+    stats, utils
 Suggests:
     testthat
 RoxygenNote: 5.0.1

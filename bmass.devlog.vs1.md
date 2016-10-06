@@ -46,8 +46,176 @@ http://stackoverflow.com/questions/5480258/how-to-delete-a-remote-tag
 ###Practicing/working on R CMD BUILD/CHECK functions
 
 ```
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab]$R CMD build bmass
+[  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab]$R CMD CHECK bmass_0.1.1.9000.tar.gz 
+* using log directory '/Users/mturchin20/Documents/Work/LabMisc/StephensLab/bmass.Rcheck'
+* using R version 3.3.0 (2016-05-03)
+* using platform: x86_64-apple-darwin15.4.0 (64-bit)
+* using session charset: ASCII
+* checking for file 'bmass/DESCRIPTION' ... OK
+* this is package 'bmass' version '0.1.1.9000'
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package 'bmass' can be installed ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+computeprior: warning in tabulate(z + 1, nbin = 3): partial argument
+  match of 'nbin' to 'nbins'
+DetermineAndApplyPriors: no visible global function definition for
+  'runif'
+ExploreBestModelsUsingPosteriors: no visible binding for global
+  variable 'Prior_PreviousSNPsEB'
+ExploreBestModelsUsingPosteriors: no visible binding for global
+  variable 'SigmaAlphas'
+ExploreBestModelsUsingPosteriors: no visible binding for global
+  variable 'Prior_PreviousSNPsEB_check2'
+ExploreBestModelsUsingPosteriors: no visible binding for global
+  variable 'PreviousSNPs_logBFs_Stacked'
+ExploreBestModelsUsingPosteriors: no visible binding for global
+  variable 'DataSources'
+GetZScoreAndDirection: no visible global function definition for
+  'qnorm'
+ProcessMergedAndAnnotatedDataSources: no visible global function
+  definition for 'cor'
+ProcessMergedAndAnnotatedDataSources: no visible global function
+  definition for 'pchisq'
+WriteTableLogFile: no visible global function definition for
+  'write.table'
+lbf.all: no visible binding for global variable 'allones'
+Undefined global functions or variables:
+  DataSources PreviousSNPs_logBFs_Stacked Prior_PreviousSNPsEB
+  Prior_PreviousSNPsEB_check2 SigmaAlphas allones cor pchisq qnorm
+  runif write.table
+Consider adding
+  importFrom("stats", "cor", "pchisq", "qnorm", "runif")
+  importFrom("utils", "write.table")
+to your NAMESPACE file.
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  'TestData1.DoesNotThrowWarningsVersion'
+  'TestData1.ThrowsWarningsVersion'
+  'TestData2.DoesNotThrowWarningsVersion'
+  'TestData2.ThrowsWarningsVersion' 'bmass_TestData1' 'bmass_TestData2'
+  'bmass_TestSigSNPs'
+Undocumented data sets:
+  'TestData1.DoesNotThrowWarningsVersion'
+  'TestData1.ThrowsWarningsVersion'
+  'TestData2.DoesNotThrowWarningsVersion'
+  'TestData2.ThrowsWarningsVersion' 'bmass_TestData1' 'bmass_TestData2'
+  'bmass_TestSigSNPs'
+All user-level objects in a package should have documentation entries.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking for code/documentation mismatches ... WARNING
+Functions or methods with usage in documentation object 'CheckCharacterFormat' but not in code:
+  CheckCharacterFormat
+
+* checking Rd \usage sections ... WARNING
+Undocumented arguments in documentation object 'CheckCharacterFormat'
+  'DataSource1'
+Documented arguments not in \usage in documentation object 'CheckCharacterFormat':
+  'x' 'y' 'DataFileList' 'DataFileLocations' 'ExpectedColumnNames'
+
+Undocumented arguments in documentation object 'OpenLogFile'
+  'OutputFileBase'
+Documented arguments not in \usage in documentation object 'OpenLogFile':
+  'x' 'y'
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking contents of 'data' directory ... OK
+* checking data for non-ASCII characters ... OK
+* checking data for ASCII and uncompressed saves ... OK
+* checking examples ... WARNING
+checking a package with encoding  'UTF-8'  in an ASCII locale
+
+ ERROR
+Running examples in 'bmass-Ex.R' failed
+The error most likely occurred in:
+
+> ### Name: CheckCharacterFormat
+> ### Title: Checking and preparing input datafiles.
+> ### Aliases: CheckCharacterFormat
+> 
+> ### ** Examples
+> 
+> func(1, 1)
+Error: could not find function "func"
+Execution halted
+* checking for unstated dependencies in 'tests' ... OK
+* checking tests ...
+  Running 'testthat.R'
+ OK
+* checking PDF version of manual ... WARNING
+LaTeX errors when creating PDF version.
+This typically indicates Rd problems.
+* checking PDF version of manual without hyperrefs or index ... ERROR
+Re-running with no redirection of stdout/stderr.
+Hmm ... looks like a package
+Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
+  pdflatex is not available
+Error in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  : 
+  pdflatex is not available
+Error in running tools::texi2pdf()
+You may want to clean up by 'rm -rf /var/folders/hw/3fshyx49303c6gkw95j44pzh0000gn/T//Rtmpw2mUZG/Rd2pdf1ff4338c9296'
+* DONE
+
+Status: 2 ERRORs, 5 WARNINGs, 1 NOTE
+See
+  '/Users/mturchin20/Documents/Work/LabMisc/StephensLab/bmass.Rcheck/00check.log'
+for details.
+```
+
+####Fixing ``no visible global function definition for 'runif'` 
+From http://stackoverflow.com/questions/31132552/no-visible-global-function-definition-for-median, adding:
 
 ```
+Imports:
+    stats
+```
+
+to `DESCRIPTION` and `import(stats)` to NAMESPACE fixed this
+
+This approach was also use to fix `no visible global function definition for 'write.table'`, where `utils` needed to be included in lieu of `stats`
+
+####Other remaining misc for the time being
+
+Most of the other comments in the `Note` are dealing with the not-completed function `ExploreBestModelsUsingPosteriors`, so a handful of variables are currently not initialized.  
+Additionally, incomplete Roxygen comments are leading to one of the `Error`s, and the other `Error` is a product of pdflatex not being available? For the moment going to come back to finish these up later, but mostly look fine for now 
+
 
 <br />
 ###Changed wrong commit author, following instructions from https://help.github.com/articles/changing-author-info/
