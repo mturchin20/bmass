@@ -248,3 +248,94 @@ http://stackoverflow.com/questions/1125968/how-to-force-git-pull-to-overwrite-lo
 http://stackoverflow.com/questions/1223354/undo-git-pull-how-to-bring-repos-to-old-state
 
 
+<br />
+<br />
+
+##20161106
+
+###Work related to moving to quicker version of `AnnotateDataWithGWASSNPs` 
+
+Some initial exploratory runs of `AnnotateMergedDataWithGWASSNPs()` (which mainly calls/uses `AnnotateDataWithGWASSNPs`) to see how long it takes and what variables/factors influence it most. Appears, unsurprisingly, that there's a linear relationship between run time and number of merged dataset entries that need to be annotated.
+
+```
+> bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")]
+> system.time(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+     user    system   elapsed
+46465.448     2.272 46480.563
+> dim(GWASsnps)
+[1] 101   2
+> GWASsnps_top25 <- head(GWASsnps, n=25)
+> dim(GWASsnps_top25)
+[1] 25  2
+> system.time(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps_top25, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+> bmassOutput2 <- bmassOutput
+> system.time(bmassOutput2[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps_top25, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")]
+) 
+     user    system   elapsed
+11642.902     1.026 11646.142
+> posterior.gl.prior <- posteriorprob(lbf.bigmat, normalize(rep(c(0,lbf$prior[-1]),nsigma)))
+Error in t(lbf) : object 'lbf.bigmat' not found
+```
+
+```
+> bmassOutput$MergedDataSources_Short <- bmassOutput$MergedDataSources[1:10000,]
+.
+.
+.
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+109.301   0.006 109.315
+> bmassOutput$MergedDataSources_Short <- bmassOutput$MergedDataSources[1:100000,]                                                                                                                                              > system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+    user   system  elapsed
+1072.733    0.076 1072.899
+> bmassOutput$MergedDataSources_Short <- bmassOutput$MergedDataSources[1:1000000,]                                                                                                                                             > system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+     user    system   elapsed
+12747.896     5.647 12754.488
+> GWASsnps1 <- GWASsnps[1,]
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+Error in GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  incorrect number of subscripts on matrix
+In addition: Warning messages:
+1: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+2: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+3: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+Timing stopped at: 68.605 0 68.611
+.
+.
+.
+
+.
+.
+.
+> library("lineprof")
+> lineprof(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+Reducing depth to 2 (from 6)
+Common path:
+     time alloc release dups ref                                       src
+1   0.006 1.928       0   39  #2 AnnotateDataWithGWASSNPs_Vs2
+2  20.633 6.442       0   57  #6 AnnotateDataWithGWASSNPs_Vs2/as.character
+3   0.001 0.058       0    0  #6 AnnotateDataWithGWASSNPs_Vs2/as.numeric
+4  17.934 1.235       0   47  #6 AnnotateDataWithGWASSNPs_Vs2/as.character
+5   0.001 0.523       0    0  #6 AnnotateDataWithGWASSNPs_Vs2/as.numeric
+6   0.002 0.012       0   37  #6 AnnotateDataWithGWASSNPs_Vs2
+7   2.775 0.475       0   10  #7 AnnotateDataWithGWASSNPs_Vs2/as.character
+8   0.001 0.046       0   10  #7 AnnotateDataWithGWASSNPs_Vs2/as.numeric
+9  17.923 1.235       0   37  #7 AnnotateDataWithGWASSNPs_Vs2/as.character
+10  0.001 0.523       0    0  #7 AnnotateDataWithGWASSNPs_Vs2/as.numeric
+11  0.002 0.478       0   37  #7 AnnotateDataWithGWASSNPs_Vs2
+12  0.014 0.477       0    0  #9 AnnotateDataWithGWASSNPs_Vs2/==
+13  0.001 0.478       0    0  #9 AnnotateDataWithGWASSNPs_Vs2
+14  0.014 0.477       0    0 #10 AnnotateDataWithGWASSNPs_Vs2/==
+15  0.001 0.000       0    0 #10 AnnotateDataWithGWASSNPs_Vs2
+
+```
+
+
+
+
+
+
+
