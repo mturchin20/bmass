@@ -303,10 +303,45 @@ In addition: Warning messages:
 3: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
   NAs introduced by coercion
 Timing stopped at: 68.605 0 68.611
-.
-.
-.
-
+> GWASsnps2 <- GWASsnps[1:2,]  
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+105.787   0.000 105.794
+Warning messages:
+1: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+2: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+3: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+4: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+5: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+212.191   0.003 212.210
+Warning messages:
+1: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+2: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+3: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+4: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+5: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+6: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+7: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+8: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+9: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
+10: In GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) ==  :
+  NAs introduced by coercion
 .
 .
 .
@@ -330,6 +365,60 @@ Common path:
 13  0.001 0.478       0    0  #9 AnnotateDataWithGWASSNPs_Vs2
 14  0.014 0.477       0    0 #10 AnnotateDataWithGWASSNPs_Vs2/==
 15  0.001 0.000       0    0 #10 AnnotateDataWithGWASSNPs_Vs2
+.
+.
+.
++ #               GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) == GWASsnps1[snpIndex,]$Chr && as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow <= GWASsnps1[snpIndex,]$BP && as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow >= GWASsnps1[snpIndex,]$BP] <- 2
++ #               GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) == GWASsnps1[snpIndex,]$Chr && as.numeric(as.character(MergedDataSource1["BP"])) == GWASsnps1[snpIndex,]$BP] <- 1                
++		  GWASannot2[MergedDataSource1["Chr"] == GWASsnps1[snpIndex,]$Chr && MergedDataSource1["BP"] - BPWindow <= GWASsnps1[snpIndex,]$BP && MergedDataSource1["BP"] + BPWindow >= GWASsnps1[snpIndex,]$BP] <- 2
++                 GWASannot2[MergedDataSource1["Chr"] == GWASsnps1[snpIndex,]$Chr && MergedDataSource1["BP"] == GWASsnps1[snpIndex,]$BP] <- 1
+.
+.
+.
+> lineprof(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+Reducing depth to 2 (from 6)
+Common path:
+   time  alloc release dups ref                             src
+1 0.002  1.522       0   39  #4 AnnotateDataWithGWASSNPs_Vs2
+2 0.278 56.755       0   32  #8 AnnotateDataWithGWASSNPs_Vs2/==
+3 0.001  0.478       0    0  #8 AnnotateDataWithGWASSNPs_Vs2
+4 0.014  0.477       0    0 #10 AnnotateDataWithGWASSNPs_Vs2/==
+5 0.001  0.478       0    0 #10 AnnotateDataWithGWASSNPs_Vs2
+6 0.014  0.477       0    0 #11 AnnotateDataWithGWASSNPs_Vs2/==
+7 0.001  0.000       0    0 #11 AnnotateDataWithGWASSNPs_Vs2
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  0.605   0.000   0.605
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+ 44.119   0.153  44.275
+.
+.
+.
++ #                        if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
++                         if (GWASsnps1[snpIndex,]$BP == MergedDataSource1["BP"]) {
++                                 GWASannot1 <- 1
++                         }
++ #                        else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (GWASannot1 != 1)) {
++                         else if ((GWASsnps1[snpIndex,]$BP >= MergedDataSource1["BP"] - BPWindow) && (GWASsnps1[snpIndex,]$BP <= MergedDataSource1["BP"] + BPWindow) && (GWASannot1 != 1)) {
++                                 GWASannot1 <- 2
+.
+.
+.
+> system.time(bmassOutput[c("MergedDataSources_Short", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+          ChrBP             Chr              BP             MAF              A1 
+  "10_10000135"            "10"     " 10000135"         "0.551"             "g" 
+         HDL_A2   HDL_Direction      HDL_pValue           HDL_N      HDL_ZScore 
+            "a"             "+" " 4.110000e-01"         "99150"  "8.221351e-01" 
+  LDL_Direction      LDL_pValue           LDL_N      LDL_ZScore    TG_Direction 
+            "-"    " 9.712e-01"         "94704" "-3.610329e-02"             "-" 
+      TG_pValue            TG_N       TG_ZScore    TC_Direction       TC_pValue 
+   " 4.344e-01"         "95848" "-7.816845e-01"             "-"    " 8.399e-01" 
+           TC_N       TC_ZScore       GWASannot 
+       " 99434" "-2.020214e-01"             "0" 
+Error in MergedDataSource1["BP"] - BPWindow : 
+  non-numeric argument to binary operator
+Timing stopped at: 14.4 0.183 14.585 
 
 ```
 

@@ -18,12 +18,15 @@
 
 AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- 0
-        for (snpIndex in 1:nrow(GWASsnps1)) {
+        print(MergedDataSource1)
+	for (snpIndex in 1:nrow(GWASsnps1)) {
                 if (GWASsnps1[snpIndex,]$Chr == as.numeric(as.character(MergedDataSource1["Chr"]))) {
                         if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
+#                        if (GWASsnps1[snpIndex,]$BP == MergedDataSource1["BP"]) {
                                 GWASannot1 <- 1
                         }
                         else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (GWASannot1 != 1)) {
+#                        else if ((GWASsnps1[snpIndex,]$BP >= MergedDataSource1["BP"] - BPWindow) && (GWASsnps1[snpIndex,]$BP <= MergedDataSource1["BP"] + BPWindow) && (GWASannot1 != 1)) {
                                 GWASannot1 <- 2
                         }
                         else {
@@ -43,8 +46,10 @@ AnnotateDataWithGWASSNPs_Vs2 <- function (MergedDataSource1, GWASsnps1, BPWindow
         for (snpIndex in 1:nrow(GWASsnps1)) {
         	GWASannot2 <- rep(0, nrow(MergedDataSource1))
         	GWASannot3 <- rep(0, nrow(MergedDataSource1))
-		GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) == GWASsnps1[snpIndex,]$Chr && as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow <= GWASsnps1[snpIndex,]$BP && as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow >= GWASsnps1[snpIndex,]$BP] <- 2
-		GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) == GWASsnps1[snpIndex,]$Chr && as.numeric(as.character(MergedDataSource1["BP"])) == GWASsnps1[snpIndex,]$BP] <- 1
+#		GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) == GWASsnps1[snpIndex,]$Chr && as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow <= GWASsnps1[snpIndex,]$BP && as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow >= GWASsnps1[snpIndex,]$BP] <- 2
+#		GWASannot2[as.numeric(as.character(MergedDataSource1["Chr"])) == GWASsnps1[snpIndex,]$Chr && as.numeric(as.character(MergedDataSource1["BP"])) == GWASsnps1[snpIndex,]$BP] <- 1
+		GWASannot2[MergedDataSource1["Chr"] == GWASsnps1[snpIndex,]$Chr && MergedDataSource1["BP"] - BPWindow <= GWASsnps1[snpIndex,]$BP && MergedDataSource1["BP"] + BPWindow >= GWASsnps1[snpIndex,]$BP] <- 2
+		GWASannot2[MergedDataSource1["Chr"] == GWASsnps1[snpIndex,]$Chr && MergedDataSource1["BP"] == GWASsnps1[snpIndex,]$BP] <- 1
 
 		GWASannot3[GWASannot1==2 || GWASannot2 == 2] <- 2
 		GWASannot3[GWASannot1==1 || GWASannot2 == 1] <- 1
@@ -201,7 +206,11 @@ AnnotateMergedDataWithGWASSNPs_Vs4 <- function(MergedDataSources, GWASsnps, GWAS
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
 #                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
 #                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs2(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow)
-                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs4(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
+                
+		GWASannot1 <- rep(0, length=nrow(MergedDataSources))
+		for i in c(
+		
+		MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs4(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
         }
 
 	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
