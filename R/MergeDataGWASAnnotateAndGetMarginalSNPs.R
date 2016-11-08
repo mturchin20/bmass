@@ -16,7 +16,7 @@
 #Annotating merged data with, if provided, GWAS SNPs
 #~~~~~~
 
-AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
+AnnotateDataWithGWASSNPs_Old <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- 0
 #        print(MergedDataSource1)
 	for (snpIndex in 1:nrow(GWASsnps1)) {
@@ -35,8 +35,9 @@ AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500
         return(GWASannot1)
 }
 
-AnnotateDataWithGWASSNPs_Vs2 <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
+AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- rep(0, nrow(MergedDataSource1))
+#        print(MergedDataSource1)
         for (snpIndex in 1:nrow(GWASsnps1)) {
         	GWASannot2 <- rep(0, nrow(MergedDataSource1))
         	GWASannot3 <- rep(0, nrow(MergedDataSource1))
@@ -149,9 +150,7 @@ MergeDataSources <- function (DataSources, LogFile) {
 
 }
 
-#AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
-#AnnotateMergedDataWithGWASSNPs_Vs2 <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
-AnnotateMergedDataWithGWASSNPs_Vs3 <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
+AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
         
 	#Annotating merged data with, if provided, GWAS SNPs
         #~~~~~~
@@ -162,9 +161,8 @@ AnnotateMergedDataWithGWASSNPs_Vs3 <- function(MergedDataSources, GWASsnps, GWAS
         }
         else {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
-#                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
-#                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs2(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow)
-                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs2(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
+#                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs_Old, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
+                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
         }
 
 	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
