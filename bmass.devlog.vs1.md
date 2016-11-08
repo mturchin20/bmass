@@ -422,6 +422,9 @@ Timing stopped at: 14.4 0.183 14.585
 .
 .
 .
+> system.time(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+545.777   1.325 547.195
 > system.time(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
     user   system  elapsed
 1048.997    1.339 1050.513
@@ -438,6 +441,123 @@ Segmentation fault
 .
 .
 .
+#AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
+#AnnotateMergedDataWithGWASSNPs_Vs2 <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
+AnnotateMergedDataWithGWASSNPs_Vs3 <- function(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, LogFile) {
+
+        #Annotating merged data with, if provided, GWAS SNPs
+        #~~~~~~
+
+        if (is.null(GWASsnps)) {
+                LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
+                MergedDataSources$GWASannot <- 0
+        }
+        else {
+                LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
+#                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
+#                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs2(MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow)
+                MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs_Vs2(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
+        }
+
+        return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
+
+}
+> system.time(AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+172.385   0.192 172.590
+> system.time(AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+373.096   0.525 373.695
+
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  2.217   0.000   2.217
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  1.673   0.006   1.683
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs2.1SNP.out")    > The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs2.2SNPs.out")
+> The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  1.438   0.023   1.461
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  0.498   0.088   0.586
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs2.Full.1SNP.out")
+> The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs2.Full.2SNPs.out")    > The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+139.881   0.040 139.931
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed 
+ 59.433   0.019  59.457 
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed 
+ 59.421   0.000  59.426 
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed 
+139.951   0.000 139.962 
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  2.211   0.000   2.211
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  1.721   0.026   1.748
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs3.1SNP.out")
+> The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs3.2SNPs.out")   > The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs4(bmassOutput$MergedDataSources, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  1.435   0.000   1.435
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+  0.518   0.000   0.518
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs3.Full.1SNP.out")     > The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs3.Full.2SNPs.out")    > The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed
+139.830   0.045 139.886
+> system.time(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+   user  system elapsed 
+ 59.365   0.019  59.388 
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs2.AllSNPs.out")
+> The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+>  profvis(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs2.Full.AllSNPs.out")  > The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+> profvis(AnnotateMergedDataWithGWASSNPs_Vs3massOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs3.AllSNPs.out")
+> The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+>  profvis(AnnotateMergedDataWithGWASSNPs_Vs3(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")], prof_output="20161108_profvis.Vs3.Full.AllSNPs.out")
+> The application 'firefox' lost its connection to the display localhost:10.0;
+most likely the X server was shut down or you killed/destroyed
+the application.
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass_dev
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass_dev/Vs1
+#From MacBook Air
+#scp -p mturchin20@wolfy.uchicago.edu:/Users/mturchin20/clstrHme/20161108_profvis.* .
+mv /mnt/lustre/home/mturchin20/20161108_profvis.* /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass_dev/Vs1/.
 ```
 
 Okay, so I realized throughout this that passing the full matrix and operating on it provides a much quicker function. However, during this process I kept the `...as.numeric(as.character(...` calls because when `apply` throws each row out as an individual vector, the formatting gets messed up (eg R makes everything a 'character' if there's anything non-numeric in one of the cells). I forgot this when I switched to the full matrix setup and I believe those formatting calls should be unnecessary. Using `lineprof` it became clear that the slowdown in the full matrix setup was due to these formatting calls, and removing them produced a function that annotates using GWAS SNPs within minutes (not hours). 
@@ -452,5 +572,65 @@ For follow-up I should a) double-check that the formatting calls are no longer n
 21 MB
 ```
 * Re b) -- looks like passing only the `Chr` and `BP` columns drastically reduces the size of the matrix, so potentially this will always be a reasonable, smaller fraction of the total matrix size. It should generally be linear with the rows of the matrix and have little to no relationship with the number of phenotypes (which would otherwise continually increase the size of the full matrix).
+* Re a) -- a little bit of work looking at how/why apply returns atomic  vectors and doesn't keep the data.frame format...or something like that. So as you can see below, if there's only numerics in the new data object, numeric state is kept, but like other aspects of R if any entries/cells have characters then the entire object is cast as a character to begin with. This is witnessed in other R processes as well, but here it may be particularly problematic since calling `as.numeric` and `as.character` becomes expensive fast.
+```
+> apply(bmassOutput$MergedDataSources[1:2,], 1, function(x) { return(print(x))})
+        ChrBP           Chr            BP           MAF            A1
+"10_10000135"          "10"    "10000135"       "0.551"           "g"
+       HDL_A2 HDL_Direction    HDL_pValue         HDL_N    HDL_ZScore
+          "a"           "+"      "0.4110"       "99150"   "0.8221351"
+LDL_Direction    LDL_pValue         LDL_N    LDL_ZScore  TG_Direction
+          "-"      "0.9712"       "94704" "-0.03610329"           "-"
+    TG_pValue          TG_N     TG_ZScore  TC_Direction     TC_pValue
+     "0.4344"       "95848"  "-0.7816845"           "-"      "0.8399"
+         TC_N     TC_ZScore
+      "99434"  "-0.2020214"
+        ChrBP           Chr            BP           MAF            A1
+"10_10000265"          "10"    "10000265"       "0.436"           "t"
+       HDL_A2 HDL_Direction    HDL_pValue         HDL_N    HDL_ZScore
+          "c"           "+"      "0.3933"       "99150"   "0.8536481"
+LDL_Direction    LDL_pValue         LDL_N    LDL_ZScore  TG_Direction
+          "+"      "0.9683"       "94704" " 0.03974052"           "-"
+    TG_pValue          TG_N     TG_ZScore  TC_Direction     TC_pValue
+     "0.4232"       "95848"  "-0.8008819"           "-"      "0.8803"
+         TC_N     TC_ZScore
+      "99434"  "-0.1505889"
+              1             2
+ChrBP         "10_10000135" "10_10000265"
+Chr           "10"          "10"
+BP            "10000135"    "10000265"
+MAF           "0.551"       "0.436"
+A1            "g"           "t"
+HDL_A2        "a"           "c"
+HDL_Direction "+"           "+"
+HDL_pValue    "0.4110"      "0.3933"
+HDL_N         "99150"       "99150"
+HDL_ZScore    "0.8221351"   "0.8536481"
+LDL_Direction "-"           "+"
+LDL_pValue    "0.9712"      "0.9683"
+LDL_N         "94704"       "94704"
+LDL_ZScore    "-0.03610329" " 0.03974052"
+TG_Direction  "-"           "-"
+TG_pValue     "0.4344"      "0.4232"
+TG_N          "95848"       "95848"
+TG_ZScore     "-0.7816845"  "-0.8008819"
+TC_Direction  "-"           "-"
+TC_pValue     "0.8399"      "0.8803"
+TC_N          "99434"       "99434"
+TC_ZScore     "-0.2020214"  "-0.1505889"
+> apply(bmassOutput$MergedDataSources[1:2,c("Chr", "BP")], 1, function(x) { return(print(x))})
+     Chr       BP
+      10 10000135
+     Chr       BP
+      10 10000265
+           1        2
+Chr       10       10
+BP  10000135 10000265
+~~~
+
+
+
+
+
 
 
