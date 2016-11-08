@@ -146,6 +146,14 @@ MergeDataSources <- function (DataSources, LogFile) {
                 }
         }
 
+	#Checking all SNPs are now oriented to minor allele, and making associated changes where needed (eg flipping MAF, ZScore directions)
+	#20161108 CHECK_0 -- Prob: Ask users to give both A1 and A2 so that can flip properly if needed here
+	MAF_CheckList <- MergedDataSources$MAF > .5
+	MergedDataSources[MAF_CheckList,]$MAF <- 1 - MergedDataSources[MAF_CheckList,]$MAF
+	for (CurrentDataSource in DataSources) {
+		eval(parse(text=paste("MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore <- -1 * MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore", sep="")))
+	}
+
 	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
 
 }
