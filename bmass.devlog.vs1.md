@@ -419,12 +419,38 @@ Common path:
 Error in MergedDataSource1["BP"] - BPWindow : 
   non-numeric argument to binary operator
 Timing stopped at: 14.4 0.183 14.585 
+.
+.
+.
+> system.time(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+    user   system  elapsed
+1048.997    1.339 1050.513
+> lineprof(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
 
+Reducing depth to 2 (from 7)
+    time   alloc release dups                     ref             src
+1 14.891 371.371       0  258 c("apply", "as.matrix") apply/as.matrix
+> val1 <- lineprof(bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")]) 
+
+ *** caught segfault ***
+address (nil), cause 'unknown'
+Segmentation fault
+.
+.
+.
 ```
 
+Okay, so I realized throughout this that passing the full matrix and operating on it provides a much quicker function. However, during this process I kept the `...as.numeric(as.character(...` calls because when `apply` throws each row out as an individual vector, the formatting gets messed up (eg R makes everything a 'character' if there's anything non-numeric in one of the cells). I forgot this when I switched to the full matrix setup and I believe those formatting calls should be unnecessary. Using `lineprof` it became clear that the slowdown in the full matrix setup was due to these formatting calls, and removing them produced a function that annotates using GWAS SNPs within minutes (not hours). 
+* I don't think lineprof likes the `apply` calls, there seems to always be segfault if I try and profile the original `AnnotateMergedDataWithGWASSNPs` even with just 2 SNPs for example
 
-
-
-
+For follow-up I should a) double-check that the formatting calls are no longer needed if always operating on the passed matrix and not individual, passed vectors (augmented by apply) and b) the memory impact of passing a full copy of what is already a particularly large matrix.
+* Re b) -- passing only the `Chr` and `BP` columns should cut down on matrix size duplication a good amount, as well as possibly moving to a setup where chromosomes are done one at a time (eg via a loop going over each chromosome)
+```
+> object_size(bmassOutput$MergedDataSources)
+494 MB
+> object_size(bmassOutput$MergedDataSources[,c("Chr","BP")])
+21 MB
+```
+* Re b) -- looks like passing only the `Chr` and `BP` columns drastically reduces the size of the matrix, so potentially this will always be a reasonable, smaller fraction of the total matrix size. It should generally be linear with the rows of the matrix and have little to no relationship with the number of phenotypes (which would otherwise continually increase the size of the full matrix).
 
 

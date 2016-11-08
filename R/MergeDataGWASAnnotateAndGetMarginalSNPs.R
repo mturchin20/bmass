@@ -18,7 +18,7 @@
 
 AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- 0
-        print(MergedDataSource1)
+#        print(MergedDataSource1)
 	for (snpIndex in 1:nrow(GWASsnps1)) {
                 if (GWASsnps1[snpIndex,]$Chr == as.numeric(as.character(MergedDataSource1["Chr"]))) {
                         if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
