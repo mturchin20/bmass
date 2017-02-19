@@ -61,7 +61,7 @@ CheckForAndReplaceZeroes <- function(x) {
 #matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)[seq.int(1, by=2, length.out=3),]
 #Test removing matrix of max values too? What about SigmaAlpa_Coordinates part?
 GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGammas, nSigmaAlphas) {
-        WeightedSumAcrossAlphaSigmas <- matrix(0, ncol=ncol(logBFs1), nrow=nGammas)
+	WeightedSumAcrossAlphaSigmas <- matrix(0, ncol=ncol(logBFs1), nrow=nGammas)
         for (i in 1:nGammas) {
                 SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
                 max <- apply(logBFs1[SigmaAlpha_Coordinates,], 2, max)
@@ -141,6 +141,8 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- ProvidedPriors is not NULL, replacing original priors with submitted values.", sep=""))
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, ProvidedPriors)
                 ModelPriors_Used <- ProvidedPriors
+		PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+		PreviousSNPs$logBFs <- PreviousSNPs_logBFs_Stacked
         } else if (is.null(GWASsnps) || UseFlatPriors == TRUE) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
 
