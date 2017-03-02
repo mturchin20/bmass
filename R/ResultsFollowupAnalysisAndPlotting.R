@@ -93,7 +93,7 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 	
 #	ModelPriors.Collapsed <- CollapseSigmaAlphasTogether(ModelPriors, length(SigmaAlphas))
 #	ListSNPs.Posteriors <- cbind(ListSNPs$Posteriors)[order(ModelPriors.Collapsed, decreasing=TRUE),]
-	ListSNPs.Posteriors <- cbind(ListSNPs$Posteriors)[ModelPriorMatrix[,ncol(ModelPriorMatrix)],]
+	ListSNPs.Posteriors <- cbind(ListSNPs$Posteriors[,(length(DataSources)+1):ncol(ListSNPs$Posteriors)])[ModelPriorMatrix[,ncol(ModelPriorMatrix)],]
 
 	
 #	ppmatrix.newhits = cbind(pp.newhits.collapse)[order(ebprior.glhits.collapse,decreasing=TRUE),]
@@ -109,7 +109,9 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 	}
 	
 	SummaryOfTopModels <- SummaryOfTopModels[order(as.numeric(SummaryOfTopModels[,2]), decreasing=TRUE),]
+	colnames(SummaryOfTopModels) <- c(paste(DataSources, collapse="_"), "n", "MeanPosterior", "OriginalPrior")
 	ListSNPs$TopModels <- SummaryOfTopModels
+#	ListSNPs$PerSNPTopModels <- PerSNPTopModels
 
         return(list(ListSNPs=ListSNPs, LogFile=LogFile))
 
@@ -157,8 +159,8 @@ PlotMarginalPosteriors <- function (DataSources, ListSNPs, Marginal, PrintMargin
 	}
 
 	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
-#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
-	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
+	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
+#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
 	for (i in 1:length(DataSources)) {
 		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
 	}
@@ -228,8 +230,8 @@ PlotMarginalPosteriors.withDirection <- function (DataSources, ListSNPs, Margina
 	}
 
 	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
-#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
-	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
+	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
+#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
 	for (i in 1:length(DataSources)) {
 		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
 	}
@@ -281,9 +283,68 @@ PlotMarginalPosteriors.withDirection <- function (DataSources, ListSNPs, Margina
 
 
 
+#20170301 NOTE -- Below has not been tested yet
+PlotZScores.OrderedByClusteredMarginals <- function (DataSources, ListSNPs, Marginal, PrintZScores=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
 
+#	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff4.", sep=""))
 
+	Marginal.Position <- -9
 
+	if (Marginal == "U") {
+		Marginal.Position <- 1
+	}
+	else if (Marginal == "D") {
+		Marginal.Position <- 2
+	}
+	else if (Marginal == "I") {
+		Marginal.Position <- 3
+	}
+	else {
+		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
+		PH <- 1
+	}
+
+	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
+	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
+#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
+	for (i in 1:length(DataSources)) {
+		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
+	}
+	colnames(ListSNPs.MarginalPosteriors) <- c("Marker", DataSources)	
+
+	ZScores <- data.frame(ListSNPs$SNPs$Marker)
+	for (i in DataSources) {
+		eval(parse(text=paste("ZScores <- cbind(ZScores, ListSNPs$SNPs$", i, "_ZScore)", sep="")))
+	}
+#	ZScores <- cbind(as.character(ListSNPs$SNPs$Marker), ZScores)
+	colnames(ZScores) <- c("Marker", DataSources)	
+
+#	print(head(ZScores))
+#	print(head(ListSNPs.MarginalPosteriors))
+#	print(melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]))
+#	print(melt(ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]))
+
+	ZScores.Melted <- melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
+	ZScores.Melted$Marker <- factor(ZScores.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
+
+	ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main)
+
+	print(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
+
+	ZScores <- ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
+	
+	if (PrintZScores == 0) {
+		return (PH <- 1)
+	}
+	else if (PrintZScores == 1) {
+		return(ZScores)
+	}
+	else {
+		#Print some type of error sign here?
+		return(PH <- 1)
+	}
+
+}
 
 
 
