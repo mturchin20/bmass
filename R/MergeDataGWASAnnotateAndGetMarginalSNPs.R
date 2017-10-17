@@ -107,7 +107,7 @@ MergeDataSources <- function (DataSources, LogFile) {
                         MergedDataSources_namesCurrent <- names(MergedDataSources)
                         MergedDataSources_namesNew <- c()
                         for (columnHeader1 in MergedDataSources_namesCurrent) {
-                                if (columnHeader1 %in% c("Chr", "BP", "A1", "MAF")) {
+                                if (columnHeader1 %in% c("Chr", "BP", "Marker", "A1", "MAF")) {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
                                 }
                                 else {
@@ -254,10 +254,12 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         #Creating subset of marginally significant SNPs using SNPMarginalUnivariateThreshold and SNPMarginalMultivariateThreshold
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on univariate and multivariate thresholds: ", as.character(SNPMarginalUnivariateThreshold) ," & ", as.character(SNPMarginalMultivariateThreshold) ,".", sep=""))
 	MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold),]
+	#20170610 NOTE -- Below version just to help with analysis of 2011ICBP dataset, a few `GWASsnps` are above 1e-6 threshold so not making it to `MarginalSNPs` list, but wouldn't be included in analysis anyways due to `GWASThresh`. Would be good to keep in the `MarginalSNPs` list though because it would make it easier to do the 'Replicated SNPs that would have been caught by our multivariate increase in power` analysis too.	
+#	MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold) | MergedDataSources$GWASannot==1,]
 
 #       print(MarginalSNPs)
 	
-	return(list(MarginalSNPs=MarginalSNPs, ZScoresCorMatrix=ZScoresCorMatrix, LogFile=LogFile))
+	return(list(MergedDataSources=MergedDataSources, MarginalSNPs=MarginalSNPs, ZScoresCorMatrix=ZScoresCorMatrix, LogFile=LogFile))
 
 }
 

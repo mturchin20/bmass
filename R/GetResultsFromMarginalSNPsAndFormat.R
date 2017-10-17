@@ -48,7 +48,7 @@ CheckForAndReplaceZeroes <- function(x) {
 #        return(MeanAcrossAlphaSigmas)
 #}
 
-####Candidate For Unit Tests####
+####Candidates For Unit Tests####
 #GetSumAcrossSigmaAlphas_withPriors(matrix(1, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
 #GetSumAcrossSigmaAlphas_withPriors(matrix(0, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
 #apply(10^matrix(0, ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
@@ -66,8 +66,9 @@ GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGam
                 SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
                 max <- apply(logBFs1[SigmaAlpha_Coordinates,], 2, max)
                 logBFs1[SigmaAlpha_Coordinates,] <- logBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(logBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(logBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
-                #20160902 CHECK_0 -- Prob: Check use of max*nSigmaAlphas at end below...point is subtracting max nSigmaAlpha number of times and then summing across those rows, so shouldn't add back that max nSigmaAlpha number of times too?
-                WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors_Matrix[SigmaAlpha_Coordinates,] * apply(10^logBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max*nSigmaAlphas
+                #20160902 20170411 CHECK_1 -- Prob: Check use of max*nSigmaAlphas at end below...point is subtracting max nSigmaAlpha number of times and then summing across those rows, so shouldn't add back that max nSigmaAlpha number of times too? Soln: No, should only be adding it back once. I 'fixed'/'solved' this a while ago and just didn't update this here, so doing it now.
+                #20170411 CHECK_0 -- Prob: Include a 'check for negInf' type situation here? What if subtract too much and get 'opposite' overflow of 'too-negative a number'? `log10(-Inf)` produces `NAs` at least so if it were a problem I'd be seeing it somewhere most likely?
+		WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors_Matrix[SigmaAlpha_Coordinates,] * apply(10^logBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max
         }
         return(WeightedSumAcrossAlphaSigmas)
 }
@@ -128,15 +129,23 @@ GetLogBFsFromData <- function(DataSources, MarginalSNPs, ZScoresCorMatrix, Sigma
 
 }
 
-DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAlphas, Models, ModelPriors, ProvidedPriors, UseFlatPriors, bmassSeedValue, LogFile) {
+DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAlphas, Models, ModelPriors, ProvidedPriors, UseFlatPriors, GWASThreshFlag, GWASThreshValue, bmassSeedValue, LogFile) {
 
 	MarginalSNPs_logBFs_Stacked <- MarginalSNPs$logBFs	
 	MarginalSNPs_logBFs_Stacked_AvgwPrior <- NULL
         ModelPriors_Used <- ModelPriors
+		
+	#20170507 NOTE -- Little bit of code to deal with 'PreviousSNPs' that are actually determined to be GWAS-significant after additional data (eg + stageII/replication data) and we only have stage 1/discovery results, so it's a 'hit' from the study but not based on the results we have. But we don't want to remove the SNP completely since the region has been determined as a hit (so want to remove the 1Mb around it downstream to not 'do it again'). #20170508 NOTE -- Made this a bit more 'global' in the code, but still come up with way to make it an optional flag or something like that
+	#20170507 CHECK_0 -- Prob: Make a flag + if/else statement here ot make this an option based on user input, not commenting on/off like doing here for the moment being
        
 	PreviousSNPs <- list()
         PreviousSNPs_logBFs_Stacked_AvgwPrior_Min <- NULL
- 
+	ZScoreHitFlag1 <- c()
+	if (GWASThreshFlag == 1) {
+		ZScoreHitFlag1 <- rep(0, nrow(MarginalSNPs$SNPs))
+		ZScoreHitFlag1[2*pnorm(apply(abs(MarginalSNPs$SNPs[,grep("ZScore", colnames(MarginalSNPs$SNPs))]),1,max),0,1,lower.tail=FALSE) < GWASThreshValue] <- 1
+	}
+
 	if (!is.null(ProvidedPriors)) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- ProvidedPriors is not NULL, replacing original priors with submitted values.", sep=""))
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, ProvidedPriors)
@@ -172,8 +181,16 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		}
 		
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Setting up GWAS trained priors and analyzing GWAS hits since GWASsnps provided.", sep=""))
-                
+               
 		PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+		
+		if (GWASThreshFlag == 1) {
+			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1]) #Matrix of nSigmaAlphas x nSNPs
+		} 
+#		20170508 NOTE -- do it this way with the next update
+#		else {
+#			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+#		}
 
                 #20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
 
@@ -204,7 +221,17 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
         MarginalSNPs$SNPs$logBFWeightedAvg <- MarginalSNPs_logBFs_Stacked_AvgwPrior
 		
 	PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1,]
-        if (dim(PreviousSNPs$SNPs)[1] > 0) {
+	
+	if (GWASThreshFlag == 1) {
+		PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1,]
+		PreviousSNPs$DontPassSNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==0,]
+	}
+#		20170508 NOTE -- do it this way with the next update
+#	else {
+#		PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1,]
+#	}
+
+	if (dim(PreviousSNPs$SNPs)[1] > 0) {
 		PreviousSNPs_logBFs_Stacked_AvgwPrior_Min <- min(PreviousSNPs$SNPs$logBFWeightedAvg)
 	}
 
@@ -265,8 +292,8 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
                         stop(Sys.time(), " -- PreviousSNPs_logBFs_Stacked_AvgwPrior_Min is NULL despite GWASsnps being provided. Unexpected error.")
                 }
                 NewSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold,]
-                NewSNPs$logBF <- MarginalSNPs$logBF[,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold]
-                NewSNPs$Posteriors <- MarginalSNPs$Posteriors[,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold]
+                NewSNPs$logBF <- cbind(MarginalSNPs$logBF[,1:length(DataSources)], MarginalSNPs$logBF[,(length(DataSources)+1):ncol(MarginalSNPs$logBF)][,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold])
+                NewSNPs$Posteriors <- cbind(MarginalSNPs$Posteriors[,1:length(DataSources)], MarginalSNPs$Posteriors[,(length(DataSources)+1):ncol(MarginalSNPs$Posteriors)][,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold])
         }
 
         ####Candidate For Unit Tests####
