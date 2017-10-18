@@ -14,7 +14,7 @@
 #' func(10, 1)
 
 ##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
-#20160822 CHECK_0 -- Prob: Double-check logic and go-through here
+#20160822 20171018 CHECK_1 -- Prob: Double-check logic and go-through here Soln: I mean....think it makes sense. Running this over each column of the stacked matrix, so the entry is a long vector of a single vector with each model across all SigmaAlphas. So if divy up that vector into nSigmaAlpha columns, should have 14 columns each with the same model per row -- so sum up the rows to get a final posteriorprob for each model in a given variant.
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
 #       print(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE))
         CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
@@ -36,17 +36,6 @@ CheckForAndReplaceZeroes <- function(x) {
         }
         return(returnValue1)
 }
-
-#GetMeanAcrossAlphaSigmas <- function(logBFs1, nGammas, nSigmaAlphas) {
-#        MeanAcrossAlphaSigmas <- matrix(0, ncol=ncol(logBFs1), nrow=nGammas)
-#        for (i in 1:nGammas) {
-#                SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
-#                max <- apply(logBFs1[SigmaAlpha_Coordinates,], 2, max)
-#                logBFs1[SigmaAlpha_Coordinates,] <- logBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(logBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(logBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
-#                MeanAcrossAlphaSigmas[i,] <- log10(apply(10^logBFs1[SigmaAlpha_Coordinates,], 2, mean)) + max
-#        }
-#        return(MeanAcrossAlphaSigmas)
-#}
 
 ####Candidates For Unit Tests####
 #GetSumAcrossSigmaAlphas_withPriors(matrix(1, ncol=2, nrow=2), matrix(1, ncol=2, nrow=2), 1, 2)
@@ -226,8 +215,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 	MarginalSNPs$logBFs <- MarginalSNPs_logBFs_Stacked
         MarginalSNPs$SNPs$logBFWeightedAvg <- MarginalSNPs_logBFs_Stacked_AvgwPrior
 		
-#	PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1,]
-
 	if (!is.null(GWASsnps)) {
 		if (GWASThreshFlag == 1) {
 			PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1,]
@@ -265,12 +252,12 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
         }
 
 	#Summing models over all values of SigmaAlphas, weighted by ModelPriors
-	#20171017 CHECK_0 -- Prob: Don't need to do the `rep()` call since the ModelPriors has priors for all models over all 14 `SigmaAlphas`....or should at least?
+	#20171017 20171018 CHECK_1 -- Prob: Don't need to do the `rep()` call since the ModelPriors has priors for all models over all 14 `SigmaAlphas`....or should at least? Soln: Realized the `rep()` calls are only by column counts which takes care of repeating for the number of variants there are -- if I was improperly repeating for multiple rounds of the priors I would also include something for the rows -- I must have noticed that the number of models present in ModelPriors was more than say 3^4, but instead 3 ^ 4 * 14, hence why only specifying a total rep equal to the number of variants.
 	#20171017 20171017 CHECK_1 -- Prob: I'm not sure if this should be done via weighing with priors, or possibly have a version that's just averaged equally across all SigmaAlphas and then produce this version with the priors. But also, why summing BFs again?....does that really make any sense? Well summing makes sense once you've applied the priors, and can do `mean()` across all BFs to get that equal weighting thing... Soln: Just do one version weighted by priors, and if user wants logBFs of equal weights across `SigmaAlphas` they can rerun using equal weights to get the results (include such an example in the vignettes to help show how?).
-#	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
-#       MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
-#       colnames(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalSNPs$SNPs$ChrBP)
-#	MarginalSNPs$logBFs <- MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed
+	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
+	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
+	colnames(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalSNPs$SNPs$ChrBP)
+	MarginalSNPs$logBFs <- MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed
 
         #Preparing posterior probabilities, Gammas x SNPs
         MarginalSNPs_logBFs_Stacked_Posteriors <- posteriorprob(MarginalSNPs_logBFs_Stacked, ModelPriors)
@@ -282,10 +269,10 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
 	if (!is.null(GWASsnps)) {
 		PreviousSNPs_logBFs_Stacked <- PreviousSNPs$logBFs
 
-#		PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(PreviousSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(PreviousSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(PreviousSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
-#       	PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed)
-#       	colnames(PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, PreviousSNPs$SNPs$ChrBP)
-#		PreviousSNPs$logBFs <- PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed
+		PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(PreviousSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(PreviousSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(PreviousSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
+		PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed)
+		colnames(PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, PreviousSNPs$SNPs$ChrBP)
+		PreviousSNPs$logBFs <- PreviousSNPs_logBFs_Stacked_SigmaAlphasSummed
 	
 		PreviousSNPs_logBFs_Stacked_Posteriors <- posteriorprob(PreviousSNPs_logBFs_Stacked, ModelPriors) #Matrix of nModels*nSigmaAlphas x nSNPs
         	PreviousSNPs_logBFs_Stacked_Posteriors_Collapsed <- apply(PreviousSNPs_logBFs_Stacked_Posteriors, 2, CollapseSigmaAlphasTogether, nSigmaAlphas=length(SigmaAlphas)) #Matrix of nModels x nSNPs
@@ -305,7 +292,7 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
                         stop(Sys.time(), " -- PreviousSNPs_logBFs_Stacked_AvgwPrior_Min is NULL despite GWASsnps being provided. Unexpected error.")
                 }
                 NewSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold,]
-#               NewSNPs$logBFs <- cbind(MarginalSNPs$logBFs[,1:length(DataSources)], MarginalSNPs$logBFs[,(length(DataSources)+1):ncol(MarginalSNPs$logBFs)][,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold])
+		NewSNPs$logBFs <- cbind(MarginalSNPs$logBFs[,1:length(DataSources)], MarginalSNPs$logBFs[,(length(DataSources)+1):ncol(MarginalSNPs$logBFs)][,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold])
                 NewSNPs$Posteriors <- cbind(MarginalSNPs$Posteriors[,1:length(DataSources)], MarginalSNPs$Posteriors[,(length(DataSources)+1):ncol(MarginalSNPs$Posteriors)][,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold])
         }
 

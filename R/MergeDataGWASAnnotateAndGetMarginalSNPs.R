@@ -90,13 +90,12 @@ MergeDataSources <- function (DataSources, LogFile) {
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Beginning DataSources merging.", sep=""))
 
         MergedDataSources <- data.frame()
-        DataSourcesMAFs <- c()
 	for (CurrentDataSource in DataSources) {
 
                 #20160930 CHECK_0 -- Prob: Go over and do this/figure out what want to do?
 		###### do thissssss
                 #
-                #Keep MAF and average across datasets? Check A1 for consistency or not expecting that since differing directions?
+                # Check A1 for consistency or not expecting that since differing directions?
                 #
                 ###### do thissssss
 
@@ -108,12 +107,8 @@ MergeDataSources <- function (DataSources, LogFile) {
                         MergedDataSources_namesCurrent <- names(MergedDataSources)
                         MergedDataSources_namesNew <- c()
                         for (columnHeader1 in MergedDataSources_namesCurrent) {
-                                if (columnHeader1 %in% c("Chr", "BP", "Marker", "A1")) {
+                                if (columnHeader1 %in% c("Chr", "BP", "Marker", "A1", "MAF")) {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
-                                }
-				else if (columnHeader1 %in% c("MAF") {
-                                        MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
-                                        MergedDataSources_namesNew <- c(MergedDataSources_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))
 				}
                                 else {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))
@@ -123,7 +118,7 @@ MergeDataSources <- function (DataSources, LogFile) {
                         MergedDataSources$ChrBP <- paste(MergedDataSources$Chr, MergedDataSources$BP, sep="_")
 		}
                 else {
-                        CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"MAF\", \"Direction\", \"pValue\", \"N\")]", sep="")))
+                        CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"A1\", \"Direction\", \"pValue\", \"N\")]", sep="")))
                         CurrentDataSource_temp$ZScore <- apply(CurrentDataSource_temp[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
 #                       CurrentDataSource_temp$Direction <- NULL
 #                       CurrentDataSource_temp$pValue <- NULL
@@ -136,6 +131,10 @@ MergeDataSources <- function (DataSources, LogFile) {
                         CurrentDataSource_temp$ChrBP <- paste(eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP", sep=""))), sep="_")
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
+
+			#CHECK FOR A1 & CurrentDataSource_A1 
+                        
+			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_A1 <- NULL", sep="")))
 
                 	#20160930 CHECK_0 -- Prob: Do this/figure this out? If even wanting to do something like this?
                         ###### do thissssss
@@ -151,29 +150,23 @@ MergeDataSources <- function (DataSources, LogFile) {
                 }
         }
 
-	DataSourcesMAFs <- MergedDataSources[,grep("_MAF", colnames(MergedDataSources))]
-	grep("ZScore", colnames(bmassOutput4$NewSNPs$SNPs))
-	DataSourcesMAFsAverage <- apply(DataSourcesMAFs, 1, mean)
-	MergedDataSources$MAF <- DataSourcesMAFsAverage
-	for (CurrentDataSource in DataSources) {
-		eval(pasrse(text=paste("MergedDataSources$", CurrentDataSources, "_MAF <- NULL", sep="")))
-	}
-
-	#Checking all SNPs are now oriented to minor allele, and making associated changes where needed (eg flipping MAF, ZScore directions)
+	#Checking if any SNPs somehow became MAF > .5 or fixed
+	###Checking all SNPs are now oriented to minor allele, and making associated changes where needed (eg flipping MAF, ZScore directions)
 	#20161108 20171018 CHECK_1 -- Prob: Ask users to give both A1 and A2 so that can flip properly if needed here Soln: I don't think I'm going to go that far with this; it will be something users will have to ensure themselves, and if there is not a match of alleles then the SNPs will just be dropped
-	#20161108 20171018 CHECK_1 -- Prob: Average MAFs across datasets Soln: Put this in, NOTE that I changed the 'MAF > .5' check from something that flips to something that now throws an error, since the MAF > .5 check was already done previously; there should not be any new variants that have MAF > .5 after averaging since all original, individual variants were <= .5 already
+	#20161108 20171018 CHECK_1 -- Prob: Average MAFs across datasets Soln: Put this in, NOTE that I changed the 'MAF > .5' check from something that flips to something that now throws an error, since the MAF > .5 check was already done previously; there should not be any new variants that have MAF > .5 after averaging since all original, individual variants were <= .5 already. Also NOTE -- I've decided not to average across MAFs in-script; I'm just going to inform the user that we'll use the first MAF from the first file inputted and they should edit/alter their input files accordingly.
 #	MAF_CheckList <- MergedDataSources$MAF > .5
 #	MergedDataSources[MAF_CheckList,]$MAF <- 1 - MergedDataSources[MAF_CheckList,]$MAF
 #	for (CurrentDataSource in DataSources) {
 #		eval(parse(text=paste("MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore <- -1 * MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore", sep="")))
 #	}
-	MAF_CheckList <- MergedDataSources$MAF > .5
-	if (TRUE %in% MAF_CheckList) {
-		stop(Sys.time(), " -- the created MergedDataSources file has averaged MAFs > .5 for certain variants. Please fix and rerun bmass: ", MergedDataSources[MAF_CheckList,]) 
-	}
 
 #	#Also checking whether any SNPs appear 'fixed', eg. MAF == 0, and dropping them if so
 #	MergedDataSources <- MergedDataSources[MergedDataSources$MAF > 0,] 
+	
+	MAF_CheckList <- MergedDataSources$MAF > .5
+	if (TRUE %in% MAF_CheckList) {
+		stop(Sys.time(), " -- the created MergedDataSources file has MAFs > .5 for certain variants. Please fix and rerun bmass: ", MergedDataSources[MAF_CheckList,]$Marker) 
+	}
 
 	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
 
