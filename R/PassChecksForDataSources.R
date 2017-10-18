@@ -65,11 +65,26 @@ CheckDataSourceDirectionColumn <- function (DataSources1) {
 	if (length(eval(parse(text=paste(DataSources1, "$Direction", sep="")))[eval(parse(text=paste(DataSources1, "$Direction", sep=""))) != "+" & eval(parse(text=paste(DataSources1, "$Direction", sep=""))) != "-"]) > 0) {
 		returnValue <- FALSE
 	}
-#	for (DirectionValue in eval(parse(text=paste(DataSources1, "$Direction", sep="")))) {
-#		if ((DirectionValue != "+") && (DirectionValue != "-")) {
-#			returnValue <- FALSE
-#		}
-#	}
+	return(returnValue)
+}
+
+CheckDataSourceMAFIsMAF <- function (DataSources1) {
+	returnValue <- TRUE
+	if (TRUE %in% eval(parse(text=paste(DataSources1, "$MAF > .5 ", sep="")))) {
+		returnValue <- FALSE
+	}
+	return(returnValue)
+}
+
+CheckDataSourceMAFFixed <- function (DataSources1) {
+	returnValue <- TRUE
+	returnVector <- eval(parse(text=paste(DataSources1, "$MAF == 0 | ", DataSources1, "$MAF == 1 ", sep="")))
+#	write(head(returnVector), stderr());
+	if (TRUE %in% returnVector) {
+		returnValue <- FALSE
+#		write(head(eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", !returnVector, ",]", sep="")))), stderr())
+		eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", returnVector, ",]", sep=""))) 
+	}
 	return(returnValue)
 }
 
@@ -121,7 +136,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
 		
-		
 		#20160901 CHECK_0 -- Prob: Do X/23 chr column conversion stuff first here
 		###### do thissssss
 		#
@@ -134,8 +148,30 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
 			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckDirectionColumn], collapse=" "))
 		}
-		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed Direction column check.", sep=""))
+
+		#20171018 CHECK_0 -- Prob: Give first-pass check of the below function
+		DataSourcesCheckMAFIsMAF <- sapply(DataSources, CheckDataSourceMAFIsMAF)
+		if (FALSE %in% DataSourcesCheckMAFIsMAF) {
+			stop(Sys.time(), " -- the following data sources have variants whose MAF entry are > .5; bmass expects the MAF column to only have values <= .5. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckMAFIsMAF], collapse=" "))
+		}
+		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed MAF column check.", sep=""))
+
+		#20171018 CHECK_0 -- Prob: Give first-pass check of the below function
+		DataSourcesCheckMAFFixed <- sapply(DataSources, CheckDataSourceMAFFixed) 
+		if (FALSE %in% DataSourcesCheckMAFFixed) {
+			warning(Sys.time(), " -- the following data sources contained variants whose AF were fixed (ie value of 0 in MAF column). These variants were removed from the dataset: ", paste(DataSources[!DataSourcesCheckMAFFixed], collapse=" "))
+			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- the following data sources contained variants whose AF were fixed (ie value of 0 in MAF column). These variants were removed from the dataset: ", DataSources[!DataSourcesCheckMAFFixed], sep=""))
+		} else {
+			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed MAF fixed check.", sep=""))
+		}
+
+
+
+
+
+
+
 
 		#20160901 CHECK_0 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too?
 		#20160930 CHECK_0 -- Prob: Go over this below section and make sure it contains everything wanted for when 'ProvidedPriors' is in fact provided?

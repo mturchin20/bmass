@@ -9,7 +9,7 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#20170220 NOTE -- probably more official/better way to do below...check it out
+#20170220 CHECK_0 -- Prob: probably more official/better way to do below...check it out
 library(ggplot2)
 library(reshape2)
 
@@ -27,7 +27,7 @@ library(reshape2)
 ##ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 ##DataList <- c("Data1", "Data2")
 
-bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = 0, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=FALSE, PrintLogStatements=FALSE, bmassSeedValue=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ZScoresCorMatrix=NULL, ExpectedColumnNames=c("Chr", "BP", "Marker", "MAF", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = 0, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=FALSE, PrintLogStatements=FALSE, bmassSeedValue=NULL) {
 
 #       print(DataSources)
 
@@ -37,13 +37,16 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedC
 		bmassOutput$MergedDataSources <- MergedDataSources
 	}
 	bmassOutput$ZScoresCorMatrix <- NULL
-        bmassOutput$MarginalSNPs <- list()
+        if (!is.null(ZScoresCorMatrix)) {
+		#20171018 CHECK_0 -- Prob: Do some pre-processing data checks here on `ZScoresCorMatrix`? Specifically check whether order of correlation matrix matches order of `DataSources`
+		bmassOutput$ZScoresCorMatrix <- ZScoresCorMatrix
+	}
+	bmassOutput$MarginalSNPs <- list()
 	bmassOutput$Models <- NULL
 	bmassOutput$ModelPriors <- NULL
         bmassOutput$PreviousSNPs <- list()
         bmassOutput$NewSNPs <- list()
         bmassOutput$GWASlogBFMinThreshold <- NULL
-        #LogFile <- c()
 	bmassOutput$LogFile <- c()
 
         bmassOutput$LogFile <- rbind(bmassOutput$LogFile, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
@@ -80,7 +83,7 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedC
 	}
 	bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")]
 
-	bmassOutput[c("MergedDataSources", "MarginalSNPs", "ZScoresCorMatrix", "LogFile")] <- ProcessMergedAndAnnotatedDataSources(DataSources, bmassOutput$MergedDataSources, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, bmassOutput$LogFile)[c("MergedDataSources", "MarginalSNPs", "ZScoresCorMatrix", "LogFile")]
+	bmassOutput[c("MergedDataSources", "MarginalSNPs", "ZScoresCorMatrix", "LogFile")] <- ProcessMergedAndAnnotatedDataSources(DataSources, bmassOutput$MergedDataSources, bmassOutput$ZScoresCorMatrix, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, bmassOutput$LogFile)[c("MergedDataSources", "MarginalSNPs", "ZScoresCorMatrix", "LogFile")]
 
 	if (PrintMergedData == FALSE) {
 		bmassOutput$MergedDataSources <- NULL
