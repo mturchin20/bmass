@@ -27,7 +27,7 @@ library(reshape2)
 ##ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
 ##DataList <- c("Data1", "Data2")
 
-bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = 0, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=NULL, bmassSeedValue=NULL) {
+bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedColumnNames=c("Chr", "BP", "MAF", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = 0, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=FALSE, PrintLogStatements=FALSE, bmassSeedValue=NULL) {
 
 #       print(DataSources)
 
@@ -47,6 +47,9 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedC
 	bmassOutput$LogFile <- c()
 
         bmassOutput$LogFile <- rbind(bmassOutput$LogFile, paste(format(Sys.time()), " -- beginning bmass.", sep=""))
+	if (PrintLogStatements == TRUE) {
+        	write(paste(format(Sys.time()), " -- beginning bmass.", sep=""), stderr())
+	}
 
         #20160823 CHECK_0: Prob -- list of Matthew functions specifically to double-check, go through, go over
         #       collapse
@@ -57,32 +60,51 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ExpectedC
 
 	if (!is.null(MergedDataSources)) {
 		bmassOutput$LogFile <- rbind(bmassOutput$LogFile, paste(format(Sys.time()), " -- MergedDataSources was provided, skipping merging data step.", sep=""))
+		if (PrintLogStatements == TRUE) {
+        		write(paste(format(Sys.time()), " -- MergedDataSources was provided, skipping merging data step.", sep=""), stderr())
+		}
 		
 		#bmassOutput$LogFile <- CheckMergedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, bmassOutput$MergedDataSources, ProvidedPriors, UseFlatPriors, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, bmassOutput$LogFile)
 	}
 	else {
+		if (PrintLogStatements == TRUE) {
+        		write(paste(format(Sys.time()), " -- Checking individual datasource files and merging datasets.", sep=""), stderr())
+		}
 		bmassOutput$LogFile <- CheckIndividualDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, bmassOutput$MergedDataSources, ProvidedPriors, UseFlatPriors, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, bmassOutput$LogFile)
 		
 		bmassOutput[c("MergedDataSources", "LogFile")] <- MergeDataSources(DataSources, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")]
 	}
 
+	if (PrintLogStatements == TRUE) {
+        	write(paste(format(Sys.time()), " -- Annotating merged datasources with GWAS SNPs (if provided) then processing finalized merged dataset.", sep=""), stderr())
+	}
 	bmassOutput[c("MergedDataSources", "LogFile")] <- AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")]
 
 	bmassOutput[c("MergedDataSources", "MarginalSNPs", "ZScoresCorMatrix", "LogFile")] <- ProcessMergedAndAnnotatedDataSources(DataSources, bmassOutput$MergedDataSources, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, bmassOutput$LogFile)[c("MergedDataSources", "MarginalSNPs", "ZScoresCorMatrix", "LogFile")]
 
-	if (is.null(PrintMergedData)) {
+	if (PrintMergedData == FALSE) {
 		bmassOutput$MergedDataSources <- NULL
 	}
 
+	if (PrintLogStatements == TRUE) {
+        	write(paste(format(Sys.time()), " -- Calculating logBFs and posteriors (if applicable).", sep=""), stderr())
+	}
+	
 	bmassOutput[c("MarginalSNPs", "Models", "ModelPriors", "LogFile")] <- GetLogBFsFromData(DataSources, bmassOutput$MarginalSNPs, bmassOutput$ZScoresCorMatrix, SigmaAlphas, bmassOutput$LogFile)[c("MarginalSNPs", "Models", "ModelPriors", "LogFile")] 
 
 	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "ModelPriors", "GWASlogBFMinThreshold", "LogFile")] <- DetermineAndApplyPriors(DataSources, bmassOutput$MarginalSNPs, GWASsnps, SigmaAlphas, bmassOutput$Models, bmassOutput$ModelPriors, ProvidedPriors, UseFlatPriors, GWASThreshFlag, GWASThreshValue, bmassSeedValue, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "ModelPriors", "GWASlogBFMinThreshold", "LogFile")]
+	
+	if (PrintLogStatements == TRUE) {
+        	write(paste(format(Sys.time()), " -- Getting final list of MarginalSNPs, PreviousSNPs, and NewSNPs (where applicable).", sep=""), stderr())
+	}
 
 	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")] <- FinalizeAndFormatResults(DataSources, bmassOutput$MarginalSNPs, bmassOutput$PreviousSNPs, GWASsnps, bmassOutput$GWASlogBFMinThreshold, SigmaAlphas, bmassOutput$Models, bmassOutput$ModelPriors, NminThreshold, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")]
 
 #	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")] <- ExploreBestModelsUsingPosteriors(DataSources, bmassOutput$MarginalSNPs, bmassOutput$PreviousSNPs, bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")]
 
-##	bmassOutput$LogFile <- LogFile
+	if (PrintLogStatements == TRUE) {
+        	write(paste(format(Sys.time()), " -- finishing bmass, exiting.", sep=""), stderr())
+	}
 
 	return(bmassOutput)
 

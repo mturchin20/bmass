@@ -146,9 +146,9 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 			if (!is.numeric(ProvidedPriors)) {
 				stop(Sys.time(), " -- ProvidedPriors input is returning false for is.numeric(). Please ensure all entries are numeric and then rerun bmass.")
 			}
-			#20170218 CHECK_0 -- Prob: come back here and check if 14 was overall needed or just a stopgap while doing some bug-testing. Originally there was no `*14`, it was just `!= 3^length(DataSources)) {`
-			if (length(ProvidedPriors) != 3^length(DataSources)*14) { 
-				stop(Sys.time(), " -- The number of entries in ProvidedPriors does not equal 3 ^ the number of datasets passed to DataSources (ie 3 ^ ", as.character(length(DataSources)), " = ", as.character(3^length(DataSources)), "). Please fix and rerun bmass.")
+			#20170218 20171017 CHECK_1 -- Prob: come back here and check if 14 was overall needed or just a stopgap while doing some bug-testing. Originally there was no `*14`, it was just `!= 3^length(DataSources)) {` Soln: 14 corresponds to `length(SigmaAlphas)` which makes sense since there are priors not only for all models but all models across all `SigmaAlphas`
+			if (length(ProvidedPriors) != 3^(length(DataSources)*length(SigmaAlphas))) { # 20171017 NOTE -- originally just had `*14` in place of where `length(SigmaAlphas)` is now
+				stop(Sys.time(), " -- The number of entries in ProvidedPriors does not equal 3 ^ (the number of datasets passed to DataSources * length(SigmaAlphas)) (ie 3 ^ (", as.character(length(DataSources)), " * ", as.character(length(SigmaAlphas)), ") = ", as.character(3^(length(DataSources)*length(SigmaAlphas))), "). Please fix and rerun bmass.")
 			}
 			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- ProvidedPriors was provided and passed checks.", sep=""))
 		}
