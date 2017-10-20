@@ -13,23 +13,7 @@
 library(ggplot2)
 library(reshape2)
 
-##Data1 <- read.table("../data/TestData1.txt", header=T)
-##Data2 <- read.table("../data/TestData2.txt", header=T)
-##SigSNPs <- read.table("../data/TestData1.GWASsnps.txt", header=T)
-##source("PrepareData.R")
-#library("devtools")
-#devtools::load_all()
-#devtools::test()
-#data(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs)
-##bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
-##bmassOutput1 <- bmass(c("Data1", "Data2"), GWASsnps=SigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
-#bmassOutput1 <- bmass(c("bmass_TestData1", "bmass_TestData2"), GWASsnps=bmass_TestSigSNPs, NminThreshold = 2000, bmassSeedValue=NULL)
-##ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N")
-##DataList <- c("Data1", "Data2")
-
 bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ZScoresCorMatrix=NULL, ExpectedColumnNames=c("Chr", "BP", "Marker", "MAF", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = 0, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=FALSE, PrintLogStatements=FALSE, bmassSeedValue=NULL) {
-
-#       print(DataSources)
 
         bmassOutput <- list()
 	bmassOutput$MergedDataSources <- NULL
@@ -68,8 +52,7 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ZScoresCo
 		}
 		
 		#bmassOutput$LogFile <- CheckMergedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, bmassOutput$MergedDataSources, ProvidedPriors, UseFlatPriors, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, bmassOutput$LogFile)
-	}
-	else {
+	} else {
 		if (PrintLogStatements == TRUE) {
         		write(paste(format(Sys.time()), " -- Checking individual datasource files and merging datasets.", sep=""), stderr())
 		}

@@ -16,28 +16,8 @@
 #Annotating merged data with, if provided, GWAS SNPs
 #~~~~~~
 
-AnnotateDataWithGWASSNPs_Old <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
-        GWASannot1 <- 0
-#        print(MergedDataSource1)
-	for (snpIndex in 1:nrow(GWASsnps1)) {
-		if (GWASsnps1[snpIndex,]$Chr == as.numeric(as.character(MergedDataSource1["Chr"]))) {
-                        if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
-                                GWASannot1 <- 1
-                        }
-                        else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (GWASannot1 != 1)) {
-                                GWASannot1 <- 2
-                        }
-                        else {
-                                PH <- NULL
-                        }
-                }
-        }
-        return(GWASannot1)
-}
-
 AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- rep(0, nrow(MergedDataSource1))
-#        print(MergedDataSource1)
         for (snpIndex in 1:nrow(GWASsnps1)) {
         	GWASannot2 <- rep(0, nrow(MergedDataSource1))
         	GWASannot3 <- rep(0, nrow(MergedDataSource1))
@@ -109,15 +89,13 @@ MergeDataSources <- function (DataSources, LogFile) {
                         for (columnHeader1 in MergedDataSources_namesCurrent) {
                                 if (columnHeader1 %in% c("Chr", "BP", "Marker", "A1", "MAF")) {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
-				}
-                                else {
+				} else {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))
                                 }
                         }
                         names(MergedDataSources) <- MergedDataSources_namesNew
                         MergedDataSources$ChrBP <- paste(MergedDataSources$Chr, MergedDataSources$BP, sep="_")
-		}
-                else {
+		} else {
                         CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"A1\", \"Direction\", \"pValue\", \"N\")]", sep="")))
                         CurrentDataSource_temp$ZScore <- apply(CurrentDataSource_temp[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
 #                       CurrentDataSource_temp$Direction <- NULL
@@ -180,10 +158,8 @@ AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps
         if (is.null(GWASsnps)) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
                 MergedDataSources$GWASannot <- 0
-        }
-        else {
+        } else {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
-#                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs_Old, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
                 MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
         }
 
@@ -205,8 +181,7 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         for (DataSource in DataSources) {
                 if (length(strsplit(ZScoresFull_CommandText, "")[[1]]) == 0) {
                         ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, "cbind(MergedDataSources$", DataSource, "_ZScore", sep="")
-                }
-                else {
+                } else {
                         ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, ",MergedDataSources$", DataSource, "_ZScore", sep="")
                 }
         }
@@ -236,8 +211,7 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         for (DataSource in DataSources) {
                 if (length(strsplit(ZScoresNullSetSelection_CommandText, "")[[1]]) == 0) {
                         ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, "(abs(ZScoresFull[,\"", DataSource, "_ZScore\"])<2)", sep="")
-                }
-                else {
+                } else {
                         ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, " & (abs(ZScoresFull[,\"", DataSource, "_ZScore\"])<2)", sep="")
                 }
         }

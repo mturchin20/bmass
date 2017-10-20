@@ -83,7 +83,7 @@ CheckDataSourceMAFFixed <- function (DataSources1) {
 	if (TRUE %in% returnVector) {
 		returnValue <- FALSE
 #		write(head(eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", !returnVector, ",]", sep="")))), stderr())
-		eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", returnVector, ",]", sep=""))) 
+#		eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", returnVector, ",]", sep=""))) 
 	}
 	return(returnValue)
 }
@@ -160,8 +160,7 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 		#20171018 CHECK_0 -- Prob: Give first-pass check of the below function
 		DataSourcesCheckMAFFixed <- sapply(DataSources, CheckDataSourceMAFFixed) 
 		if (FALSE %in% DataSourcesCheckMAFFixed) {
-			warning(Sys.time(), " -- the following data sources contained variants whose AF were fixed (ie value of 0 in MAF column). These variants were removed from the dataset: ", paste(DataSources[!DataSourcesCheckMAFFixed], collapse=" "))
-			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- the following data sources contained variants whose AF were fixed (ie value of 0 in MAF column). These variants were removed from the dataset: ", DataSources[!DataSourcesCheckMAFFixed], sep=""))
+			stop(Sys.time(), " -- the following data sources have variants whose MAF are == 0 (or == 1); bmass expects only segregating variants (eg not fixed). Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckMAFFixed], collapse=" "))
 		} else {
 			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed MAF fixed check.", sep=""))
 		}

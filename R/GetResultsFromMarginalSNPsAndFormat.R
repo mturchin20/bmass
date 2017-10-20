@@ -16,7 +16,6 @@
 ##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
 #20160822 20171018 CHECK_1 -- Prob: Double-check logic and go-through here Soln: I mean....think it makes sense. Running this over each column of the stacked matrix, so the entry is a long vector of a single vector with each model across all SigmaAlphas. So if divy up that vector into nSigmaAlpha columns, should have 14 columns each with the same model per row -- so sum up the rows to get a final posteriorprob for each model in a given variant.
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
-#       print(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE))
         CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
         return(CollapsedInputs)
 }
