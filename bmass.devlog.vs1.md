@@ -468,7 +468,12 @@ AnnotateMergedDataWithGWASSNPs_Vs3 <- function(MergedDataSources, GWASsnps, GWAS
 > system.time(AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps2, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
    user  system elapsed
 373.096   0.525 373.695
-
+> system.time(AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources_Short, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+     user    system   elapsed
+12176.175     1.477 12178.802
+> system.time(AnnotateMergedDataWithGWASSNPs(bmassOutput$MergedDataSources, GWASsnps, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
+     user    system   elapsed
+45893.556     2.232 45912.593
 > system.time(AnnotateMergedDataWithGWASSNPs_Vs2(bmassOutput$MergedDataSources_Short, GWASsnps1, GWASsnps_AnnotateWindow, bmassOutput$LogFile)[c("MergedDataSources", "LogFile")])
    user  system elapsed
   2.217   0.000   2.217
