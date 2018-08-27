@@ -9,6 +9,9 @@ VectorOfFalse <- c(FALSE, FALSE, FALSE)
 LogTest1 <- c("Test1")
 LogTest2 <- matrix(c("Test1", "Test1"), nrow=2)
 assign("bmass_ZeroMatrix", matrix(0, nrow=2, ncol=2), envir = .GlobalEnv)
+#TestEvalParseCommands1 <- paste("Testing This With ", LogTest1, sep="")
+#TestEvalParseCommands2 <- eval(parse(text=paste("Testing This With ", LogTest1, sep="")))
+#eval(parse(text=paste("TestEvalParseCommands3 <- Testing This With ", LogTest1, sep="")))
 
 test_that("Check basic R functionality", {
 	expect_equal(is.null(NULL), TRUE)
@@ -39,6 +42,9 @@ test_that("Check basic R functionality", {
 	expect_equal(eval(parse(text="bmass_TestData1")), bmass_TestData1)
 	expect_equal(eval(parse(text=paste("bmass_TestData1", "$Direction", sep=""))), bmass_TestData1$Direction)
 	expect_equal(eval(parse(text=paste("bmass_TestData1", "$Direction", sep="")))[eval(parse(text=paste("bmass_TestData1", "$Direction", sep=""))) == "+"], bmass_TestData1$Direction[bmass_TestData1$Direction == "+"])
+#	expect_equal(TestEvalParseCommands1, TestEvalParseCommands2)
+#	expect_equal(TestEvalParseCommands1, TestEvalParseCommands3)
+#	expect_equal(TestEvalParseCommands2, TestEvalParseCommands3)
 })
 
 test_that("DataSources is of datatype vector", {

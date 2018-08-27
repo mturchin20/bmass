@@ -165,13 +165,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed MAF fixed check.", sep=""))
 		}
 
-
-
-
-
-
-
-
 		#20160901 CHECK_0 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too?
 		#20160930 CHECK_0 -- Prob: Go over this below section and make sure it contains everything wanted for when 'ProvidedPriors' is in fact provided?
 		if (!is.null(ProvidedPriors)) {

@@ -110,10 +110,6 @@ MergeDataSources <- function (DataSources, LogFile) {
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
 
-			#CHECK FOR A1 & CurrentDataSource_A1 
-                        
-			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_A1 <- NULL", sep="")))
-
                 	#20160930 CHECK_0 -- Prob: Do this/figure this out? If even wanting to do something like this?
                         ###### do thissssss
                         #
@@ -123,6 +119,16 @@ MergeDataSources <- function (DataSources, LogFile) {
 
 			###Candidate for unit tests
                         MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
+			
+			#CHECK FOR A1 & CurrentDataSource_A1 
+                       
+#			if (FALSE %in% eval(parse(text=paste("apply(cbind(MergedDataSources$A1, MergedDataSources$", CurrentDataSource, "_A1), 1, function(x) { 
+#			if (FALSE %in% eval(parse(text=paste("ifelse(MergedDataSources$A1==MergedDataSources$", CurrentDataSource, "_A1), TRUE, FALSE)))) {
+#
+#			}
+
+			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_A1 <- NULL", sep="")))
+
 
                         rm(CurrentDataSource_temp)
                 }
