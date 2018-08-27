@@ -16,28 +16,8 @@
 #Annotating merged data with, if provided, GWAS SNPs
 #~~~~~~
 
-AnnotateDataWithGWASSNPs_Old <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
-        GWASannot1 <- 0
-#        print(MergedDataSource1)
-	for (snpIndex in 1:nrow(GWASsnps1)) {
-		if (GWASsnps1[snpIndex,]$Chr == as.numeric(as.character(MergedDataSource1["Chr"]))) {
-                        if (GWASsnps1[snpIndex,]$BP == as.numeric(as.character(MergedDataSource1["BP"]))) {
-                                GWASannot1 <- 1
-                        }
-                        else if ((GWASsnps1[snpIndex,]$BP >= as.numeric(as.character(MergedDataSource1["BP"])) - BPWindow) && (GWASsnps1[snpIndex,]$BP <= as.numeric(as.character(MergedDataSource1["BP"])) + BPWindow) && (GWASannot1 != 1)) {
-                                GWASannot1 <- 2
-                        }
-                        else {
-                                PH <- NULL
-                        }
-                }
-        }
-        return(GWASannot1)
-}
-
 AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- rep(0, nrow(MergedDataSource1))
-#        print(MergedDataSource1)
         for (snpIndex in 1:nrow(GWASsnps1)) {
         	GWASannot2 <- rep(0, nrow(MergedDataSource1))
         	GWASannot3 <- rep(0, nrow(MergedDataSource1))
@@ -90,12 +70,12 @@ MergeDataSources <- function (DataSources, LogFile) {
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Beginning DataSources merging.", sep=""))
 
         MergedDataSources <- data.frame()
-        for (CurrentDataSource in DataSources) {
+	for (CurrentDataSource in DataSources) {
 
                 #20160930 CHECK_0 -- Prob: Go over and do this/figure out what want to do?
 		###### do thissssss
                 #
-                #Keep MAF and average across datasets? Check A1 for consistency or not expecting that since differing directions?
+                # Check A1 for consistency or not expecting that since differing directions?
                 #
                 ###### do thissssss
 
@@ -109,16 +89,14 @@ MergeDataSources <- function (DataSources, LogFile) {
                         for (columnHeader1 in MergedDataSources_namesCurrent) {
                                 if (columnHeader1 %in% c("Chr", "BP", "Marker", "A1", "MAF")) {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, columnHeader1)
-                                }
-                                else {
+				} else {
                                         MergedDataSources_namesNew <- c(MergedDataSources_namesNew, paste(CurrentDataSource, "_", columnHeader1, sep=""))
                                 }
                         }
                         names(MergedDataSources) <- MergedDataSources_namesNew
                         MergedDataSources$ChrBP <- paste(MergedDataSources$Chr, MergedDataSources$BP, sep="_")
-                }
-                else {
-                        CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"Direction\", \"pValue\", \"N\")]", sep="")))
+		} else {
+                        CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"A1\", \"Direction\", \"pValue\", \"N\")]", sep="")))
                         CurrentDataSource_temp$ZScore <- apply(CurrentDataSource_temp[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
 #                       CurrentDataSource_temp$Direction <- NULL
 #                       CurrentDataSource_temp$pValue <- NULL
@@ -131,6 +109,10 @@ MergeDataSources <- function (DataSources, LogFile) {
                         CurrentDataSource_temp$ChrBP <- paste(eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP", sep=""))), sep="_")
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
+
+			#CHECK FOR A1 & CurrentDataSource_A1 
+                        
+			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_A1 <- NULL", sep="")))
 
                 	#20160930 CHECK_0 -- Prob: Do this/figure this out? If even wanting to do something like this?
                         ###### do thissssss
@@ -146,17 +128,23 @@ MergeDataSources <- function (DataSources, LogFile) {
                 }
         }
 
-	#Checking all SNPs are now oriented to minor allele, and making associated changes where needed (eg flipping MAF, ZScore directions)
-	#20161108 CHECK_0 -- Prob: Ask users to give both A1 and A2 so that can flip properly if needed here
-	#20161108 CHECK_0 -- Prob: Average MAFs across datasets
-	MAF_CheckList <- MergedDataSources$MAF > .5
-	MergedDataSources[MAF_CheckList,]$MAF <- 1 - MergedDataSources[MAF_CheckList,]$MAF
-	for (CurrentDataSource in DataSources) {
-		eval(parse(text=paste("MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore <- -1 * MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore", sep="")))
-	}
+	#Checking if any SNPs somehow became MAF > .5 or fixed
+	###Checking all SNPs are now oriented to minor allele, and making associated changes where needed (eg flipping MAF, ZScore directions)
+	#20161108 20171018 CHECK_1 -- Prob: Ask users to give both A1 and A2 so that can flip properly if needed here Soln: I don't think I'm going to go that far with this; it will be something users will have to ensure themselves, and if there is not a match of alleles then the SNPs will just be dropped
+	#20161108 20171018 CHECK_1 -- Prob: Average MAFs across datasets Soln: Put this in, NOTE that I changed the 'MAF > .5' check from something that flips to something that now throws an error, since the MAF > .5 check was already done previously; there should not be any new variants that have MAF > .5 after averaging since all original, individual variants were <= .5 already. Also NOTE -- I've decided not to average across MAFs in-script; I'm just going to inform the user that we'll use the first MAF from the first file inputted and they should edit/alter their input files accordingly.
+#	MAF_CheckList <- MergedDataSources$MAF > .5
+#	MergedDataSources[MAF_CheckList,]$MAF <- 1 - MergedDataSources[MAF_CheckList,]$MAF
+#	for (CurrentDataSource in DataSources) {
+#		eval(parse(text=paste("MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore <- -1 * MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore", sep="")))
+#	}
 
-	#Also checking whether any SNPs appear 'fixed', eg. MAF == 0, and dropping them if so
-	MergedDataSources <- MergedDataSources[MergedDataSources$MAF > 0,] 
+#	#Also checking whether any SNPs appear 'fixed', eg. MAF == 0, and dropping them if so
+#	MergedDataSources <- MergedDataSources[MergedDataSources$MAF > 0,] 
+	
+	MAF_CheckList <- MergedDataSources$MAF > .5
+	if (TRUE %in% MAF_CheckList) {
+		stop(Sys.time(), " -- the created MergedDataSources file has MAFs > .5 for certain variants. Please fix and rerun bmass: ", MergedDataSources[MAF_CheckList,]$Marker) 
+	}
 
 	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
 
@@ -170,10 +158,8 @@ AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps
         if (is.null(GWASsnps)) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- No GWASsnps list provided, skipping annotating MergedDataSources.", sep=""))
                 MergedDataSources$GWASannot <- 0
-        }
-        else {
+        } else {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Annotating MergedDataSources with provided GWASsnps list.", sep=""))
-#                MergedDataSources$GWASannot <- apply(MergedDataSources, 1, AnnotateDataWithGWASSNPs_Old, GWASsnps1=GWASsnps, BPWindow=GWASsnps_AnnotateWindow)
                 MergedDataSources$GWASannot <- AnnotateDataWithGWASSNPs(MergedDataSources[,c("Chr", "BP")], GWASsnps, GWASsnps_AnnotateWindow)
         }
 
@@ -181,7 +167,7 @@ AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps
 
 }
 
-ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, LogFile) {
+ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources, ZScoresCorMatrix, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, LogFile) {
 
         #Calculating RSS0(eg ZScoreCorMatrix) and subsetting down to marginally significant SNPs
         #~~~~~~
@@ -195,8 +181,7 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         for (DataSource in DataSources) {
                 if (length(strsplit(ZScoresFull_CommandText, "")[[1]]) == 0) {
                         ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, "cbind(MergedDataSources$", DataSource, "_ZScore", sep="")
-                }
-                else {
+                } else {
                         ZScoresFull_CommandText <- paste(ZScoresFull_CommandText, ",MergedDataSources$", DataSource, "_ZScore", sep="")
                 }
         }
@@ -226,15 +211,17 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         for (DataSource in DataSources) {
                 if (length(strsplit(ZScoresNullSetSelection_CommandText, "")[[1]]) == 0) {
                         ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, "(abs(ZScoresFull[,\"", DataSource, "_ZScore\"])<2)", sep="")
-                }
-                else {
+                } else {
                         ZScoresNullSetSelection_CommandText <- paste(ZScoresNullSetSelection_CommandText, " & (abs(ZScoresFull[,\"", DataSource, "_ZScore\"])<2)", sep="")
                 }
         }
         ZScoresNullSetSelection <- eval(parse(text=ZScoresNullSetSelection_CommandText))
         ZScoresNullset <- ZScoresFull[ZScoresNullSetSelection,]
 
-        ZScoresCorMatrix <- cor(ZScoresNullset)
+	#If no input `ZScoresCorMatrix`, then should be `NULL`
+        if (is.null(ZScoresCorMatrix)) {
+		ZScoresCorMatrix <- cor(ZScoresNullset)
+	}
 
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Determining initial threshold statistics.", sep=""))
 

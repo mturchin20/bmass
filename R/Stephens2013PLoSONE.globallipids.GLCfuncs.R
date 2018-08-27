@@ -26,7 +26,8 @@ centered.lbf = function(lbf){
 #prior is nmodel vector
 posteriorprob = function(lbf, prior){
 lbf =centered.lbf(lbf) #remove max from each column to avoid overflow
-post = apply(prior * 10^lbf,2,normalize)
+#post = apply(prior * 10^lbf,2,normalize)
+post = apply(matrix(prior, nrow=nrow(lbf), ncol=ncol(lbf), byrow=FALSE) * (10^lbf),2,normalize) #20171017 NOTE -- I added this in
 return(post)
 }
 

@@ -103,20 +103,15 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, SigmaAlphas, 
 }
 
 #20170220 NOTE -- ModelMatrix currently being treated as independent few lines of code outside of bmass package, so not doing it inside here yet...
-#GetTopModelsPerSNPViaPosteriors
 GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMatrix, LogFile) {
 
 	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff2.", sep=""))
 	
-#	ModelPriors.Collapsed <- CollapseSigmaAlphasTogether(ModelPriors, length(SigmaAlphas))
-#	ListSNPs.Posteriors <- cbind(ListSNPs$Posteriors)[order(ModelPriors.Collapsed, decreasing=TRUE),]
 	ListSNPs.Posteriors <- cbind(ListSNPs$Posteriors[,(length(DataSources)+1):ncol(ListSNPs$Posteriors)])[ModelPriorMatrix[,ncol(ModelPriorMatrix)],]
-
 	
 #	ppmatrix.newhits = cbind(pp.newhits.collapse)[order(ebprior.glhits.collapse,decreasing=TRUE),]
 
 	ModelPriorMatrix.Paste <- apply(ModelPriorMatrix[,1:length(DataSources)], 1, function(x) paste(x, collapse="_"))
-#	PerSNPTopModels <- cbind(ModelPriorMatrix.Paste[apply(ListSNPs$Posteriors, 2, which.max)], apply(ListSNPs$Posteriors, 2, max))
 	PerSNPTopModels <- cbind(ModelPriorMatrix.Paste[apply(ListSNPs.Posteriors, 2, which.max)], apply(ListSNPs.Posteriors, 2, max))
 	SummaryOfTopModels <- c()
 	
@@ -130,7 +125,6 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 	}
 	colnames(SummaryOfTopModels) <- c(paste(DataSources, collapse="_"), "n", "MeanPosterior", "OriginalPrior")
 	ListSNPs$TopModels <- SummaryOfTopModels
-#	ListSNPs$PerSNPTopModels <- PerSNPTopModels
 
         return(list(ListSNPs=ListSNPs, LogFile=LogFile))
 
@@ -165,21 +159,17 @@ PlotMarginalPosteriors <- function (DataSources, ListSNPs, Marginal, PrintMargin
 
 	if (Marginal == "U") {
 		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
+	} else if (Marginal == "D") {
 		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
+	} else if (Marginal == "I") {
 		Marginal.Position <- 3
-	}
-	else {
+	} else {
 		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
 		PH <- 1
 	}
 
 	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
 	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
-#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
 	for (i in 1:length(DataSources)) {
 		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
 	}
@@ -188,28 +178,135 @@ PlotMarginalPosteriors <- function (DataSources, ListSNPs, Marginal, PrintMargin
 	ListSNPs.MarginalPosteriors.Melted <- melt(ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
 	ListSNPs.MarginalPosteriors.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
 
-#	ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = "white", high="steelblue") + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-#	ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main)
-
 	ListSNPs.MarginalPosteriors <- ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
 
 #	print(ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
 #20170622 NOTE -- included the `limits` addition and the movement to a returning of the plot in order to help with paper/manuscript/chapter stuff -- not meant to be included for final package. `limits` may be worthwhile to keep as an option though.
-#	print(ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
+	print(ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
 
 	if (PrintMarginals == 0) {
-#		return(PH <- 1)
-		return(ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)))
-	}
-	else if (PrintMarginals == 1) {
+		return (PH <- 1)
+	} else if (PrintMarginals == 1) {
 		return(ListSNPs.MarginalPosteriors)
+	} else {
+		#Print some type of error sign here?
+		return(PH <- 1)
 	}
-	else {
+
+
+}
+
+#20170222 NOTE -- Below has not been tested yet
+PlotMarginalPosteriors.withDirection <- function (DataSources, ListSNPs, Marginal, PrintMarginals=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
+
+#	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff4.", sep=""))
+
+	Marginal.Position <- -9
+
+	if (Marginal == "U") {
+		Marginal.Position <- 1
+	} else if (Marginal == "D") {
+		Marginal.Position <- 2
+	} else if (Marginal == "I") {
+		Marginal.Position <- 3
+	} else {
+		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
+		PH <- 1
+	}
+
+	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
+	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
+	for (i in 1:length(DataSources)) {
+		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
+	}
+	colnames(ListSNPs.MarginalPosteriors) <- c("Marker", DataSources)	
+
+	Z <- c()
+	for (i in DataSources) {
+		eval(parse(text=paste("Z <- cbind(Z, ListSNPs$SNPs$", i, "_ZScore)", sep="")))
+	}
+
+	Z.Directions <- apply(Z, c(1,2), function(x) { y <- 0; if (x > 0) { y <- 1; } else if (x < 0) { y <- -1; } else if (x == 0) { y <- 0; } else { y <- NA; }; return(y);})
+
+	ListSNPs.MarginalPosteriors.wDirection <- ListSNPs.MarginalPosteriors
+	ListSNPs.MarginalPosteriors.wDirection[,2:(length(DataSources)+1)] <- ListSNPs.MarginalPosteriors.wDirection[,2:(length(DataSources)+1)] * Z.Directions
+
+	ListSNPs.MarginalPosteriors.Melted <- melt(ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
+	ListSNPs.MarginalPosteriors.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
+
+	ListSNPs.MarginalPosteriors.wDirection.Melted <- melt(ListSNPs.MarginalPosteriors.wDirection[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
+	ListSNPs.MarginalPosteriors.wDirection.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.wDirection.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
+
+	ListSNPs.MarginalPosteriors <- ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
+
+	print(ggplot(ListSNPs.MarginalPosteriors.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
+
+	if (PrintMarginals == 0) {
+		return (PH <- 1)
+	} else if (PrintMarginals == 1) {
+		return(ListSNPs.MarginalPosteriors)
+	} else {
 		#Print some type of error sign here?
 		return(PH <- 1)
 	}
 
 }
+
+#20170301 NOTE -- Below has not been tested yet
+PlotZScores.OrderedByClusteredMarginals <- function (DataSources, ListSNPs, Marginal, PrintZScores=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
+
+	Marginal.Position <- -9
+
+	if (Marginal == "U") {
+		Marginal.Position <- 1
+	} else if (Marginal == "D") {
+		Marginal.Position <- 2
+	} else if (Marginal == "I") {
+		Marginal.Position <- 3
+	} else {
+		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
+		PH <- 1
+	}
+
+	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
+	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
+	for (i in 1:length(DataSources)) {
+		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
+	}
+	colnames(ListSNPs.MarginalPosteriors) <- c("Marker", DataSources)	
+
+	ZScores <- data.frame(ListSNPs$SNPs$Marker)
+	for (i in DataSources) {
+		eval(parse(text=paste("ZScores <- cbind(ZScores, ListSNPs$SNPs$", i, "_ZScore)", sep="")))
+	}
+	colnames(ZScores) <- c("Marker", DataSources)	
+
+	ZScores.Melted <- melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
+	ZScores.Melted$Marker <- factor(ZScores.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
+
+	ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main)
+
+	print(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
+
+	ZScores <- ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
+	
+	if (PrintZScores == 0) {
+		return (PH <- 1)
+	} else if (PrintZScores == 1) {
+		return(ZScores)
+	} else {
+		#Print some type of error sign here?
+		return(PH <- 1)
+	}
+
+}
+
+#####
+#
+# 20171019 NOTE -- Below code/functions meant for manuscript production, not final release of the R package (possibly make this a separate .R file?)
+#
+#####
+
 
 #20170622 NOTE -- added/made this function below
 PlotMarginalPosteriors.ForManuscript <- function (DataSources, ListSNPs, Marginal, PrintMarginals=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="white", highcolor="steelblue") {
@@ -220,14 +317,11 @@ PlotMarginalPosteriors.ForManuscript <- function (DataSources, ListSNPs, Margina
 
 	if (Marginal == "U") {
 		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
+	} else if (Marginal == "D") {
 		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
+	} else if (Marginal == "I") {
 		Marginal.Position <- 3
-	}
-	else {
+	} else {
 		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
 		PH <- 1
 	}
@@ -262,134 +356,22 @@ PlotMarginalPosteriors.ForManuscript <- function (DataSources, ListSNPs, Margina
 	ListSNPs.MarginalPosteriors.U.Melted <- melt(ListSNPs.MarginalPosteriors.U[hclust(dist(ListSNPs.MarginalPosteriors.D[,2:(length(DataSources)+1)]))$order,])
 	ListSNPs.MarginalPosteriors.U.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.U.Melted$Marker, levels=ListSNPs.MarginalPosteriors.U[hclust(dist(ListSNPs.MarginalPosteriors.D[,2:(length(DataSources)+1)]))$order,1])
 
-
-#	print(ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
 #20170622 NOTE -- included the `limits` addition and the movement to a returning of the plot in order to help with paper/manuscript/chapter stuff -- not meant to be included for final package. `limits` may be worthwhile to keep as an option though.
 #	print(ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
 
 	if (PrintMarginals == 0) {
-#		return(PH <- 1)
 		if (Marginal == "U") {
 			return(ggplot(ListSNPs.MarginalPosteriors.U.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-		}
-		else if (Marginal == "D") {
+		} else if (Marginal == "D") {
 			return(ggplot(ListSNPs.MarginalPosteriors.D.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-		}
-		else if (Marginal == "I") {
+		} else if (Marginal == "I") {
 			return(ggplot(ListSNPs.MarginalPosteriors.I.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-		}
-		else {
+		} else {
 			return(PH <- 1)
 		}
-	}
-	else if (PrintMarginals == 1) {
+	} else if (PrintMarginals == 1) {
 		return(ListSNPs.MarginalPosteriors)
-	}
-	else {
-		#Print some type of error sign here?
-		return(PH <- 1)
-	}
-
-}
-
-#sub.pp.marginals.DirAssoc <- t(sub.pp.marginals[[2]])
-##colnames(sub.pp.marginals.DirAssoc) <- sub$snp
-##sub.pp.marginals.DirAssoc <- rbind(as.character(sub$snp), sub.pp.marginals.DirAssoc)
-#sub.pp.marginals.DirAssoc <- data.frame(cbind(as.character(sub$snp), sub.pp.marginals.DirAssoc))
-#sub.pp.marginals.DirAssoc[,2] <- as.numeric(as.character(sub.pp.marginals.DirAssoc[,2]))
-#etc
-#colnames(sub.pp.marginals.DirAssoc) <- c("snp", "LDL", "HDL", "TC", "TG")
-#
-#ggPlotData_newhits <- melt(sub.pp.marginals.DirAssoc.newhits[hclust(dist(sub.pp.marginals.DirAssoc.newhits[,2:5]))$order,][c(1:20,60:92),])
-#ggPlotData_newhits$snp <- factor(ggPlotData_newhits$snp, levels=sub.pp.marginals.DirAssoc.newhits[,1][hclust(dist(sub.pp.marginals.DirAssoc.newhits[,2:5]))$order][c(1:20,60:92)])
-#
-
-#sub.pp.marginals.DirAssoc <- t(sub.pp.marginals[[2]])
-##colnames(sub.pp.marginals.DirAssoc) <- sub$snp
-##sub.pp.marginals.DirAssoc <- rbind(as.character(sub$snp), sub.pp.marginals.DirAssoc)
-#sub.pp.marginals.DirAssoc <- data.frame(cbind(as.character(sub$snp), sub.pp.marginals.DirAssoc))
-#sub.pp.marginals.DirAssoc[,2] <- as.numeric(as.character(sub.pp.marginals.DirAssoc[,2]))
-#etc
-#colnames(sub.pp.marginals.DirAssoc) <- c("snp", "LDL", "HDL", "TC", "TG")
-#
-#ggPlotData_newhits <- melt(sub.pp.marginals.DirAssoc.newhits[hclust(dist(sub.pp.marginals.DirAssoc.newhits[,2:5]))$order,][c(1:20,60:92),])
-#ggPlotData_newhits$snp <- factor(ggPlotData_newhits$snp, levels=sub.pp.marginals.DirAssoc.newhits[,1][hclust(dist(sub.pp.marginals.DirAssoc.newhits[,2:5]))$order][c(1:20,60:92)])
-#
-##ggplot(melt(sub.pp.marginals.DirAssoc.newhits), aes(variable, snp, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = "white", high="steelblue") + coord_flip()
-#ggplot(ggPlotData_newhits, aes(variable, snp, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = "white", high="steelblue") + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-#
-#
-#dev.off()
-
-
-
-#20170222 NOTE -- Below has not been tested yet
-PlotMarginalPosteriors.withDirection <- function (DataSources, ListSNPs, Marginal, PrintMarginals=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
-
-#	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff4.", sep=""))
-
-	Marginal.Position <- -9
-
-	if (Marginal == "U") {
-		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
-		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
-		Marginal.Position <- 3
-	}
-	else {
-		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
-		PH <- 1
-	}
-
-	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
-	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
-#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
-	for (i in 1:length(DataSources)) {
-		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
-	}
-	colnames(ListSNPs.MarginalPosteriors) <- c("Marker", DataSources)	
-
-	Z <- c()
-	for (i in DataSources) {
-		eval(parse(text=paste("Z <- cbind(Z, ListSNPs$SNPs$", i, "_ZScore)", sep="")))
-	}
-
-	Z.Directions <- apply(Z, c(1,2), function(x) { y <- 0; if (x > 0) { y <- 1; } else if (x < 0) { y <- -1; } else if (x == 0) { y <- 0; } else { y <- NA; }; return(y);})
-
-#	print(head(ListSNPs$SNPs))
-#	print(head(ListSNPs.MarginalPosteriors))
-#	print(head(Z.Directions))
-
-	ListSNPs.MarginalPosteriors.wDirection <- ListSNPs.MarginalPosteriors
-	ListSNPs.MarginalPosteriors.wDirection[,2:(length(DataSources)+1)] <- ListSNPs.MarginalPosteriors.wDirection[,2:(length(DataSources)+1)] * Z.Directions
-
-#	posterior.sub.NoSum.marginals.DirAssoc.wDir <- posterior.sub.NoSum.marginals.DirAssoc
-#	posterior.sub.NoSum.marginals.DirAssoc.wDir[,2:5] <- posterior.sub.NoSum.marginals.DirAssoc[,2:5] * Z.Directions.sub.lbfavunif
-	
-	ListSNPs.MarginalPosteriors.Melted <- melt(ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
-	ListSNPs.MarginalPosteriors.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
-
-	ListSNPs.MarginalPosteriors.wDirection.Melted <- melt(ListSNPs.MarginalPosteriors.wDirection[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
-	ListSNPs.MarginalPosteriors.wDirection.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.wDirection.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
-
-#	ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = "white", high="steelblue") + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-#	ggplot(ListSNPs.MarginalPosteriors.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main)
-	ggplot(ListSNPs.MarginalPosteriors.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main)
-
-	ListSNPs.MarginalPosteriors <- ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
-
-	print(ggplot(ListSNPs.MarginalPosteriors.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-
-	if (PrintMarginals == 0) {
-		return (PH <- 1)
-	}
-	else if (PrintMarginals == 1) {
-		return(ListSNPs.MarginalPosteriors)
-	}
-	else {
+	} else {
 		#Print some type of error sign here?
 		return(PH <- 1)
 	}
@@ -406,14 +388,11 @@ PlotMarginalPosteriors.withDirection.ForManuscript <- function (DataSources, Lis
 
 	if (Marginal == "U") {
 		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
+	} else if (Marginal == "D") {
 		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
+	} else if (Marginal == "I") {
 		Marginal.Position <- 3
-	}
-	else {
+	} else {
 		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
 		PH <- 1
 	}
@@ -473,98 +452,20 @@ PlotMarginalPosteriors.withDirection.ForManuscript <- function (DataSources, Lis
 	ListSNPs.MarginalPosteriors.U.wDirection.Melted <- melt(ListSNPs.MarginalPosteriors.U.wDirection[hclust(dist(ListSNPs.MarginalPosteriors.D[,2:(length(DataSources)+1)]))$order,])
 	ListSNPs.MarginalPosteriors.U.wDirection.Melted$Marker <- factor(ListSNPs.MarginalPosteriors.U.wDirection.Melted$Marker, levels=ListSNPs.MarginalPosteriors.D[hclust(dist(ListSNPs.MarginalPosteriors.D[,2:(length(DataSources)+1)]))$order,1])
 
-	
-#	ListSNPs.MarginalPosteriors <- ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
-
-#	print(ggplot(ListSNPs.MarginalPosteriors.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-
 	if (PrintMarginals == 0) {
-#		return(PH <- 1)
 		if (Marginal == "U") {
-#			return(ggplot(ListSNPs.MarginalPosteriors.U.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(limits = c(-0,1), low = lowcolor, high=highcolor) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
 			return(ggplot(ListSNPs.MarginalPosteriors.U.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-		}
-		else if (Marginal == "D") {
+		} else if (Marginal == "D") {
 			return(ggplot(ListSNPs.MarginalPosteriors.D.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-		}
-		else if (Marginal == "I") {
+		} else if (Marginal == "I") {
 			return(ggplot(ListSNPs.MarginalPosteriors.I.wDirection.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-		}
-		else {
+		} else {
 			return(PH <- 1)
 		}
-	}
-	else if (PrintMarginals == 1) {
+	} else if (PrintMarginals == 1) {
 #		return(ListSNPs.MarginalPosteriors)
 		return(PH <- 1)
-	}
-	else {
-		#Print some type of error sign here?
-		return(PH <- 1)
-	}
-
-}
-
-
-
-
-#20170301 NOTE -- Below has not been tested yet
-PlotZScores.OrderedByClusteredMarginals <- function (DataSources, ListSNPs, Marginal, PrintZScores=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
-
-#	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff4.", sep=""))
-
-	Marginal.Position <- -9
-
-	if (Marginal == "U") {
-		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
-		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
-		Marginal.Position <- 3
-	}
-	else {
-		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
-		PH <- 1
-	}
-
-	ListSNPs.MarginalPosteriors <- t(ListSNPs$Marginals[[Marginal.Position]])
-	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$Marker), ListSNPs.MarginalPosteriors))
-#	ListSNPs.MarginalPosteriors <- data.frame(cbind(as.character(ListSNPs$SNPs$ChrBP), ListSNPs.MarginalPosteriors))
-	for (i in 1:length(DataSources)) {
-		ListSNPs.MarginalPosteriors[,i+1] <- as.numeric(as.character(ListSNPs.MarginalPosteriors[,i+1]))
-	}
-	colnames(ListSNPs.MarginalPosteriors) <- c("Marker", DataSources)	
-
-	ZScores <- data.frame(ListSNPs$SNPs$Marker)
-	for (i in DataSources) {
-		eval(parse(text=paste("ZScores <- cbind(ZScores, ListSNPs$SNPs$", i, "_ZScore)", sep="")))
-	}
-#	ZScores <- cbind(as.character(ListSNPs$SNPs$Marker), ZScores)
-	colnames(ZScores) <- c("Marker", DataSources)	
-
-#	print(head(ZScores))
-#	print(head(ListSNPs.MarginalPosteriors))
-#	print(melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]))
-#	print(melt(ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]))
-
-	ZScores.Melted <- melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
-	ZScores.Melted$Marker <- factor(ZScores.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
-
-	ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main)
-
-	print(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-
-	ZScores <- ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
-	
-	if (PrintZScores == 0) {
-		return (PH <- 1)
-	}
-	else if (PrintZScores == 1) {
-		return(ZScores)
-	}
-	else {
+	} else {
 		#Print some type of error sign here?
 		return(PH <- 1)
 	}
@@ -573,19 +474,15 @@ PlotZScores.OrderedByClusteredMarginals <- function (DataSources, ListSNPs, Marg
 
 #20170622 NOTE -- added/made this function below
 PlotZScores.OrderedByClusteredMarginals.ForManuscript <- function (DataSources, ListSNPs, Marginal, PrintZScores=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
-#	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff4.", sep=""))
 	Marginal.Position <- -9
 	
 	if (Marginal == "U") {
 		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
+	} else if (Marginal == "D") {
 		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
+	} else if (Marginal == "I") {
 		Marginal.Position <- 3
-	}
-	else {
+	} else {
 		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
 		PH <- 1
 	}
@@ -606,18 +503,13 @@ PlotZScores.OrderedByClusteredMarginals.ForManuscript <- function (DataSources, 
 	ZScores.Melted <- melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
 	ZScores.Melted$Marker <- factor(ZScores.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
 
-#	print(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-
 	ZScores <- ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
 	
 	if (PrintZScores == 0) {
-#		return(PH <- 1)
 		return(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradient(low = "white", high="steelblue") + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-	}
-	else if (PrintZScores == 1) {
+	} else if (PrintZScores == 1) {
 		return(ZScores)
-	}
-	else {
+	} else {
 		#Print some type of error sign here?
 		return(PH <- 1)
 	}
@@ -625,19 +517,15 @@ PlotZScores.OrderedByClusteredMarginals.ForManuscript <- function (DataSources, 
 
 #20170622 NOTE -- added/made this function below
 PlotZScores.OrderedByClusteredMarginals.withDirection.ForManuscript <- function (DataSources, ListSNPs, Marginal, PrintZScores=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="darkred", midcolor="white", highcolor="steelblue") {
-#	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- stuff4.", sep=""))
 	Marginal.Position <- -9
 	
 	if (Marginal == "U") {
 		Marginal.Position <- 1
-	}
-	else if (Marginal == "D") {
+	} else if (Marginal == "D") {
 		Marginal.Position <- 2
-	}
-	else if (Marginal == "I") {
+	} else if (Marginal == "I") {
 		Marginal.Position <- 3
-	}
-	else {
+	} else {
 		#20170219 CHECK_0 -- Prob: Put an exit of some sort here if Marginal not equal to any of these three options
 		PH <- 1
 	}
@@ -658,43 +546,17 @@ PlotZScores.OrderedByClusteredMarginals.withDirection.ForManuscript <- function 
 	ZScores.Melted <- melt(ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,])
 	ZScores.Melted$Marker <- factor(ZScores.Melted$Marker, levels=ListSNPs.MarginalPosteriors[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,1])
 
-#	print(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-
 	ZScores <- ZScores[hclust(dist(ListSNPs.MarginalPosteriors[,2:(length(DataSources)+1)]))$order,]
 	
 	if (PrintZScores == 0) {
-#		return(PH <- 1)
 		return(ggplot(ZScores.Melted, aes(variable, Marker, value)) + geom_tile(aes(fill=value), colour="white") + scale_fill_gradientn(colours=c("darkred", "white", "steelblue")) + coord_flip() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) + labs(title=Main))
-	}
-	else if (PrintZScores == 1) {
+	} else if (PrintZScores == 1) {
 		return(ZScores)
-	}
-	else {
+	} else {
 		#Print some type of error sign here?
 		return(PH <- 1)
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-#CountModelClasses <- function(ModelEntries) { 
-#
-#UniBFs <- lbf.newhits.sigmaaSummed.plusGammaDescrips[t(apply(lbf.newhits.sigmaaSummed.plusGammaDescrips[,1:4], 1, CountGammaValues))[,2] == 1 & t(apply(lbf.newhits.sigmaaSummed.plusGammaDescrips[,1:4], 1, CountGammaValues))[,1] == 0,]
-#UniBFs.max <- apply(UniBFs[,5:ncol(UniBFs)], 2, max)
-#MultiBFs <- lbf.newhits.sigmaaSummed.plusGammaDescrips[t(apply(lbf.newhits.sigmaaSummed.plusGammaDescrips[,1:4], 1, CountGammaValues))[,2] > 1 | ( t(apply(lbf.newhits.sigmaaSummed.plusGammaDescrips[,1:4], 1, CountGammaValues))[,2] == 1 & t(apply(lbf.newhits.sigmaaSummed.plusGammaDescrips[,1:4], 1, CountGammaValues))[,1] > 0),]
-#MultiBFs.max <- apply(MultiBFs[,5:ncol(MultiBFs)], 2, max)
-#AllBFs <- lbf.newhits.sigmaaSummed.plusGammaDescrips[t(apply(lbf.newhits.sigmaaSummed.plusGammaDescrips[,1:4], 1, CountGammaValues))[,2] == 4,]
-
-
-
 
 
 
