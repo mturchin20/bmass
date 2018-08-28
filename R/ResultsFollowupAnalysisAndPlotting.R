@@ -120,6 +120,7 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 	        SummaryOfTopModels <- rbind(SummaryOfTopModels, cbind(i, nrow(PerSNPTopModels.Subset), round(mean(as.numeric(PerSNPTopModels.Subset[,2])), digits=3), ModelPriorMatrix[ModelPriorMatrix.Paste == i, length(DataSources)+1]))
 	}
 
+	#The below code leads to an error downstream when there is only 1 entry, hence the if clause and separation (code is also unnecessary if there is only 1 entry)
 	if (nrow(SummaryOfTopModels) > 1) {
 		SummaryOfTopModels <- SummaryOfTopModels[order(as.numeric(SummaryOfTopModels[,2]), decreasing=TRUE),]
 	}

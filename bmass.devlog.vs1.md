@@ -15,8 +15,7 @@ cp -p /Users/mturchin20/Documents/Work/LabMisc/StephensLab/Multivariate/multivar
 
 
 ##20161006
-
-###Including tags onto current and past commits
+##Including tags onto current and past commits
 
 ```
 [  mturchin20@wireless-s0-no-150-8-172  ~/Documents/Work/LabMisc/StephensLab/bmass]$git tag -a v0.1.1 -m "First draft of code reorganization, bmass() runs"
@@ -252,8 +251,7 @@ http://stackoverflow.com/questions/1223354/undo-git-pull-how-to-bring-repos-to-o
 <br />
 
 ##20161106
-
-###Work related to moving to quicker version of `AnnotateDataWithGWASSNPs` 
+##Work related to moving to quicker version of `AnnotateDataWithGWASSNPs` 
 
 Some initial exploratory runs of `AnnotateMergedDataWithGWASSNPs()` (which mainly calls/uses `AnnotateDataWithGWASSNPs`) to see how long it takes and what variables/factors influence it most. Appears, unsurprisingly, that there's a linear relationship between run time and number of merged dataset entries that need to be annotated.
 
@@ -632,6 +630,56 @@ TC_ZScore     "-0.2020214"  "-0.1505889"
 Chr       10       10
 BP  10000135 10000265
 ~~~
+
+
+
+
+##20180827
+##Prepping & using location for testruns of `bmass()` as work on alignment + continued development
+
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass
+mv /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass_* /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/.
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013
+cd /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1
+R
+#Run GlobalLipids2013 `bmass()` code and setup, eg see below:
+```
+library("devtools"); devtools::load_all("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/bmass");
+HDL <- read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+LDL <- read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_LDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.MatchedToHDL.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+TG <- read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_TG.wMarker.MinorAllele.bmass.formatted.noDups.noNA.MatchedToHDL.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+TC <- read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_TC.wMarker.MinorAllele.bmass.formatted.noDups.noNA.MatchedToHDL.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+GWASsnps <- read.table("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/ng.2797-S1.edited.vs2.carriageRemoved.rsIDs.HapMart.ChrBP.txt", header=F);
+names(GWASsnps) <- c("Chr", "BP")
+
+bmassOutput1_NoMAF01 <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps=GWASsnps, NminThreshold = 50000, bmassSeedValue=926231);
+quantile(2*pnorm(apply(abs(bmassOutput1_NoMAF01$PreviousSNPs$SNPs[,grep("ZScore", colnames(bmassOutput1_NoMAF01$PreviousSNPs$SNPs)),]), 1, max),  0, 1, lower.tail=FALSE))
+
+HDL <- HDL[HDL$MAF > .01,]
+LDL <- LDL[LDL$MAF > .01,]
+TG <- TG[TG$MAF > .01,]
+TC <- TC[TC$MAF > .01,]
+
+bmassOutput1_NoGWASThresh <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps=GWASsnps, NminThreshold = 50000, bmassSeedValue=926231);
+bmassOutput3_NoGWASThresh <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps=GWASsnps, NminThreshold = 50000, PrintMergedData=TRUE, PruneMarginalSNPs=FALSE, bmassSeedValue=926231);
+bmassOutput1 <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps=GWASsnps, GWASThreshFlag = 1, NminThreshold = 50000, bmassSeedValue=926231);
+bmassOutput3 <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps=GWASsnps, GWASThreshFlag = 1, NminThreshold = 50000, PrintMergedData=TRUE, PruneMarginalSNPs=FALSE, bmassSeedValue=926231);
+
+write.table(bmassOutput1$NewSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput3$MergedDataSources, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput1$PreviousSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput1$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MarginalSNPs.Pruned.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput3$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+system("gzip /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt")
+
+
+
+```
+
+
+
+
 
 
 
