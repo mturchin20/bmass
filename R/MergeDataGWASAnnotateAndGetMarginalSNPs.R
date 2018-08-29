@@ -110,18 +110,10 @@ MergeDataSources <- function (DataSources, LogFile) {
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
 
-                	#20160930 CHECK_0 -- Prob: Do this/figure this out? If even wanting to do something like this?
-                        ###### do thissssss
-                        #
-                        # Test performances of merge function here in varying circumstances
-                        #
-                        ###### do thissssss
-
-			###Candidate for unit tests
+                	#20160930 20180829 CHECK_1 -- Prob: Do this/figure this out? If even wanting to do something like this? Soln: This is precisely what unit test functionality is for, so will use unit tests to resolve this concern
                         MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 			
-			#CHECK FOR A1 & CurrentDataSource_A1 
-                       
+#2080829 NOTE -- probably not going to use the first line here? probably goign to use line underneath it
 #			if (FALSE %in% eval(parse(text=paste("apply(cbind(MergedDataSources$A1, MergedDataSources$", CurrentDataSource, "_A1), 1, function(x) { 
 #			if (FALSE %in% eval(parse(text=paste("ifelse(MergedDataSources$A1==MergedDataSources$", CurrentDataSource, "_A1), TRUE, FALSE)))) {
 #
@@ -134,22 +126,13 @@ MergeDataSources <- function (DataSources, LogFile) {
                 }
         }
 
-	#Checking if any SNPs somehow became MAF > .5 or fixed
-	###Checking all SNPs are now oriented to minor allele, and making associated changes where needed (eg flipping MAF, ZScore directions)
 	#20161108 20171018 CHECK_1 -- Prob: Ask users to give both A1 and A2 so that can flip properly if needed here Soln: I don't think I'm going to go that far with this; it will be something users will have to ensure themselves, and if there is not a match of alleles then the SNPs will just be dropped
 	#20161108 20171018 CHECK_1 -- Prob: Average MAFs across datasets Soln: Put this in, NOTE that I changed the 'MAF > .5' check from something that flips to something that now throws an error, since the MAF > .5 check was already done previously; there should not be any new variants that have MAF > .5 after averaging since all original, individual variants were <= .5 already. Also NOTE -- I've decided not to average across MAFs in-script; I'm just going to inform the user that we'll use the first MAF from the first file inputted and they should edit/alter their input files accordingly.
-#	MAF_CheckList <- MergedDataSources$MAF > .5
-#	MergedDataSources[MAF_CheckList,]$MAF <- 1 - MergedDataSources[MAF_CheckList,]$MAF
-#	for (CurrentDataSource in DataSources) {
-#		eval(parse(text=paste("MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore <- -1 * MergedDataSources[MAF_CheckList,]$", CurrentDataSource, "_ZScore", sep="")))
-#	}
-
-#	#Also checking whether any SNPs appear 'fixed', eg. MAF == 0, and dropping them if so
-#	MergedDataSources <- MergedDataSources[MergedDataSources$MAF > 0,] 
 	
+	#Checking that SNP remains MAF > .5 after processing
 	MAF_CheckList <- MergedDataSources$MAF > .5
 	if (TRUE %in% MAF_CheckList) {
-		stop(Sys.time(), " -- the created MergedDataSources file has MAFs > .5 for certain variants. Please fix and rerun bmass: ", MergedDataSources[MAF_CheckList,]$Marker) 
+		stop(Sys.time(), " -- the created MergedDataSources file has SNPs with final MAFs > .5. Please fix and rerun bmass: ", MergedDataSources[MAF_CheckList,]$Marker) 
 	}
 
 	return(list(MergedDataSources=MergedDataSources, LogFile=LogFile))
@@ -199,7 +182,6 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
                 ZScoresFullNames_CommandText <- c(ZScoresFullNames_CommandText, paste(DataSource, "_ZScore", sep=""))
         }
         colnames(ZScoresFull) <- ZScoresFullNames_CommandText
-#       print(ZScoresFull)
 
         #Checking ZScore matrix for infinites and replacing with appropriate max/min values
         ZScoresFull_InfiniteCheck <- apply(ZScoresFull, 2, CheckForInfiniteZScores)
@@ -242,16 +224,12 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         ZScoresFull_unistat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_unistat, df=1, log.p=TRUE, lower.tail=FALSE)
         MergedDataSources$unistat_log10pVal <- ZScoresFull_unistat_log10pVal
 
-#       print(MergedDataSources)
-
         #Creating subset of marginally significant SNPs using SNPMarginalUnivariateThreshold and SNPMarginalMultivariateThreshold
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on univariate and multivariate thresholds: ", as.character(SNPMarginalUnivariateThreshold) ," & ", as.character(SNPMarginalMultivariateThreshold) ,".", sep=""))
 	MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold),]
 	#20170610 NOTE -- Below version just to help with analysis of 2011ICBP dataset, a few `GWASsnps` are above 1e-6 threshold so not making it to `MarginalSNPs` list, but wouldn't be included in analysis anyways due to `GWASThresh`. Would be good to keep in the `MarginalSNPs` list though because it would make it easier to do the 'Replicated SNPs that would have been caught by our multivariate increase in power` analysis too.	
-#	MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold) | MergedDataSources$GWASannot==1,]
+	#MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold) | MergedDataSources$GWASannot==1,]
 
-#       print(MarginalSNPs)
-	
 	return(list(MergedDataSources=MergedDataSources, MarginalSNPs=MarginalSNPs, ZScoresCorMatrix=ZScoresCorMatrix, LogFile=LogFile))
 
 }
