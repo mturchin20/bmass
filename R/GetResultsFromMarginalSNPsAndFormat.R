@@ -55,7 +55,7 @@ GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGam
                 max <- apply(logBFs1[SigmaAlpha_Coordinates,], 2, max)
                 logBFs1[SigmaAlpha_Coordinates,] <- logBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(logBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(logBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
                 #20160902 20170411 CHECK_1 -- Prob: Check use of max*nSigmaAlphas at end below...point is subtracting max nSigmaAlpha number of times and then summing across those rows, so shouldn't add back that max nSigmaAlpha number of times too? Soln: No, should only be adding it back once. I 'fixed'/'solved' this a while ago and just didn't update this here, so doing it now.
-                #20170411 CHECK_0 -- Prob: Include a 'check for negInf' type situation here? What if subtract too much and get 'opposite' overflow of 'too-negative a number'? `log10(-Inf)` produces `NAs` at least so if it were a problem I'd be seeing it somewhere most likely?
+                #20170411 20180829 CHECK_1 -- Prob: Include a 'check for negInf' type situation here? What if subtract too much and get 'opposite' overflow of 'too-negative a number'? `log10(-Inf)` produces `NAs` at least so if it were a problem I'd be seeing it somewhere most likely? Soln: I don't think that's possible since the smallest value `logBF` can be is 0, then `max(logBF)` is not `Inf`, therefore `logBF - max` should not produce a `-Inf` value on the other side
 		WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors_Matrix[SigmaAlpha_Coordinates,] * apply(10^logBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max
         }
         return(WeightedSumAcrossAlphaSigmas)
@@ -103,11 +103,8 @@ GetLogBFsFromData <- function(DataSources, MarginalSNPs, ZScoresCorMatrix, Sigma
         MarginalSNPs$SNPs$Nmin <- NsMarginal_RowMins
 
         #20160822 20160823 CHECK_1 -- Prob: Go through use of 'do.call(rbind...etc...' and double-check logic Soln: Reminder, do.call is for applying a function to a given list of arguments. Eg the contents of do.call are treated as the full set of arguments to be used, versus say an 'apply' version where the function is applied individually to each set of arguments/vectors.
-        #20160822 CHECK_0 -- Prob: Change output of Matthew's code to use logBFs vs. lbf
-        #20160822 CHECK_0 -- Prob: Change output of Matthew's code to match styles developed here
-
-#       print(MarginalSNPs)
-#       print(ZScoresMarginal)
+        #20160822 20180829 CHECK_1 -- Prob: Change output of Matthew's code to use logBFs vs. lbf Soln: Moved this concern and idea to 'future directions' of next bmass version release, ie good 'next step to-do' after cleaning up comments and formatting of everything first (and confirming code and results still work as everything previously did)
+        #20160822 20180829 CHECK_1 -- Prob: Change output of Matthew's code to match styles developed here Soln: See above
 
         MarginalSNPs_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalSNPs$SNPs$Nmin, MarginalSNPs$SNPs$MAF, SigmaAlphas)
         MarginalSNPs_logBFs_Stacked <- do.call(rbind, MarginalSNPs_logBFs$lbf)
@@ -143,25 +140,21 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
         } else if (is.null(GWASsnps) && UseFlatPriors == TRUE) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
 
-                #20160930 CHECK_0 -- Prob: Go over this use again of 0 to start the original prior setup w/ Matthew
+                #20160930 20180828 CHECK_1 -- Prob: Go over this use again of 0 to start the original prior setup w/ Matthew Soln: /Pretty/ sure this is 0, and not .5, because we are now dealing with SNPs that we have determined /to be/ associated, so having any weight on the null model of 'no associations with anything' (as we start with initially at .5) would no longer make any sense here
 		Prior_FlatUnif <- normalize(rep(c(0,ModelPriors[-1]),length(SigmaAlphas)))
-                #nsigma=length(sigmaa)
-                #origprior = rep(c(0,lbf$prior[-1]),nsigma)
-                #origprior = normalize(origprior)
 
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and flat-tiered priors.", sep=""))
 
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, Prior_FlatUnif)
                 ModelPriors_Used <- Prior_FlatUnif
 
-		#20160930 CHECK_0 -- Prob: Do this below? Had no CHECK_0 note until this one so maybe just passing reminder/note that was or isn't meant to be taken care of eventually?
+		#20160930 20180829 CHECK_1 -- Prob: Do this below? Had no CHECK_0 note until this one so maybe just passing reminder/note that was or isn't meant to be taken care of eventually? Soln: Yeah I think these were just quick comments made a while ago that were more-or-less taken care of while doing the initial writeup/development of everything...can really just remove/delete these things here now
                 #Add summary stats to marginal SNPs
                 #Add SNPs x Model matrix with prior*logBFs as entries, summed (or avg'd??) across SigmaAlphas
         } else if (is.null(GWASsnps) && UseFlatPriors == FALSE) {
 		#20171017 CHECK_0 -- Prob: Throw an error/fail thing here
 		PH <- 1
-	}
-	else {
+	} else {
 	
 		if (!is.null(bmassSeedValue)) {
 			set.seed(bmassSeedValue)
@@ -173,13 +166,12 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Setting up GWAS trained priors and analyzing GWAS hits since GWASsnps provided.", sep=""))
                
-		PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
-		
+		PreviousSNPs_logBFs_Stacked <- c() #Will be matrix of nSigmaAlphas x nSNPs
 		if (GWASThreshFlag == 1) {
-			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1]) #Matrix of nSigmaAlphas x nSNPs
+			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1]) 
 		} 
 		else if (GWASThreshFlag == 0) {
-			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) #Matrix of nSigmaAlphas x nSNPs
+			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) 
 		} 
 		else {
 			#20171017 CHECK_0 -- Prob: Throw an error/fail thing here
@@ -189,15 +181,9 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
                 #20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
 
                 Prior_PreviousSNPsEB <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors, 100) #Vector with nModels*nSigmaAlphas entries
-                #20160823 CHECK_0: Prob -- double check use of em.priorprobs here too with runif prior starting point
-                #20160823 CHECK_0: Prob -- Do multiple runs of em.priorprobs and figure out way to compare them for consistency?
+                #20160823 20180829 CHECK_1 -- Prob: double check use of em.priorprobs here too with runif prior starting point Soln: lower priority atm, not sure if really need to be concerned about this at this point
+                #20160823 20180829 CHECK_1 -- Prob: Do multiple runs of em.priorprobs and figure out way to compare them for consistency? Soln: lower priority atm, not sure if really need to be concerned about this at this point
                 Prior_PreviousSNPsEB_check2 <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors*runif(length(ModelPriors)), 100)
-
-                ###### do thissssss
-                #
-                # Run multiple EMs to check/test for convergence?
-                #
-                ###### do thissssss
 
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, Prior_PreviousSNPsEB)
                 ModelPriors_Used <- Prior_PreviousSNPsEB
@@ -205,8 +191,7 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		PreviousSNPs$logBFs <- PreviousSNPs_logBFs_Stacked
         }
 
-        #20160901 CHECK_0 -- Prob: Do something more substantive here? A better error message, or give just a warning instead? Don't exist program?
-        ####Candidate For Unit Tests####
+        #20160901 20180829 CHECK_1 -- Prob: Do something more substantive here? A better error message, or give just a warning instead? Don't exist program? Soln: I think exiting here is fine and is most likely the most proper solution for this right now; if something were to be happening here that is this odd, the real 'answer'/'solution' would be for the users to contact me and then for a discussion to occur  
         if (is.null(MarginalSNPs_logBFs_Stacked_AvgwPrior)) {
                 stop(Sys.time(), " -- No average log BFs were returned from method. Check if all input variables are as the method expects.")
         }
@@ -299,19 +284,4 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
         #print(dim(matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE)))
         
 	return(list(MarginalSNPs=MarginalSNPs, PreviousSNPs=PreviousSNPs, NewSNPs=NewSNPs, LogFile=LogFile))
-
-        ##extract lbfs for all the new hits
-        #lbf.newhits= lbf.bigmat[,gl$nmin>20000]
-        #lbf.newhits= lbf.newhits[,l==1]
-        #lbf.newhits= lbf.newhits[,sub$annot==0 & sub$lbfav>5.083439 & sub$nmin>20000]
-        #pp.newhits = posteriorprob(lbf.newhits,ebprior.glhits) #posterior prob on models for new hits
-        #pp.newhits.collapse =  apply(pp.newhits,2,collapse, nsigmaa=length(sigmaa))
-        #
-        #ppmatrix.newhits = cbind(pp.newhits.collapse)[order(ebprior.glhits.collapse,decreasing=TRUE),]
-        #pp.newhits.classmatrix = rbind(colSums(ppmatrix.newhits[allassoc,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,6]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,5]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,4]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,3]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,2]==0,]),colSums(ppmatrix.newhits[allbut1assoc & modelmatrix[,1]==0,]))
-        #bestclass= apply(pp.newhits.classmatrix, 2,which.max)
-        #cbind(as.character(newhits$snp),bestclass,apply(pp.newhits.classmatrix,2,max))
-
 }
-
-

@@ -72,13 +72,6 @@ MergeDataSources <- function (DataSources, LogFile) {
         MergedDataSources <- data.frame()
 	for (CurrentDataSource in DataSources) {
 
-                #20160930 CHECK_0 -- Prob: Go over and do this/figure out what want to do?
-		###### do thissssss
-                #
-                # Check A1 for consistency or not expecting that since differing directions?
-                #
-                ###### do thissssss
-
                 if (nrow(MergedDataSources)==0) {
                         MergedDataSources <- eval(parse(text=CurrentDataSource))
                         MergedDataSources$ZScore <- apply(MergedDataSources[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
@@ -110,11 +103,8 @@ MergeDataSources <- function (DataSources, LogFile) {
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
 
-                	#20160930 20180829 CHECK_1 -- Prob: Do this/figure this out? If even wanting to do something like this? Soln: This is precisely what unit test functionality is for, so will use unit tests to resolve this concern
                         MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 			
-#2080829 NOTE -- probably not going to use the first line here? probably goign to use line underneath it
-#			if (FALSE %in% eval(parse(text=paste("apply(cbind(MergedDataSources$A1, MergedDataSources$", CurrentDataSource, "_A1), 1, function(x) { 
 #			if (FALSE %in% eval(parse(text=paste("ifelse(MergedDataSources$A1==MergedDataSources$", CurrentDataSource, "_A1), TRUE, FALSE)))) {
 #
 #			}
@@ -126,9 +116,6 @@ MergeDataSources <- function (DataSources, LogFile) {
                 }
         }
 
-	#20161108 20171018 CHECK_1 -- Prob: Ask users to give both A1 and A2 so that can flip properly if needed here Soln: I don't think I'm going to go that far with this; it will be something users will have to ensure themselves, and if there is not a match of alleles then the SNPs will just be dropped
-	#20161108 20171018 CHECK_1 -- Prob: Average MAFs across datasets Soln: Put this in, NOTE that I changed the 'MAF > .5' check from something that flips to something that now throws an error, since the MAF > .5 check was already done previously; there should not be any new variants that have MAF > .5 after averaging since all original, individual variants were <= .5 already. Also NOTE -- I've decided not to average across MAFs in-script; I'm just going to inform the user that we'll use the first MAF from the first file inputted and they should edit/alter their input files accordingly.
-	
 	#Checking that SNP remains MAF > .5 after processing
 	MAF_CheckList <- MergedDataSources$MAF > .5
 	if (TRUE %in% MAF_CheckList) {
@@ -227,8 +214,6 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         #Creating subset of marginally significant SNPs using SNPMarginalUnivariateThreshold and SNPMarginalMultivariateThreshold
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Subsetting down to marginally significant SNPs based on univariate and multivariate thresholds: ", as.character(SNPMarginalUnivariateThreshold) ," & ", as.character(SNPMarginalMultivariateThreshold) ,".", sep=""))
 	MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold),]
-	#20170610 NOTE -- Below version just to help with analysis of 2011ICBP dataset, a few `GWASsnps` are above 1e-6 threshold so not making it to `MarginalSNPs` list, but wouldn't be included in analysis anyways due to `GWASThresh`. Would be good to keep in the `MarginalSNPs` list though because it would make it easier to do the 'Replicated SNPs that would have been caught by our multivariate increase in power` analysis too.	
-	#MarginalSNPs$SNPs <- MergedDataSources[MergedDataSources$mvstat_log10pVal > -log10(SNPMarginalUnivariateThreshold) | MergedDataSources$unistat_log10pVal > -log10(SNPMarginalMultivariateThreshold) | MergedDataSources$GWASannot==1,]
 
 	return(list(MergedDataSources=MergedDataSources, MarginalSNPs=MarginalSNPs, ZScoresCorMatrix=ZScoresCorMatrix, LogFile=LogFile))
 
