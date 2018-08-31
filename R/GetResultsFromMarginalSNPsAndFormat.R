@@ -14,7 +14,6 @@
 #' func(10, 1)
 
 ##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
-#20160822 20171018 CHECK_1 -- Prob: Double-check logic and go-through here Soln: I mean....think it makes sense. Running this over each column of the stacked matrix, so the entry is a long vector of a single vector with each model across all SigmaAlphas. So if divy up that vector into nSigmaAlpha columns, should have 14 columns each with the same model per row -- so sum up the rows to get a final posteriorprob for each model in a given variant.
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
         CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
         return(CollapsedInputs)
@@ -54,8 +53,6 @@ GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGam
                 SigmaAlpha_Coordinates <- seq.int(from=i, by=nGammas, length.out=nSigmaAlphas)
                 max <- apply(logBFs1[SigmaAlpha_Coordinates,], 2, max)
                 logBFs1[SigmaAlpha_Coordinates,] <- logBFs1[SigmaAlpha_Coordinates,] - matrix(max, nrow=nrow(logBFs1[SigmaAlpha_Coordinates,]), ncol=ncol(logBFs1[SigmaAlpha_Coordinates,]), byrow=TRUE)
-                #20160902 20170411 CHECK_1 -- Prob: Check use of max*nSigmaAlphas at end below...point is subtracting max nSigmaAlpha number of times and then summing across those rows, so shouldn't add back that max nSigmaAlpha number of times too? Soln: No, should only be adding it back once. I 'fixed'/'solved' this a while ago and just didn't update this here, so doing it now.
-                #20170411 20180829 CHECK_1 -- Prob: Include a 'check for negInf' type situation here? What if subtract too much and get 'opposite' overflow of 'too-negative a number'? `log10(-Inf)` produces `NAs` at least so if it were a problem I'd be seeing it somewhere most likely? Soln: I don't think that's possible since the smallest value `logBF` can be is 0, then `max(logBF)` is not `Inf`, therefore `logBF - max` should not produce a `-Inf` value on the other side
 		WeightedSumAcrossAlphaSigmas[i,] <- log10(sapply(apply(ModelPriors_Matrix[SigmaAlpha_Coordinates,] * apply(10^logBFs1[SigmaAlpha_Coordinates,], c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + max
         }
         return(WeightedSumAcrossAlphaSigmas)
@@ -102,10 +99,6 @@ GetLogBFsFromData <- function(DataSources, MarginalSNPs, ZScoresCorMatrix, Sigma
         NsMarginal_RowMins <- apply(NsMarginal, 1, min)
         MarginalSNPs$SNPs$Nmin <- NsMarginal_RowMins
 
-        #20160822 20160823 CHECK_1 -- Prob: Go through use of 'do.call(rbind...etc...' and double-check logic Soln: Reminder, do.call is for applying a function to a given list of arguments. Eg the contents of do.call are treated as the full set of arguments to be used, versus say an 'apply' version where the function is applied individually to each set of arguments/vectors.
-        #20160822 20180829 CHECK_1 -- Prob: Change output of Matthew's code to use logBFs vs. lbf Soln: Moved this concern and idea to 'future directions' of next bmass version release, ie good 'next step to-do' after cleaning up comments and formatting of everything first (and confirming code and results still work as everything previously did)
-        #20160822 20180829 CHECK_1 -- Prob: Change output of Matthew's code to match styles developed here Soln: See above
-
         MarginalSNPs_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalSNPs$SNPs$Nmin, MarginalSNPs$SNPs$MAF, SigmaAlphas)
         MarginalSNPs_logBFs_Stacked <- do.call(rbind, MarginalSNPs_logBFs$lbf)
 	MarginalSNPs$logBFs <- MarginalSNPs_logBFs_Stacked
@@ -120,9 +113,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 	MarginalSNPs_logBFs_Stacked_AvgwPrior <- NULL
         ModelPriors_Used <- ModelPriors
 		
-	#20170507 NOTE -- Little bit of code to deal with 'PreviousSNPs' that are actually determined to be GWAS-significant after additional data (eg + stageII/replication data) and we only have stage 1/discovery results, so it's a 'hit' from the study but not based on the results we have. But we don't want to remove the SNP completely since the region has been determined as a hit (so want to remove the 1Mb around it downstream to not 'do it again'). #20170508 NOTE -- Made this a bit more 'global' in the code, but still come up with way to make it an optional flag or something like that
-	#20170507 201705__ CHECK_1 -- Prob: Make a flag + if/else statement here ot make this an option based on user input, not commenting on/off like doing here for the moment being Soln: Think I took care of this then at some point, probably soon after the original comment, since only have if statement down here nad not something commented in/out?
-       
 	PreviousSNPs <- list()
         PreviousSNPs_logBFs_Stacked_AvgwPrior_Min <- NULL
 	ZScoreHitFlag1 <- c()
@@ -140,7 +130,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
         } else if (is.null(GWASsnps) && UseFlatPriors == TRUE) {
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Setting up flat-tiered priors, GWASnps either not provided or flat prior explicitly requested.", sep=""))
 
-                #20160930 20180828 CHECK_1 -- Prob: Go over this use again of 0 to start the original prior setup w/ Matthew Soln: /Pretty/ sure this is 0, and not .5, because we are now dealing with SNPs that we have determined /to be/ associated, so having any weight on the null model of 'no associations with anything' (as we start with initially at .5) would no longer make any sense here
 		Prior_FlatUnif <- normalize(rep(c(0,ModelPriors[-1]),length(SigmaAlphas)))
 
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Identifying potential new hits based on average log BFs and flat-tiered priors.", sep=""))
@@ -148,9 +137,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, Prior_FlatUnif)
                 ModelPriors_Used <- Prior_FlatUnif
 
-		#20160930 20180829 CHECK_1 -- Prob: Do this below? Had no CHECK_0 note until this one so maybe just passing reminder/note that was or isn't meant to be taken care of eventually? Soln: Yeah I think these were just quick comments made a while ago that were more-or-less taken care of while doing the initial writeup/development of everything...can really just remove/delete these things here now
-                #Add summary stats to marginal SNPs
-                #Add SNPs x Model matrix with prior*logBFs as entries, summed (or avg'd??) across SigmaAlphas
         } else if (is.null(GWASsnps) && UseFlatPriors == FALSE) {
 		#20171017 CHECK_0 -- Prob: Throw an error/fail thing here
 		PH <- 1
@@ -178,11 +164,7 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 			PH <- 1
 		}
 
-                #20160822 20160823 CHECK_1 -- Prob: Do GWAS hit analysis/work here Soln: Wrote up a few first-level GWAS hit results to get things started. Certainly will undergo further revisions down the line but fine strating point for now.
-
                 Prior_PreviousSNPsEB <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors, 100) #Vector with nModels*nSigmaAlphas entries
-                #20160823 20180829 CHECK_1 -- Prob: double check use of em.priorprobs here too with runif prior starting point Soln: lower priority atm, not sure if really need to be concerned about this at this point
-                #20160823 20180829 CHECK_1 -- Prob: Do multiple runs of em.priorprobs and figure out way to compare them for consistency? Soln: lower priority atm, not sure if really need to be concerned about this at this point
                 Prior_PreviousSNPsEB_check2 <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors*runif(length(ModelPriors)), 100)
 
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, Prior_PreviousSNPsEB)
@@ -191,7 +173,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		PreviousSNPs$logBFs <- PreviousSNPs_logBFs_Stacked
         }
 
-        #20160901 20180829 CHECK_1 -- Prob: Do something more substantive here? A better error message, or give just a warning instead? Don't exist program? Soln: I think exiting here is fine and is most likely the most proper solution for this right now; if something were to be happening here that is this odd, the real 'answer'/'solution' would be for the users to contact me and then for a discussion to occur  
         if (is.null(MarginalSNPs_logBFs_Stacked_AvgwPrior)) {
                 stop(Sys.time(), " -- No average log BFs were returned from method. Check if all input variables are as the method expects.")
         }
@@ -227,17 +208,14 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
         NewSNPs <- list()
 	MarginalSNPs_logBFs_Stacked <- MarginalSNPs$logBFs
 
-        #Pruning marginal hits by logBFWeightedAvg if requested
         if (PruneMarginalSNPs == TRUE) {
-                #20160901 CHECK_0 -- Prob: Go over indepthits function, rewrite, or just lightly edit? redo names, double-check functionality? def get some unit testing in there
+                #20160901 20180829 CHECK_1 -- Prob: Go over indepthits function, rewrite, or just lightly edit? redo names, double-check functionality? def get some unit testing in there Soln: not going to rewrite (for now), but pushing this into the rest of the 'to create unit tests for' notes I'm taking at the moment
                 MarginalSNPs_PrunedList <- indephits(MarginalSNPs$SNPs$logBFWeightedAvg, MarginalSNPs$SNPs$Chr, MarginalSNPs$SNPs$BP, T=PruneMarginalSNPs_bpWindow)
                 MarginalSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs_PrunedList==1,]
                 MarginalSNPs_logBFs_Stacked <- MarginalSNPs_logBFs_Stacked[,MarginalSNPs_PrunedList==1]
         }
 
 	#Summing models over all values of SigmaAlphas, weighted by ModelPriors
-	#20171017 20171018 CHECK_1 -- Prob: Don't need to do the `rep()` call since the ModelPriors has priors for all models over all 14 `SigmaAlphas`....or should at least? Soln: Realized the `rep()` calls are only by column counts which takes care of repeating for the number of variants there are -- if I was improperly repeating for multiple rounds of the priors I would also include something for the rows -- I must have noticed that the number of models present in ModelPriors was more than say 3^4, but instead 3 ^ 4 * 14, hence why only specifying a total rep equal to the number of variants.
-	#20171017 20171017 CHECK_1 -- Prob: I'm not sure if this should be done via weighing with priors, or possibly have a version that's just averaged equally across all SigmaAlphas and then produce this version with the priors. But also, why summing BFs again?....does that really make any sense? Well summing makes sense once you've applied the priors, and can do `mean()` across all BFs to get that equal weighting thing... Soln: Just do one version weighted by priors, and if user wants logBFs of equal weights across `SigmaAlphas` they can rerun using equal weights to get the results (include such an example in the vignettes to help show how?).
 	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- GetSumAcrossSigmaAlphas_withPriors(MarginalSNPs_logBFs_Stacked, matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), nrow=length(ModelPriors), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE), nrow(Models), length(SigmaAlphas))
 	MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed <- cbind(Models, MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed)
 	colnames(MarginalSNPs_logBFs_Stacked_SigmaAlphasSummed) <- c(DataSources, MarginalSNPs$SNPs$ChrBP)
@@ -265,12 +243,7 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
 		PreviousSNPs$Posteriors <- PreviousSNPs_logBFs_Stacked_Posteriors_Collapsed
 	}
 
-        #20160905 20161005 CHECK_1 -- Prob: Convert either 'MarginalSNPs_logBFs_Stacked_PosteriorProbabilities' to 'PosteriorProbs' or 'PreviousSNPs_PosteriorProbs' to 'PreviousSNPs_PosteriorProbabilities' Soln: Actually deicded to change both terms to 'Posteriors', so neither 'PosteriorProbabilities' or 'PosteriorProbs' was used. 
-        #20160905 201609** CHECK_1 -- Prob: Change 'MarginalSNPs' to 'MarginalSNPs' probably? Soln: I made this change as evidenced by the aforementioned names are the same -- did a file-wide substitution of 'MarginalHits' to 'MarginalSNPs' so that's probably what was being referenced here. Didn't make the note here when I made the change so I don't recall the exact date I did this, but it was sometime before 20161005 and likely mid/late September.
-        #20160905 20161005 CHECK_1 -- Prob: Move this (NewSNPs <- NULL) below intialization section to proper beginning of .R file code as necessary once change/reorganization occurs Soln: Moved it to top of this function block
-
         #Determining new hits if GWASsnps were provided to determine minimum MarginalSNPs_logBFs_Stacked_AvgwPrior value threshold
-        #20160902 2017____ CHECK_1 -- Prob: Check that PreviousSNPs_logBFs_Stacked_AvgwPrior_Min is non null here? Soln: Did this here, not sure when? So guess it's taken care of now?
         if (!is.null(GWASsnps)) {
                 if (is.null(PreviousSNPs_logBFs_Stacked_AvgwPrior_Min)) {
                         stop(Sys.time(), " -- PreviousSNPs_logBFs_Stacked_AvgwPrior_Min is NULL despite GWASsnps being provided. Unexpected error.")
@@ -280,8 +253,5 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
                 NewSNPs$Posteriors <- cbind(MarginalSNPs$Posteriors[,1:length(DataSources)], MarginalSNPs$Posteriors[,(length(DataSources)+1):ncol(MarginalSNPs$Posteriors)][,MarginalSNPs$SNPs$GWASannot == 0 & MarginalSNPs$SNPs$logBFWeightedAvg >= PreviousSNPs_logBFs_Stacked_AvgwPrior_Min & MarginalSNPs$SNPs$Nmin >= NminThreshold])
         }
 
-        ####Candidate For Unit Tests####
-        #print(dim(matrix(rep(ModelPriors, ncol(MarginalSNPs_logBFs_Stacked)), ncol=ncol(MarginalSNPs_logBFs_Stacked), byrow=FALSE)))
-        
 	return(list(MarginalSNPs=MarginalSNPs, PreviousSNPs=PreviousSNPs, NewSNPs=NewSNPs, LogFile=LogFile))
 }

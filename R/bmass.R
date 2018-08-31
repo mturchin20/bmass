@@ -9,7 +9,6 @@
 #' func(1, 1)
 #' func(10, 1)
 
-#20170220 20180829 CHECK_1 -- Prob: probably more official/better way to do below...check it out Soln: pushing this for later notice, not as necessary to figure out immediately to get this to where it should be for next step in production/release
 library(ggplot2)
 library(reshape2)
 
@@ -22,7 +21,6 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ZScoresCo
 	}
 	bmassOutput$ZScoresCorMatrix <- NULL
         if (!is.null(ZScoresCorMatrix)) {
-		#20171018 20180829 CHECK_1 -- Prob: Do some pre-processing data checks here on `ZScoresCorMatrix`? Specifically check whether order of correlation matrix matches order of `DataSources` Soln: I think this has to be left for the user to confirm for themself; however can and should make an explicit note of the need for this in the instructions if/when a ZScoresCorMatrix is provided 
 		bmassOutput$ZScoresCorMatrix <- ZScoresCorMatrix
 	}
 	bmassOutput$MarginalSNPs <- list()
@@ -38,10 +36,6 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ZScoresCo
         	write(paste(format(Sys.time()), " -- beginning bmass.", sep=""), stderr())
 	}
 
-        #20160823 20180829 CHECK_1: Prob -- list of Matthew functions specifically to double-check, go through, go over Soln: went over, looks fine; note that `collapse` was changed to `CollapseSigmaAlphasTogether` to create a bit more explicit function
-        #       collapse
-        #       em.priorprobs
-
         #Loading and checking data
         #~~~~~~
 
@@ -50,8 +44,7 @@ bmass <- function (DataSources, GWASsnps=NULL, MergedDataSources=NULL, ZScoresCo
 		if (PrintLogStatements == TRUE) {
         		write(paste(format(Sys.time()), " -- MergedDataSources was provided, skipping merging data step.", sep=""), stderr())
 		}
-		
-		#bmassOutput$LogFile <- CheckMergedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, bmassOutput$MergedDataSources, ProvidedPriors, UseFlatPriors, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, bmassOutput$LogFile)
+#		bmassOutput$LogFile <- CheckMergedDataSources(DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, bmassOutput$MergedDataSources, ProvidedPriors, UseFlatPriors, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, bmassOutput$LogFile)
 	} else {
 		if (PrintLogStatements == TRUE) {
         		write(paste(format(Sys.time()), " -- Checking individual datasource files and merging datasets.", sep=""), stderr())

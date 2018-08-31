@@ -59,7 +59,7 @@ CheckDataSourceHeaders <- function (DataSources1, ExpectedColumnNames1) {
 	return(returnValueVector)
 }
 
-#20160929 CHECK_0: Prob -- Come back and check new functionality version below when running on 2nd version of bmass
+#20160929 20180830 CHECK_1 -- Prob: Come back and check new functionality version below when running on 2nd version of bmass Soln: looks fine to me for now
 CheckDataSourceDirectionColumn <- function (DataSources1) {
 	returnValue <- TRUE
 	if (length(eval(parse(text=paste(DataSources1, "$Direction", sep="")))[eval(parse(text=paste(DataSources1, "$Direction", sep=""))) != "+" & eval(parse(text=paste(DataSources1, "$Direction", sep=""))) != "-"]) > 0) {
@@ -79,18 +79,15 @@ CheckDataSourceMAFIsMAF <- function (DataSources1) {
 CheckDataSourceMAFFixed <- function (DataSources1) {
 	returnValue <- TRUE
 	returnVector <- eval(parse(text=paste(DataSources1, "$MAF == 0 | ", DataSources1, "$MAF == 1 ", sep="")))
-#	write(head(returnVector), stderr());
 	if (TRUE %in% returnVector) {
 		returnValue <- FALSE
-#		write(head(eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", !returnVector, ",]", sep="")))), stderr())
-#		eval(parse(text=paste(DataSources1, " <- ", DataSources1, "[", returnVector, ",]", sep=""))) 
 	}
 	return(returnValue)
 }
 
 CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNames, SigmaAlphas, MergedDataSources, ProvidedPriors, UseFlatPrior, PruneMarginalHits, PruneMarginalHits_bpWindow, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, NminThreshold, bmassSeedValue, LogFile) {
 
-	#20160823 CHECK_0: Prob -- list of Matthew functions specifically to double-check, go through, go over
+	#20160823 20180830 CHECK_1: Prob -- list of Matthew functions specifically to double-check, go through, go over Soln: this was responded to and resolved in another .R file
 	#	collapse
 	#	em.priorprobs
 
@@ -121,7 +118,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed exists check.", sep=""))
 		
-		#20160814 20160814 CHECK_1 -- Prob: Create way to specify which files are causing the data.frame failure here? Maybe change DataFrameCheckValues into a vector of true/false statements and then convert the trues to their text names as posible outputs? Soln: Moved to a format where returning TRUE and FALSE statements in a vector, and then pass that vector to DataSources character vector to get proper output. 
 		DataSourcesCheckDataFrames <- sapply(DataSources, CheckDataFrameFormat)
 		if (FALSE %in% DataSourcesCheckDataFrames) {
 			stop(Sys.time(), " -- the following data sources are not formatted as data.frames. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckDataFrames], collapse=" "))
@@ -136,28 +132,23 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
 		
-		#20160901 CHECK_0 -- Prob: Do X/23 chr column conversion stuff first here
-		###### do thissssss
-		#
-		#Check for 'X' chromosomes and convert to 23 & print warning/logfile statement
-		#
-		###### do thissssss
+		#20160901 20180830 CHECK_1 -- Prob: Do X/23 chr column conversion stuff first here Soln: Unsure if there's an exactly a problem for which this is trying to solve (at lest with the downstream material I am doing within the code itself); therefore just leaving thos back up to user descretion, or if necessary at some point later coming back and recreating this.
 	
-		#20160901 CHECK_0 -- Prob: Check multiple columns in entries to make sure input types/classes are as what's exepected? Eg chr/bp numeric, alleles chars, N and pvals numeric? Do X/23 conversion stuff before ondividual data column class/type checks first
+		#20160901 20180830 CHECK_10 -- Prob: Check multiple columns in entries to make sure input types/classes are as what's exepected? Eg chr/bp numeric, alleles chars, N and pvals numeric? Do X/23 conversion stuff before ondividual data column class/type checks first Soln1: probably fine with what have here, but give once-over before finishing things up to determine if there needs to be any other additions (already have a few that are good things ti have here)
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
 			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckDirectionColumn], collapse=" "))
 		}
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed Direction column check.", sep=""))
 
-		#20171018 CHECK_0 -- Prob: Give first-pass check of the below function
+		#20171018 20180830 CHECK_1 -- Prob: Give first-pass check of the below function Soln: done, looks fine for a first-pass check
 		DataSourcesCheckMAFIsMAF <- sapply(DataSources, CheckDataSourceMAFIsMAF)
 		if (FALSE %in% DataSourcesCheckMAFIsMAF) {
 			stop(Sys.time(), " -- the following data sources have variants whose MAF entry are > .5; bmass expects the MAF column to only have values <= .5. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckMAFIsMAF], collapse=" "))
 		}
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed MAF column check.", sep=""))
 
-		#20171018 CHECK_0 -- Prob: Give first-pass check of the below function
+		#20171018 20180830 CHECK_1 -- Prob: Give first-pass check of the below function Soln: done, looks fine for a first-pass check
 		DataSourcesCheckMAFFixed <- sapply(DataSources, CheckDataSourceMAFFixed) 
 		if (FALSE %in% DataSourcesCheckMAFFixed) {
 			stop(Sys.time(), " -- the following data sources have variants whose MAF are == 0 (or == 1); bmass expects only segregating variants (eg not fixed). Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckMAFFixed], collapse=" "))
@@ -165,8 +156,8 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed MAF fixed check.", sep=""))
 		}
 
-		#20160901 CHECK_0 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too?
-		#20160930 CHECK_0 -- Prob: Go over this below section and make sure it contains everything wanted for when 'ProvidedPriors' is in fact provided?
+		#20160901 20180830 CHECK_1 -- Prob: How stringent should test types be for input variables? Eg need to be testing ProvidedPriors is numeric, and other specific input variable classes too? Soln: I feel like this is asking for a lot in terms of predicting ahead of time, and that in fact it's sometimes unclear how R is handling things; it may be better to let the output be a reflection of whether certain things are making sense here or not (eg have certain expectations for what 'behaving data' should look like, either null or w/ signal -- problems with casting will likely lead to odd conversions and just weird looking results, and also failures for certain commands that are eventually called and used; so really should see evidence of something like this in some manner eventually)
+		#20160930 20180830 CHECK_1 -- Prob: Go over this below section and make sure it contains everything wanted for when 'ProvidedPriors' is in fact provided? Soln: looks fine for now
 		if (!is.null(ProvidedPriors)) {
 			if (!is.vector(ProvidedPriors)) {
 				stop(Sys.time(), " -- ProvidedPriors input is not in vector format. Please fix and rerun bmass.")
@@ -174,8 +165,7 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 			if (!is.numeric(ProvidedPriors)) {
 				stop(Sys.time(), " -- ProvidedPriors input is returning false for is.numeric(). Please ensure all entries are numeric and then rerun bmass.")
 			}
-			#20170218 20171017 CHECK_1 -- Prob: come back here and check if 14 was overall needed or just a stopgap while doing some bug-testing. Originally there was no `*14`, it was just `!= 3^length(DataSources)) {` Soln: 14 corresponds to `length(SigmaAlphas)` which makes sense since there are priors not only for all models but all models across all `SigmaAlphas`
-			if (length(ProvidedPriors) != 3^(length(DataSources)*length(SigmaAlphas))) { # 20171017 NOTE -- originally just had `*14` in place of where `length(SigmaAlphas)` is now
+			if (length(ProvidedPriors) != 3^(length(DataSources)*length(SigmaAlphas))) { 
 				stop(Sys.time(), " -- The number of entries in ProvidedPriors does not equal 3 ^ (the number of datasets passed to DataSources * length(SigmaAlphas)) (ie 3 ^ (", as.character(length(DataSources)), " * ", as.character(length(SigmaAlphas)), ") = ", as.character(3^(length(DataSources)*length(SigmaAlphas))), "). Please fix and rerun bmass.")
 			}
 			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- ProvidedPriors was provided and passed checks.", sep=""))
@@ -186,12 +176,11 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 			stop(Sys.time(), " -- .")
 		}
 
-	}
-	else {
+	} else {
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- MergedDataSources file provided, going through data checks.", sep=""))
 
-		#20160901 CHECK_0 -- Prob: Get this done at some point soon'ish, not soon after first rough draft completed for everything
+		#20160901 20180830 CHECK_1 -- Prob: Get this done at some point soon'ish, not soon after first rough draft completed for everything Soln: So my feeling is that if users are inputting their own MergedDataSources file (and it didn't come from a previous run of this code), then it is on them to determine all the columns and associated material are as they should be; possible step for a future direction, but atm that feels like a large amount of overhead that isn't immediately necessary/high on the priority list before getting the first v1.0.0 out there/this all published
 		###### do thissssss
 		#
 		#Routine for checks if MergedDataSources file provided?
