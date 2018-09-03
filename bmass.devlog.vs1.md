@@ -42,6 +42,11 @@ http://stackoverflow.com/questions/18216991/create-a-tag-in-github-repository
 http://stackoverflow.com/questions/5480258/how-to-delete-a-remote-tag  
 
 <br />
+
+20180828 NOTE -- git tag -a v0.1.2 -m "First major update/push of code clean-up/commenting/prep for production" 
+20180831 NOTE -- need to also do the following to push tags: "git push --tags" (from: http://www.thisprogrammingthing.com/2013/git-tags-not-showing-in-github/)
+
+
 ###Practicing/working on R CMD BUILD/CHECK functions
 
 ```
@@ -641,6 +646,8 @@ mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass
 mv /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass_* /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/.
 mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1
 mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5
+mkdir /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012
 cd /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1
 R
 #Run GlobalLipids2013 `bmass()` code and setup, eg see below:
@@ -674,9 +681,123 @@ write.table(bmassOutput3$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/La
 system("gzip /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt")
 
 
+library("devtools"); devtools::load_all("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/bmass");
+Height <- read.table("/mnt/gluster/data/external_public_supp/GIANT2014_5/GIANT_HEIGHT_Wood_et_al_2014_publicrelease_HapMapCeuFreq.wUCSCGenomeBrowser_dbSNP130.vs1.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.noCox.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+BMI <- read.table("/mnt/gluster/data/external_public_supp/GIANT2014_5/SNP_gwas_mc_merge_nogc.tbl.uniq.wUCSCGenomeBrowser_dbSNP130.vs1.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.noCox.MatchedToHeight.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+WHRadjBMI <- read.table("/mnt/gluster/data/external_public_supp/GIANT2014_5/GIANT_2015_WHRadjBMI_COMBINED_EUR.wUCSCGenomeBrowser_dbSNP130.vs1.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.noCox.MatchedToHeight.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+
+GWASsnps <- read.table("/mnt/lustre/home/mturchin20/Data/GIANT/2014_5/GIANT2014_5.AllGWASHits.HeightBMIWHRadjBMI.WHRadjBMI_no2nds.MarkerChrBP.BPMinus1.txt", header=F);
+GWASsnps <- GWASsnps[,2:3]
+names(GWASsnps) <- c("Chr", "BP");
+
+bmassOutput1_NoMAF01 <- bmass(c("Height", "BMI", "WHRadjBMI"), GWASsnps=GWASsnps, NminThreshold = 50000, bmassSeedValue=5219471);
+quantile(2*pnorm(apply(abs(bmassOutput1_NoMAF01$PreviousSNPs$SNPs[,grep("ZScore", colnames(bmassOutput1_NoMAF01$PreviousSNPs$SNPs)),]), 1, max),  0, 1, lower.tail=FALSE))
+
+Height <- Height[Height$MAF > .01,]
+BMI <- BMI[BMI$MAF > .01,]
+WHRadjBMI <- WHRadjBMI[WHRadjBMI$MAF > .01,]
+
+bmassOutput1_NoGWASThresh <- bmass(c("Height", "BMI", "WHRadjBMI"), GWASsnps=GWASsnps, NminThreshold = 50000, PrintMergedData=FALSE, bmassSeedValue=5219471);
+bmassOutput3_NoGWASThresh <- bmass(c("Height", "BMI", "WHRadjBMI"), GWASsnps=GWASsnps, NminThreshold = 50000, PrintMergedData=TRUE, PruneMarginalSNPs=FALSE, bmassSeedValue=5219471);
+bmassOutput1 <- bmass(c("Height", "BMI", "WHRadjBMI"), GWASsnps=GWASsnps, GWASThreshFlag = 1, NminThreshold = 50000, PrintMergedData=FALSE, bmassSeedValue=5219471);
+bmassOutput3 <- bmass(c("Height", "BMI", "WHRadjBMI"), GWASsnps=GWASsnps, GWASThreshFlag = 1, NminThreshold = 50000, PrintMergedData=TRUE, PruneMarginalSNPs=FALSE, bmassSeedValue=5219471);
+
+write.table(bmassOutput1$NewSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.NewSNPs.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput3$MergedDataSources, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MergedDataSources.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput1$PreviousSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.PreviousSNPs.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput1$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MarginalSNPs.Pruned.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput3$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+system("gzip /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MergedDataSources.vs1.txt")
+
+
+library("devtools"); devtools::load_all("/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/bmass");
+RBC <- read.table("/mnt/gluster/data/external_public_supp/HaemgenRBC2012/HaemGenRBC_RBC.wHapMap22.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.DropNoHapMap.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+MCV <- read.table("/mnt/gluster/data/external_public_supp/HaemgenRBC2012/HaemGenRBC_MCV.wHapMap22.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.DropNoHapMap.MatchedToRBC.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+PCV <- read.table("/mnt/gluster/data/external_public_supp/HaemgenRBC2012/HaemGenRBC_PCV.wHapMap22.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.DropNoHapMap.MatchedToRBC.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+MCH <- read.table("/mnt/gluster/data/external_public_supp/HaemgenRBC2012/HaemGenRBC_MCH.wHapMap22.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.DropNoHapMap.MatchedToRBC.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+Hb <- read.table("/mnt/gluster/data/external_public_supp/HaemgenRBC2012/HaemGenRBC_Hb.wHapMap22.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.DropNoHapMap.MatchedToRBC.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+MCHC <- read.table("/mnt/gluster/data/external_public_supp/HaemgenRBC2012/HaemGenRBC_MCHC.wHapMap22.wMarker.MinorAllele.bmass.formatted.noDups.noNA.noComma.DropNoHapMap.MatchedToRBC.DropNoMatch.no0Dir.noFixed.forceMAF.txt.gz", header=T);
+
+GWASsnps <- read.table("/mnt/lustre/home/mturchin20/Data/HaemgenRBC2012/HaemgenRBC2012.Table1.Edited.MarkerChrBP.txt", header=F);
+GWASsnps <- GWASsnps[,2:3]
+names(GWASsnps) <- c("Chr", "BP");
+
+bmassOutput1_NoMAF01 <- bmass(c("RBC", "MCV", "PCV", "MCH", "Hb", "MCHC"), GWASsnps=GWASsnps, NminThreshold = 10000, bmassSeedValue=266481);
+
+RBC <- RBC[RBC$MAF > .01,]
+MCV <- MCV[MCV$MAF > .01,]
+PCV <- PCV[PCV$MAF > .01,]
+MCH <- MCH[MCH$MAF > .01,]
+Hb <- Hb[Hb$MAF > .01,]
+MCHC <- MCHC[MCHC$MAF > .01,]
+
+bmassOutput1_NoGWASThresh <- bmass(c("RBC", "MCV", "PCV", "MCH", "Hb", "MCHC"), GWASsnps=GWASsnps, NminThreshold = 10000, bmassSeedValue=266481);
+bmassOutput3_NoGWASThresh <- bmass(c("RBC", "MCV", "PCV", "MCH", "Hb", "MCHC"), GWASsnps=GWASsnps, NminThreshold = 10000, PrintMergedData=TRUE, PruneMarginalSNPs=FALSE, bmassSeedValue=266481);
+bmassOutput1 <- bmass(c("RBC", "MCV", "PCV", "MCH", "Hb", "MCHC"), GWASsnps=GWASsnps, GWASThreshFlag = 1, GWASThreshValue = 1e-8, NminThreshold = 10000, bmassSeedValue=266481);
+bmassOutput3 <- bmass(c("RBC", "MCV", "PCV", "MCH", "Hb", "MCHC"), GWASsnps=GWASsnps, GWASThreshFlag = 1, GWASThreshValue = 1e-8, NminThreshold = 10000, PrintMergedData=TRUE, PruneMarginalSNPs=FALSE, bmassSeedValue=266481);
+
+write.table(bmassOutput1$NewSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.NewSNPs.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput3$MergedDataSources, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MergedDataSources.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput1$PreviousSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.PreviousSNPs.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput1$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MarginalSNPs.Pruned.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+write.table(bmassOutput3$MarginalSNPs$SNPs, file="/mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt", quote=FALSE, row.names=FALSE)
+
+system("gzip /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MergedDataSources.vs1.txt")
+
+
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs1.txt) | wc 
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs1.txt) | wc
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) | wc
+cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt.gz) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt.gz) | wc
+##cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs1.txt | tail -n +2) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs2.txt | tail -n +2)
+##cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs1.txt | tail -n +2) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs2.txt | tail -n +2)
+##cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt | tail -n +2) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs2.txt | tail -n +2) 
+##cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt.gz | tail -n +2) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs2.txt.gz | tail -n +2)
+
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.NewSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.NewSNPs.SNPs.vs1.txt) | wc 
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.PreviousSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.PreviousSNPs.SNPs.vs1.txt) | wc
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) | wc
+cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.MergedDataSources.vs1.txt.gz) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MergedDataSources.vs1.txt.gz) | wc
+
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.NewSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.NewSNPs.SNPs.vs1.txt) | wc 
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.PreviousSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.PreviousSNPs.SNPs.vs1.txt) | wc
+cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) | wc
+cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.MergedDataSources.vs1.txt.gz) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MergedDataSources.vs1.txt.gz) | wc
+
+
+
 
 ```
 
+~~~
+#20180903
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.NewSNPs.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.PreviousSNPs.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt.gz) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GlobalLipids2013/bmass.GlobalLipids2013.Vs2.MergedDataSources.vs1.txt.gz) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.NewSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.NewSNPs.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.PreviousSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.PreviousSNPs.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@spudling93  ~/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1]$cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/GIANT2014_5/Vs2/bmass.GIANT2014_5.Vs2.MergedDataSources.vs1.txt.gz) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/GIANT2014_5/bmass.GIANT2014_5.Vs2.MergedDataSources.vs1.txt.gz) | wc
+      0       0       0
+[  mturchin20@bigmem01  ~]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.NewSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.NewSNPs.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@bigmem01  ~]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.PreviousSNPs.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.PreviousSNPs.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@bigmem01  ~]$cmp <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) <(cat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MarginalSNPs.NotPruned.SNPs.vs1.txt) | wc
+      0       0       0
+[  mturchin20@bigmem01  ~]$cmp <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/HaemgenRBC2012/Vs2/bmass.HaemgenRBC2012.Vs2.MergedDataSources.vs1.txt.gz) <(zcat /mnt/lustre/home/mturchin20/Lab_Stuff/StephensLab/Multivariate/bmass/bmass_temp1/HaemgenRBC2012/bmass.HaemgenRBC2012.Vs2.MergedDataSources.vs1.txt.gz) | wc
+      0       0       0
+
+
+~~~
 
 
 

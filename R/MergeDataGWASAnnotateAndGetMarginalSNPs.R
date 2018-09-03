@@ -102,14 +102,13 @@ MergeDataSources <- function (DataSources, LogFile) {
                         CurrentDataSource_temp$ChrBP <- paste(eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr", sep=""))), eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP", sep=""))), sep="_")
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
-
-                        MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 			
 #			if (FALSE %in% eval(parse(text=paste("ifelse(MergedDataSources$A1==MergedDataSources$", CurrentDataSource, "_A1), TRUE, FALSE)))) {
 #
 #			}
 
 			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_A1 <- NULL", sep="")))
+                        MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 
 
                         rm(CurrentDataSource_temp)
