@@ -1,18 +1,3 @@
-#' Checking and preparing input datafiles.
-#' 
-#' Description 
-#' 
-#' @param x Something.
-#' @param y Something2.
-####' @param DataFileList Comma-separated list of all the datafile names being analyzed (these are assumed to be the names of the phenotypes being analyzed). This should be in the same order as DataFileLocations. The default value for this paramter is NULL. If NULL, the list of datafile names are derived from the list of datafile locations.
-#' @param DataFileLocations Comma-separated list of all the datafile locations being analyzed. This should be in the same order as PhenotypeList. The default value for this parameter is NULL. Users must supply a list of datafile locations to run bmass.
-#' @param ExpectedColumnNames Comma-separated list of the expected column names to be found at the head of each datafile. The default value for this parameter is Chr,BP,A1,MAF,Direction,p_Value,N. Users should not supply or alter this parameter.
-#' @param OutputFileBase
-#' @return A merged and combined dataset The sum of \code{x} and \code{y}.
-#' @examples
-#' func(1, 1)
-#' func(10, 1)
-
 ##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
         CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
@@ -116,7 +101,7 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 	PreviousSNPs <- list()
         PreviousSNPs_logBFs_Stacked_AvgwPrior_Min <- NULL
 	ZScoreHitFlag1 <- c()
-	if (GWASThreshFlag == 1) {
+	if (GWASThreshFlag) {
 		ZScoreHitFlag1 <- rep(0, nrow(MarginalSNPs$SNPs))
 		ZScoreHitFlag1[2*pnorm(apply(abs(MarginalSNPs$SNPs[,grep("ZScore", colnames(MarginalSNPs$SNPs))]),1,max),0,1,lower.tail=FALSE) < GWASThreshValue] <- 1
 	}
@@ -153,10 +138,10 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
                 LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Setting up GWAS trained priors and analyzing GWAS hits since GWASsnps provided.", sep=""))
                
 		PreviousSNPs_logBFs_Stacked <- c() #Will be matrix of nSigmaAlphas x nSNPs
-		if (GWASThreshFlag == 1) {
+		if (GWASThreshFlag) {
 			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1]) 
 		} 
-		else if (GWASThreshFlag == 0) {
+		else if (!GWASThreshFlag) {
 			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) 
 		} 
 		else {
@@ -181,10 +166,10 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
         MarginalSNPs$SNPs$logBFWeightedAvg <- MarginalSNPs_logBFs_Stacked_AvgwPrior
 		
 	if (!is.null(GWASsnps)) {
-		if (GWASThreshFlag == 1) {
+		if (GWASThreshFlag) {
 			PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==1,]
 			PreviousSNPs$DontPassSNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1 & ZScoreHitFlag1==0,]
-		} else if (GWASThreshFlag == 0) {
+		} else if (!GWASThreshFlag) {
 			PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1,]
 		} else {
 			#20171017 CHECK_0 -- Prob: Throw an error/fail thing here

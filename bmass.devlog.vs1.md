@@ -1,8 +1,9 @@
 ##General Comments
 
-###Markdown related
+###Markdown & Hadley Wickham Package-structure related
 
 Including spaces/linebreaks: http://stackoverflow.com/questions/24575680/new-lines-inside-paragraph-in-readme-md
+Changing aspects of Roxygen2 setup & structure: https://stackoverflow.com/questions/8873514/documenting-setter-functions-with-roxygen
 
 ##20160812
 

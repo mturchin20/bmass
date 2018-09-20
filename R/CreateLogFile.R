@@ -1,14 +1,3 @@
-#' Checking and setting up logfile interface.
-#' 
-#' Description 
-#' 
-#' @param x Something.
-#' @param y Something2.
-#' @return A merged and combined dataset The sum of \code{x} and \code{y}.
-#' @examples
-#' func(1, 1)
-#' func(10, 1)
-
 OpenLogFile <- function(OutputFileBase) {
 	FileNameLog <- paste(OutputFileBase, ".bmass.log", sep="")
 	if (file.exists(FileNameLog)) {
