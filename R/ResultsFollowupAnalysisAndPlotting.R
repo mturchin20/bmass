@@ -1,4 +1,3 @@
-
 #' Checking and preparing input datafiles.
 #' 
 #' Description 
@@ -33,9 +32,10 @@ CountModelClasses <- function(ModelEntries) {
 }
 
 #20170219 NOTE -- Unsure if going to really be using the below function eventually. Might hack together components separately and then reformulate a different 'main' function that bring them together, all outside of the below function here, than resue or continuing to operate on this one. Feel like this was created as a placeholder and not touched for a while, so contains elements that don't follow where/how the package has gone elsewhere
+#20180919 NOTE -- Barely goign to be using any of these ancillary functions, so planning on removing most of them (if not all) from the main, first release of the software package; anything included will be explicitly based on what the manuscript uses, and if putting the function/explanation isn't reasonable on the public 'code' github page
 ExploreBestModelsUsingPosteriors <- function (PreviousSNPs, MarginalSNPs, NewSNPs, Models, ModelPriors, LogFile) {
 
-        #20160930 CHECK_0 -- Prob: Come back and go through what keeping here and what moving to later, downstream analysis section. Eg may want to keep and calculate posteriors here? AllAssoc & AllBut1Assoc may be for downstream analysis results/intrepretations?
+        #20160930 20180919 CHECK_1 -- Prob: Come back and go through what keeping here and what moving to later, downstream analysis section. Eg may want to keep and calculate posteriors here? AllAssoc & AllBut1Assoc may be for downstream analysis results/intrepretations? Soln: Moot for now, maybe something to come back to later -- even if so later, should just be a function that helps users pull out or specify their models of interest, vs. choosing some pre-ordained groups of models that 'might be of interest' to the users, ie should really let the user choose explicitly and just help this process somehow
         Prior_PreviousSNPsEB_Collapsed <- CollapseSigmaAlphasTogether(Prior_PreviousSNPsEB, length(SigmaAlphas))
         Prior_PreviousSNPsEB_check2_Collapsed <- CollapseSigmaAlphasTogether(Prior_PreviousSNPsEB_check2, length(SigmaAlphas))
 
@@ -146,11 +146,11 @@ GetMarginalPosteriors <- function (DataSources, ListSNPs, Models, SigmaAlphas, L
 
 }
 
-#20170221 CHECK_0 -- Prob: Make separate version with direction?
-#20170222 CHECK_0 -- Prob: keep as one function?
-#20170222 CHECK_0 -- Prob: Calling ggplot on own doesn't work (though plot() does), so hack of 'print(ggplot...' works but why? Fix this, right?
-#20170221 CHECK_0 -- Prob: Control/offer choice on printing out reordered marginal results?
-#plot options?
+#20170221 20180919 CHECK_1 -- Prob: Make separate version with direction? Soln: The majority, if not all, of these functions will not be included in the first, finalized release version; if anything is included it will be because it is specifically used in ther manuscript and cannot easily be displayed or presented on the public 'code' github page being created
+#20170222 20180919 CHECK_1 -- Prob: keep as one function? Soln: Meet, see above
+#20170222 20180919 CHECK_1 -- Prob: Calling ggplot on own doesn't work (though plot() does), so hack of 'print(ggplot...' works but why? Fix this, right? Soln: Moot, see above
+#20170221 20180919 CHECK_1 -- Prob: Control/offer choice on printing out reordered marginal results? Soln: Moot, see above
+#20170221 20180919 CHECK_1 -- Prob: plot options? Soln: Moot, see above
 #PlotMarginalPosteriors <- function (DataSources, ListSNPs, Marginal, PrintMarginals=1) {
 PlotMarginalPosteriors <- function (DataSources, ListSNPs, Marginal, PrintMarginals=1, Main=NULL, xLab=NULL, yLab=NULL, lowcolor="white", highcolor="steelblue") {
 
