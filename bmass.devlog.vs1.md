@@ -3,7 +3,9 @@
 ###Markdown & Hadley Wickham Package-structure related
 
 Including spaces/linebreaks: http://stackoverflow.com/questions/24575680/new-lines-inside-paragraph-in-readme-md
-Changing aspects of Roxygen2 setup & structure: https://stackoverflow.com/questions/8873514/documenting-setter-functions-with-roxygen
+Changing aspects of Roxygen2 setup & structure: http://r-pkgs.had.co.nz/man.html, https://stackoverflow.com/questions/8873514/documenting-setter-functions-with-roxygen
+Info on vignettes: http://r-pkgs.had.co.nz/vignettes.html, http://kbroman.org/pkg_primer/pages/vignettes.html (use `devtools::build_vignettes()` or `devtools::build()`)
+Info on finalizing package checking & related misc: http://r-pkgs.had.co.nz/check.html (use `devtools::check()`)
 
 ##20160812
 
