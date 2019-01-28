@@ -1,0 +1,104 @@
+---
+title: "bmass Introduction"
+author: "Michael C Turchin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is an introductory example of how to run `bmass`. In this introductory example, we will:
+- Download our example dataset
+- Quality control (QC) & format our example dataset
+- Run `bmass`
+- Access results
+
+## Downloading `GlobalLipids2013`
+
+For this vigenette, we will be download and analyze the `GlobalLipids2013` dataset. To download the necessary files from http://csg.sph.umich.edu/willer/public/lipids2013/, run the following:
+
+```
+mkdir my-directory/GlobalLipids2013
+cd my-directory/GlobalLipids2013
+
+wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_LDL.txt.gz
+wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_HDL.txt.gz
+wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TG.txt.gz
+wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TC.txt.gz
+```
+
+## Formatting & QC'ing our dataset
+
+To run bmass, it is recommended that at least a minimal level of QC is performed on the datasets of interest. Additionally, it is important that all the single nucleotide polymorphisms (SNPs) being analyzed are oriented to the same reference allele across all the phenotypes being included. This latter situation is emphasized so that the correct direction of effect is assigned to each phenotype for a given SNP (which is oriented based on reference allele).
+
+Below is example bash code on how to reformat, conduct some basic QC, and orient the reference alleles on the `GlobalLipids2013` dataset. First, we will reformat our input datafiles to match the requirements for `bmass`. `bmass` expects input files to have the following columns: Chromosome, Basepair, Marker ID, Minor Allele Frequency (MAF), Reference Allele, Alternative Allele, Direction of Effect, p-Value, and Sample Size (N). To create files that match these specifications, we will conduct the following: extract the columns that are needed, convert the provided reference allele frequency to MAF, and extract the direction of effect from the providede effect sizes.
+```
+zcat jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_HDL.formatted.txt.gz 
+zcat jointGwasMc_LDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_LDL.formatted.txt.gz 
+zcat jointGwasMc_TG.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TG.formatted.txt.gz 
+zcat jointGwasMc_TC.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TC.formatted.txt.gz 
+```
+
+Next, we will conduct some basic level QC steps. These steps include: remove duplicate entries of SNPs, remove SNPs that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF < .01), have sample sample sizes < 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). 
+```
+join <(zcat jointGwasMc_HDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_HDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_HDL.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_LDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_LDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_LDL.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_TG.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_TG.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_TG.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_TC.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_TC.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_TC.formatted.QCed.txt.gz 
+```
+
+Lastly, we will orient all phenotype files to the HDL minor allele:
+```
+join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat jointGwasMc_LDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { print STDERR "Error1 -- direction of effect allele matching"; } } print join("\t", @F[2..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_LDL.formatted.QCed.HDLMatch.txt.gz
+join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat jointGwasMc_TG.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { print STDERR "Error1 -- direction of effect allele matching"; } } print join("\t", @F[2..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_TG.formatted.QCed.HDLMatch.txt.gz
+join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat jointGwasMc_TC.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { print STDERR "Error1 -- direction of effect allele matching"; } } print join("\t", @F[2..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_TC.formatted.QCed.HDLMatch.txt.gz
+```
+
+
+
+
+## Running `bmass`
+
+Now with our four `GlobalLipids2013` files properly formatted and QCed, we are able to run `bmass`. To do so, we will also need the list of published univariate GWAS SNPs from the `GlobalLipids2013` publication (presented as two columns per SNP, chromosome and basepair position) -- these have been provided in the `data` subdirectory (`GlobalLipids2013.GWASsnps.txt`). To run `bmass` with our prepared input datafiles and our list of univariate GWAS SNPs, we run the following R code:
+
+```{r}
+library("bmass");
+library("devtools"); devtools::load_all("/home/mturchin20/project/Lab_Stuff/StephensLab/bmass");
+HDL <- read.table("jointGwasMc_HDL.formatted.QCed.txt.gz", header=T);
+LDL <- read.table("jointGwasMc_LDL.formatted.QCed.HDLMatch.txt.gz", header=T);
+TG <- read.table("jointGwasMc_TG.formatted.QCed.HDLMatch.txt.gz", header=T); 
+TC <- read.table("jointGwasMc_TC.formatted.QCed.HDLMatch.txt.gz", header=T);
+GWASsnps <- read.table("../data/GlobalLipids2013.GWASsnps.txt", header=T);
+Phenotypes <- c("HDL", "LDL", "TG", "TC");
+bmassResults <- bmass(Phenotypes, GWASsnps);
+```
+
+Note that to run `bmass` we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype's respective data file. 
+
+
+## Access results
+
+`bmass` returns a list containing multiple subsets of information, including separate sublists pertaining to the previous univariate SNPs used for training the multivariate model priors and the new multivariate SNPs (if any) bmass has idenfitifed as significant. Run `summary(bmassResults)` and you should see the following:
+```
+
+```
+
+`bmassResults$PreviousSNPs`
+
+
+
+
+
+
+join <(zcat /project/mstephens/mturchin20/gluster/data/external_public_supp/GlobalLipids2013/jointGwasMc_HDL.txt.gz | sed 's/:/_/g' | sed 's/chr//g' | awk '{ print $1 }' | grep -v hg18 | sort | uniq -u) <(zcat /project/mstephens/mturchin20/gluster/data/external_public_supp/GlobalLipids2013/jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | grep -v hg | grep -v ^rs | grep -v NA | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $PH = 1; } $F[3] = 1 - $F[3]; } print $F[0], "_", $F[1], "\t", join("\t", @F);' | sort -k 1,1) | perl -lane 'splice(@F, 0, 1); print join("\t", @F);' | gzip > /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz
+
+join <(zcat /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_LDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); $F[5] = 1 - $F[5]; if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { $PH = 1; } } elsif ($F[1] eq $F[6]) { $PH = 1; } else { push(@F, "NoAlleleMatch"); } print join("\t", @F[2..$#F]);' | gzip > /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_LDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.MatchedToHDL.txt.test2.gz
+
+zcat /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .5) { $F[3] = 1 - $F[3]; } if ($F[3] > 0) { print join("\t", @F); } }' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.no0Dir.noFixed.forceMAF.txt.gz
+
+
+
+
+
