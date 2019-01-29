@@ -243,17 +243,3 @@ So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` anal
 
 
 
-
-
-
-
-join <(zcat /project/mstephens/mturchin20/gluster/data/external_public_supp/GlobalLipids2013/jointGwasMc_HDL.txt.gz | sed 's/:/_/g' | sed 's/chr//g' | awk '{ print $1 }' | grep -v hg18 | sort | uniq -u) <(zcat /project/mstephens/mturchin20/gluster/data/external_public_supp/GlobalLipids2013/jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | grep -v hg | grep -v ^rs | grep -v NA | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $PH = 1; } $F[3] = 1 - $F[3]; } print $F[0], "_", $F[1], "\t", join("\t", @F);' | sort -k 1,1) | perl -lane 'splice(@F, 0, 1); print join("\t", @F);' | gzip > /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz
-
-join <(zcat /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_LDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); $F[5] = 1 - $F[5]; if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { $PH = 1; } } elsif ($F[1] eq $F[6]) { $PH = 1; } else { push(@F, "NoAlleleMatch"); } print join("\t", @F[2..$#F]);' | gzip > /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_LDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.MatchedToHDL.txt.test2.gz
-
-zcat /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.txt.gz | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .5) { $F[3] = 1 - $F[3]; } if ($F[3] > 0) { print join("\t", @F); } }' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > /project/mstephens/mturchin20/Lab_Stuff/StephensLab/Multivariate/GlobalLipids2013/Vs2/jointGwasMc_HDL.wMarker.MinorAllele.bmass.formatted.noDups.noNA.no0Dir.noFixed.forceMAF.txt.gz
-
-
-
-
-
