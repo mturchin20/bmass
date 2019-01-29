@@ -13,7 +13,7 @@ This is an introductory example of how to run `bmass`. In this introductory exam
 - Download our example dataset
 - Quality control (QC) & format our example dataset
 - Run `bmass`
-- Access results
+- Access & explore results
 
 ## Downloading `GlobalLipids2013`
 
@@ -33,20 +33,20 @@ wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TC.txt.gz
 
 To run bmass, it is recommended that at least a minimal level of QC is performed on the datasets of interest. Additionally, it is important that all the single nucleotide polymorphisms (SNPs) being analyzed are oriented to the same reference allele across all the phenotypes being included. This latter situation is emphasized so that the correct direction of effect is assigned to each phenotype for a given SNP (which is oriented based on reference allele).
 
-Below is example bash code on how to reformat, conduct some basic QC, and orient the reference alleles on the `GlobalLipids2013` dataset. First, we will reformat our input datafiles to match the requirements for `bmass`. `bmass` expects input files to have the following columns: Chromosome, Basepair, Marker ID, Minor Allele Frequency (MAF), Reference Allele, Alternative Allele, Direction of Effect, p-Value, and Sample Size (N). To create files that match these specifications, we will conduct the following: extract the columns that are needed, convert the provided reference allele frequency to MAF, and extract the direction of effect from the providede effect sizes.
+Below is example bash code on how to reformat, conduct some basic QC, and orient the reference alleles on the `GlobalLipids2013` dataset. First, we will reformat our input datafiles to match the requirements for `bmass`. `bmass` expects input files to have the following columns: Chromosome, Basepair, Marker ID, Minor Allele Frequency (MAF), Reference Allele, Alternative Allele, Direction of Effect, p-Value, and Sample Size (N). To create files that match these specifications, we will conduct the following: extract the columns that are needed, orient SNPs to the minor allele, and extract the direction of effect from the provided effect sizes.
 ```
-zcat jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_HDL.formatted.txt.gz 
-zcat jointGwasMc_LDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_LDL.formatted.txt.gz 
-zcat jointGwasMc_TG.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TG.formatted.txt.gz 
-zcat jointGwasMc_TC.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0;} if ($F[3] > .5) { $F[3] = 1 - $F[3]; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TC.formatted.txt.gz 
+zcat jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_HDL.formatted.txt.gz 
+zcat jointGwasMc_LDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_LDL.formatted.txt.gz 
+zcat jointGwasMc_TG.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TG.formatted.txt.gz 
+zcat jointGwasMc_TC.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TC.formatted.txt.gz 
 ```
 
-Next, we will conduct some basic level QC steps. These steps include: remove duplicate entries of SNPs, remove SNPs that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF < .01), have sample sample sizes < 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). 
+Next, we will conduct some basic level QC steps. These steps include: remove duplicate entries of SNPs, remove SNPs that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF < .01), have sample sample sizes < 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). We will also orient each SNP/phenotype file to its respective minor allele.  
 ```
-join <(zcat jointGwasMc_HDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_HDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_HDL.formatted.QCed.txt.gz 
-join <(zcat jointGwasMc_LDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_LDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_LDL.formatted.QCed.txt.gz 
-join <(zcat jointGwasMc_TG.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_TG.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_TG.formatted.QCed.txt.gz 
-join <(zcat jointGwasMc_TC.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_TC.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_TC.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_HDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_HDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_HDL.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_LDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_LDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_LDL.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_TG.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_TG.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_TG.formatted.QCed.txt.gz 
+join <(zcat jointGwasMc_TC.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_TC.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip > jointGwasMc_TC.formatted.QCed.txt.gz 
 ```
 
 Lastly, we will orient all phenotype files to the HDL minor allele:
@@ -55,8 +55,6 @@ join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" 
 join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat jointGwasMc_TG.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { print STDERR "Error1 -- direction of effect allele matching"; } } print join("\t", @F[2..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_TG.formatted.QCed.HDLMatch.txt.gz
 join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $5 }' | sort -k 1,1) <(zcat jointGwasMc_TC.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'if ($F[1] eq $F[7]) { ($F[6], $F[7]) = ($F[7], $F[6]); if ($F[8] eq "-") { $F[8] = "+"; } elsif ($F[8] eq "+") { $F[8] = "-"; } else { print STDERR "Error1 -- direction of effect allele matching"; } } print join("\t", @F[2..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_TC.formatted.QCed.HDLMatch.txt.gz
 ```
-
-
 
 
 ## Running `bmass`
@@ -75,17 +73,174 @@ Phenotypes <- c("HDL", "LDL", "TG", "TC");
 bmassResults <- bmass(Phenotypes, GWASsnps);
 ```
 
-Note that to run `bmass` we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype's respective data file. 
+Note that to run `bmass` we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype's respective data file. Also note that you will see a warning that one or more of the `GlobalLipids2013` datafiles contains p-values smaller than the threshold at which R can handle converting them into logarthmic scale -- this is to be expected.  
 
 
-## Access results
+## Accessing & exploring results
 
-`bmass` returns a list containing multiple subsets of information, including separate sublists pertaining to the previous univariate SNPs used for training the multivariate model priors and the new multivariate SNPs (if any) bmass has idenfitifed as significant. Run `summary(bmassResults)` and you should see the following:
+`bmass` returns a list containing multiple areas of information, including separate sublists pertaining to the previous univariate GWAS SNPs used for training the multivariate model priors and the new multivariate SNPs (if any) bmass has idenfitifed as significant. Run `summary(bmassResults)` and you should see the following:
+```
+> summary(bmassResults)
+                      Length Class  Mode     
+MarginalSNPs             3   -none- list     
+PreviousSNPs             4   -none- list     
+NewSNPs                  3   -none- list     
+LogFile                 20   -none- character
+ZScoresCorMatrix        16   -none- numeric  
+Models                 324   -none- numeric  
+ModelPriors           1134   -none- numeric  
+GWASlogBFMinThreshold    1   -none- numeric  
 ```
 
+We will touch on all the above outputs. 
+
+
+### NewSNPs
+
+The `NewSNPs` sublist contains information pertaining to the new significant multivariate associations found by `bmass`, if any were identified. Running `summary(bmassResults$NewSNPs)` you should see the following:
+```
+> summary(bmassResults$NewSNPs)
+           Length Class      Mode   
+SNPs         30   data.frame list   
+logBFs     5427   -none-     numeric
+Posteriors 5427   -none-     numeric
 ```
 
-`bmassResults$PreviousSNPs`
+`bmassResults$NewSNPs$SNPs` contains the 'main' `bmass` output of interest -- the list of new multivariate associations found by `bmass` and those SNPs' related information. The format of this output appears as follows:
+```
+> head(bmassResults$NewSNPs$SNPs, n=3)
+              ChrBP Chr        BP    Marker    MAF A1 HDL_A2 HDL_Direction
+1704   10_101902054  10 101902054 rs2862954 0.4631  C      T             +
+72106    10_5839619  10   5839619 rs2275774 0.1781  G      A             +
+118903 11_109521729  11 109521729  rs661171 0.2876  T      G             +
+       HDL_pValue  HDL_N HDL_ZScore LDL_Direction LDL_pValue    LDL_N
+1704    1.287e-06 186893   4.841751             +  5.875e-01 172821.0
+72106   7.601e-07 179144   4.945343             -  7.773e-05 165198.0
+118903  1.705e-06 186946   4.785573             +  1.653e-02 172877.9
+       LDL_ZScore TG_Direction TG_pValue     TG_N TG_ZScore TC_Direction
+1704    0.5424624            +  0.013930 177587.1  2.459063            +
+72106  -3.9512933            -  0.001035 169853.0 -3.280836            -
+118903  2.3969983            -  0.155800 177645.0 -1.419340            +
+       TC_pValue   TC_N TC_ZScore GWASannot   mvstat mvstat_log10pVal  unistat
+1704   2.526e-04 187083  3.659609         0 48.70946         9.173067 23.44255
+72106  1.911e-02 179333 -2.343378         0 38.26288         7.004804 24.45642
+118903 1.785e-05 187131  4.290215         0 37.84098         6.917765 22.90171
+       unistat_log10pVal     Nmin logBFWeightedAvg
+1704            5.890421 172821.0         7.068306
+72106           6.119129 165198.0         5.447201
+118903          5.768276 172877.9         5.438490
+```
+
+`NewSNPs$logBFs` contains the log10 Bayes Factor (BF) for each multivariate model tested (in the form of a Model x SNP matrix, with the first columns of the matrix describing each model). `NewSNPs$Posteriors` is a similar matrix, just with each matrix entry representing the posterior probability for each model/SNP combination instead of the log10 BF. 
+```
+> dim(bmassResults$NewSNPs$logBFs)
+[1] 81 67
+> bmassResults$NewSNPs$logBFs[1:5,1:10]
+     HDL LDL TG TC 10_101902054   10_5839619 11_109521729   11_13313759
+[1,]   0   0  0  0     0.000000    0.0000000    0.0000000    0.00000000
+[2,]   1   0  0  0  -233.831047 -235.0781367 -234.6670299 -234.15472067
+[3,]   2   0  0  0     0.000000    0.0000000    0.0000000    0.00000000
+[4,]   0   1  0  0     0.165855    0.3172489   -0.1100418    0.06393596
+[5,]   1   1  0  0   -64.774919  -66.2959645  -69.2388829  -69.93309528
+       11_45696596   11_47251202
+[1,]    0.00000000    0.00000000
+[2,] -231.68478695 -219.10321932
+[3,]    0.00000000    0.00000000
+[4,]   -0.04838241    0.04997886
+[5,]  -65.59917325  -45.04269241
+```
+
+
+### PreviousSNPs
+
+`PreviousSNPs` contains similar information as `NewSNPs` does, but pertaining to the set of previous univariate GWAS significant SNPs used to train the multivariate model priors and set the empirical significance threshold for weighted average BF. Running `summary(bmassResults$PreviousSNPs)` you see:
+```
+> summary(bmassResults$PreviousSNPs)
+             Length Class      Mode   
+logBFs       12069  -none-     numeric
+SNPs            30  data.frame list   
+DontPassSNPs    30  data.frame list   
+Posteriors   12069  -none-     numeric
+```
+
+`PreviousSNPs$SNPs`, `PreviousSNPs$logBFs`, and `PreviousSNPs$Posteriors` all match the descriptions as above with `NewSNPs`. However `PreviousSNPs$DontPassSNPs` refers to any GWAS SNPs which are included in the final publicaiton list but which do meet the original study's univariate GWAS p-value threshold based on the dataset released. This can for instance occur when a final GWAS SNP list is produced from combining a discovery dataset with a replication dataset, and the former data is the only part of the study publicly released. Therefore `bmass` keeps track of these SNPs so as not to call them a completely novel multivariate SNP, but also to not use them to train the multivariate model priors since they do not technically reach univariate GWAS significance based on the dataset provided alone.
+
+The format of `DontPassSNPs` is the same seen in `NewSNPs$SNPs` and `PreviousSNPs$SNPs`. 
+
+
+### MarginalSNPs
+
+`MarginalSNPs` contains the same information as `NewSNPs` and `PreviousSNPs`, but pertaining to the set of marginally significant SNPs extracted from the intermediate `MergedDataSources` dataset (a data.frame that contains all the input phenotype files combined) based on the `SNPMarginalUnivariateThreshold` and `SNPMarginalMultivariateThreshold` values (default of 1e-6 for each). `summary(bmassResults$MarginalSNPs)` returns:
+```
+> summary(bmassResults$MarginalSNPs)
+           Length Class      Mode   
+SNPs          30  data.frame list   
+logBFs     20493  -none-     numeric
+Posteriors 20493  -none-     numeric
+```
+
+`MarginalSNPs$SNPs`, `MarginalSNPs$logBFs`, and `MarginalSNPs$Posteriors` are all as described above.
+
+
+### ZScoresCorMatrix
+
+This is the phenotype correlation matrix (V_0 hat in `Detailed Methods (Global Lipids Analysis)` of Stephens 2013 PLoS ONE) derived from extracting all the 'null' SNPs (abs(ZScore) < 2 for every phenotype) in the dataset.
+```
+> bmassResults$ZScoresCorMatrix
+           HDL_ZScore LDL_ZScore  TG_ZScore TC_ZScore
+HDL_ZScore  1.0000000 -0.0872789 -0.3655508 0.1523894
+LDL_ZScore -0.0872789  1.0000000  0.1607208 0.8223175
+TG_ZScore  -0.3655508  0.1607208  1.0000000 0.2892982
+TC_ZScore   0.1523894  0.8223175  0.2892982 1.0000000
+``` 
+
+
+### Models
+
+This is a matrix displaying all the model combinations possible given the set of d input phenotypes and 3 model categories of directly associated (1), indirectly associated (2), and unassociated (0). The total number of models displayed should be 3^d.
+```
+> dim(bmassResults$Models)
+[1] 81  4
+> head(bmassResults$Models)
+     [,1] [,2] [,3] [,4]
+[1,]    0    0    0    0
+[2,]    1    0    0    0
+[3,]    2    0    0    0
+[4,]    0    1    0    0
+[5,]    1    1    0    0
+[6,]    2    1    0    0
+``` 
+
+
+### ModelPriors
+
+This is set of priors determined for each multivariate model using the previous univariate GWAS SNPs and an EM algorithm setup (see eq. 36 in Stephens 2013). Note that for any model which does not contain at least one phenotype in the directly associated category, the prior was automatically set to 0 (aside from the global null model of all phenotypes set to unassociated). 
+```
+> length(bmassResults$ModelPriors)
+[1] 1134
+dim?
+head?
+> head(cbind(bmassResults$Models, matrix(bmassResults$ModelPriors, nrow=81, byrow=FALSE)))
+     [,1] [,2] [,3] [,4]          [,5]          [,6]          [,7]
+[1,]    0    0    0    0  0.000000e+00  0.000000e+00  0.000000e+00
+[2,]    1    0    0    0  0.000000e+00 1.524507e-270 1.032154e-247
+[3,]    2    0    0    0  0.000000e+00  0.000000e+00  0.000000e+00
+[4,]    0    1    0    0  0.000000e+00  0.000000e+00  0.000000e+00
+[5,]    1    1    0    0 8.712578e-276 8.168092e-194 9.142506e-140
+[6,]    2    1    0    0  0.000000e+00  0.000000e+00  0.000000e+00
+``` 
+
+
+### GWASlogBFMinThreshold
+
+This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are 'multivariate significant'. As described in Stephens 2013, each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model's BF, where weights are determined from the previous univariate GWAS SNPs (eq. 8 in Stephens 2013). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.
+```
+> bmassResults$GWASlogBFMinThreshold
+[1] 4.289906
+```
+
+So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` analysis has a BFavg value >= 4.289906 (and is also more than a 1Mb window away from a previous univariate GWAS SNP). 
+
 
 
 
