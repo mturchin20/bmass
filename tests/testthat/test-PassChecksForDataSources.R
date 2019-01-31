@@ -1,4 +1,4 @@
-context("CheckDataSources")
+context("Tests for PassChecksForDataSources.R")
 
 data(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs)
 DataSources <- c("bmass_TestData1", "bmass_TestData2")

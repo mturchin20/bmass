@@ -1,0 +1,30 @@
+context("Tests for bmass.R") 
+
+#library("devtools"); devtools::load_all("/home/mturchin20/project/Lab_Stuff/StephensLab/bmass");
+#bmass_TestData1 <- read.table("bmass_TestData1.txt", header=T)
+#bmass_TestData2 <- read.table("bmass_TestData2.txt", header=T)
+#bmass_TestSigSNPs <- read.table("bmass_TestSigSNPs.txt", header=T)
+#DataSources <- c("bmass_TestData1", "bmass_TestData2")
+#bmass_Output <- bmass(DataSources, bmass_TestSigSNPs) 
+
+data(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs)
+DataSources <- c("bmass_TestData1", "bmass_TestData2")
+bmass_TestData1 <- bmass_TestData1[bmass_TestData1$pValue > 0,]
+bmass_TestData2 <- bmass_TestData2[bmass_TestData2$pValue > 0,]
+
+assign("bmass_TestData1", bmass_TestData1, envir = .GlobalEnv)
+assign("bmass_TestData2", bmass_TestData2, envir = .GlobalEnv)
+assign("bmass_Output", bmass(DataSources, bmass_TestSigSNPs), envir = .GlobalEnv)
+assign("bmass_Output_ZScoresCorMatrix", c(1.0000000,0.5972347,0.5972347,1.0000000), envir = .GlobalEnv)
+assign("bmass_Output_GWASlogBFMinThreshold", 7.41173, envir = .GlobalEnv)
+assign("bmass_Output_PreviousSNPs_SNP1", 12.53854, envir = .GlobalEnv)
+assign("bmass_Output_MarginalSNPs_SNP1", 6.257912, envir = .GlobalEnv)
+
+test_that("bmass runs the main bmass function", {
+	expect_equal(c(bmass_Output$ZScoresCorMatrix), bmass_Output_ZScoresCorMatrix, tolerance=1e-6)
+	expect_equal(bmass_Output$GWASlogBFMinThreshold, bmass_Output_GWASlogBFMinThreshold, tolerance=1e-6)
+	expect_equal(bmass_Output$PreviousSNPs$SNPs$logBFWeightedAvg[1], bmass_Output_PreviousSNPs_SNP1, tolerance=1e-6)
+	expect_equal(bmass_Output$MarginalSNPs$SNPs$logBFWeightedAvg[3], bmass_Output_MarginalSNPs_SNP1, tolerance=1e-6)
+})
+
+rm(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs, bmass_Output, bmass_Output_ZScoresCorMatrix, bmass_Output_GWASlogBFMinThreshold, bmass_Output_PreviousSNPs_SNP1, bmass_Output_MarginalSNPs_SNP1, envir = .GlobalEnv)

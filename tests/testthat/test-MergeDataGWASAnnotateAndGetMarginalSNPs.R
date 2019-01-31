@@ -1,10 +1,5 @@
 context("Tests for MergeDataGWASAnnotateAndGetMarginalSNPs.R")
 
-#library("devtools"); devtools::load_all("/home/mturchin20/project/Lab_Stuff/StephensLab/bmass");
-#bmass_TestData1 <- read.table("bmass_TestData1.txt", header=T)
-#bmass_TestData2 <- read.table("bmass_TestData2.txt", header=T)
-#bmass_TestSigSNPs <- read.table("bmass_TestSigSNPs.txt", header=T)
-
 data(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs)
 DataSources <- c("bmass_TestData1", "bmass_TestData2")
 ExpectedColumnNames <- c("Chr", "BP", "A1", "MAF", "Direction", "pValue", "N") 
