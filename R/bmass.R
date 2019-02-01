@@ -14,14 +14,17 @@
 #' @param PrintMergedData A logical TRUE/FALSE flag that indicates whether the intermediary 'merged datafile' should be included in the final bmass output; this file combines all the phenotypes for every SNP provided just prior to thresholding for marginally significant SNPs. Default is FALSE. 
 #' @param PrintProgress A logical TRUE/FALSE flag that indicates whether progress statements should be printed to stderr() during the course of running bmass() or not. Default is FALSE.
 #'
-#' @return A list containing model, SNP, and posterior information for both the previously significant univariate SNPs ("PreviousSNPs") and the newly significant multivariate SNPs ("NewSNPs"). For a full breakdown of the bmass() output list structure, please see the associated README and/or vignettes. 
+#' @return A list containing model, SNP, and posterior information for both the previously significant univariate SNPs ("PreviousSNPs") and the newly significant multivariate SNPs ("NewSNPs"). For a full breakdown of the bmass() output list structure, please see the associated vignettes. 
 #'
 #' @examples
+#' \dontrun{
 #' bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, NminThreshold = 50000) 
 #' bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshValue = 1e-8, NminThreshold = 50000, PrintProgress=TRUE) 
 #' bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE, SNPMarginalUnivariateThreshold = 1e-4, SNPMarginalMultivariateThreshold = 1e-4, PrintMergedData = TRUE) 
 #' bmassOutput <- list(); bmassOutput <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, NminThreshold = 50000) 
+#' }
 #'
+#' @export
 bmass <- function (DataSources, GWASsnps = NULL, MergedDataSources = NULL, ZScoresCorMatrix = NULL, ExpectedColumnNames = c("Chr", "BP", "Marker", "MAF", "A1", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = TRUE, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=FALSE, PrintProgress=FALSE, bmassSeedValue=1) {
 
         bmassOutput <- list()

@@ -40,8 +40,12 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, SigmaAlphas, 
 #' @return A matrix containing each model that was a SNP's top model at least once, along with related information; this matrix is appended to the input ListSNPs as a new object, "TopModels" (the full returned object is a list containing the input ListSNPs and the input LogFile)
 #'
 #' @examples
+#' \dontrun{
 #' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
 #' bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+#' }
+#'
+#' @export
 GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMatrix, LogFile) {
 
 	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Running GetTopModelsPerSNPViaPosteriors().", sep=""))
@@ -80,8 +84,12 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 #' @return A list containing three matrices of SNPs x Phenotypes marginal posteriors for each category \{U,D,I\}; this list is appended to the input ListSNPs as a new object, "Posteriors" (the full returned object is a list containing the input ListSNPs and the input LogFile)
 #'
 #' @examples
+#' \dontrun{
 #' GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
 #' bmassOutput[c("NewSNPs", "LogFile")] <- GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+#' }
+#'
+#' @export
 GetMarginalPosteriors <- function (DataSources, ListSNPs, Models, LogFile) {
 	
 	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Running GetMarginalPosteriors().", sep=""))
