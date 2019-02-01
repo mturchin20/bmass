@@ -9,3 +9,4 @@ vignettes/my-vignette.Rmd
 temp/
 R/GetResultsFromMarginalSNPsAndFormat.OrgiCopy.JustForGWASThreshInterimPeriod.R
 R/ResultsFollowupAnalysisAndPlotting.20180919.CopyForNonPublishingFunctions.R
+vignettes/*html
