@@ -1,4 +1,3 @@
-#Annotating merged data with, if provided, GWAS SNPs
 AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500000) {
         GWASannot1 <- rep(0, nrow(MergedDataSource1))
         for (snpIndex in 1:nrow(GWASsnps1)) {

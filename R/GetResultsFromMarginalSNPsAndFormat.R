@@ -1,4 +1,4 @@
-##collapse takes a vector that is nsigmmaa stacked m-vectors, and adds them together to produce a single m vector (averages over values of sigmaa)
+#This function expects columns from nSigmaAlphas stacked Model x SNP matrices of posterior probabilities, such that a single column (ie single SNP) is converted to a Model x nSigmaAlphas matrix and summed across rows for a single posterior probability per Model (eg the 'marginal' of across all sigma_alphas)  
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
         CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
         return(CollapsedInputs)
@@ -32,6 +32,8 @@ CheckForAndReplaceZeroes <- function(x) {
 #log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes)) + apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max)
 #matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)[seq.int(1, by=2, length.out=3),]
 #Test removing matrix of max values too? What about SigmaAlpa_Coordinates part?
+
+#This function is expecting nSigmaAlphas Model x SNP matrices of logBFs stacked ontop of one another. ModelPriors_Matrix is a matrix containing the vector of model priors (ModelPriors = one set of model priors * nSigmaAlphas) replicated as a column for each snp. 
 GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGammas, nSigmaAlphas) {
 	WeightedSumAcrossAlphaSigmas <- matrix(0, ncol=ncol(logBFs1), nrow=nGammas)
         for (i in 1:nGammas) {
