@@ -120,8 +120,9 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
                 ModelPriors_Used <- Prior_FlatUnif
 
         } else if (is.null(GWASsnps) && UseFlatPriors == FALSE) {
-		#20171017 CHECK_0 -- Prob: Throw an error/fail thing here
-		PH <- 1
+		#20171017 20190204 CHECK_1 -- Prob: Throw an error/fail thing here Soln: Made 'stop()' calls
+		stop("Error 1a (GetResultsFromMarginalSNPsAndFormat.R) -- code does not currently accept 'UseFlatPrior == FALSE' while not providing a list of GWAS snps (ie is.null(GWASsnps) == TRUE); please rerun with different argument options"); 
+#		PlaceHolder1 <- 1
 	} else {
 	
 		if (!is.null(bmassSeedValue)) {
@@ -142,8 +143,8 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) 
 		} 
 		else {
-			#20171017 CHECK_0 -- Prob: Throw an error/fail thing here
-			PH <- 1
+			#20171017 20190204 CHECK_1 -- Prob: Throw an error/fail thing here Soln: Made 'stop()' calls
+			stop("Error 2a (GetResultsFromMarginalSNPsAndFormat.R) -- Unexpected conditional outcome, 'if (GWASThreshFlag)' nor 'if (!GWASThreshFlag)' are true");
 		}
 
                 Prior_PreviousSNPsEB <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors, 100) #Vector with nModels*nSigmaAlphas entries
@@ -169,8 +170,8 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		} else if (!GWASThreshFlag) {
 			PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1,]
 		} else {
-			#20171017 CHECK_0 -- Prob: Throw an error/fail thing here
-			PH <- 1
+			#20171017 20190204 CHECK_1 -- Prob: Throw an error/fail thing here Soln: Made 'stop()' calls
+			stop("Error 2b (GetResultsFromMarginalSNPsAndFormat.R) -- Unexpected conditional outcome, 'if (GWASThreshFlag)' nor 'if (!GWASThreshFlag)' are true");
 		}	
 	
 		if (dim(PreviousSNPs$SNPs)[1] > 0) {
