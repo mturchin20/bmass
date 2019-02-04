@@ -16,5 +16,5 @@ WriteLogFile <- function(OutputFileBase, OutputData) {
 
 WriteTableLogFile <- function(OutputFileBase, OutputData) {
 	FileNameLog <- paste(OutputFileBase, ".bmass.log", sep="")
-	write.table(OutputData, file=FileNameLog, append=TRUE, row.names=FALSE, quote=FALSE)
+	utils::write.table(OutputData, file=FileNameLog, append=TRUE, row.names=FALSE, quote=FALSE)
 }

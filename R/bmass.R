@@ -2,14 +2,12 @@
 #'
 #' Run bmass on a set of phenotypes that each have univariate GWAS statistics on the same set of SNPs 
 #' 
-#' @usage bmass <- function (DataSources, GWASsnps = NULL, GWASThreshFlag = FALSE, GWASThreshValue = 5e-8, NminThreshold = 0)
-#"
 #' @param DataSources A string indicating the variable names of the input datafiles and phenotypes 
 #' @param GWASsnps A data.table containing rows of SNPs that were univariate genome-wide significant in the phenotypes being used for analysis; GWASsnps input file should have two columns, one for chromosome and another for basepair position (with column headers of "Chr" and "BP")
 #' @param GWASThreshFlag A logical TRUE/FALSE flag that indicates whether to threshold input GWASsnps list by a univariate GWAS p-value or not (eg the input GWASsnps list contains variants that are significant from discovery + replication data, but the input summary statistics are just from the discovery cohort). Default is TRUE. 
 #' @param GWASThreshValue A numerical value indicating the univariate p-value threshold to use in conjunction with the GWASThreshFlag. Default is 5e-8. 
 #' @param SNPMarginalUnivariateThreshold A numerical value indicating the univariate p-value threshold to use when collecting marginally significant SNPs for final bmass analysis. Default is 1e-6.  
-#' @param SNPMarginalUnivariateThreshold A numerical value indicating the basic multivariate p-value threshold to use when collecting marginally significant SNPs for final bmasss analysis. Default is 1e-6.
+#' @param SNPMarginalMultivariateThreshold A numerical value indicating the basic multivariate p-value threshold to use when collecting marginally significant SNPs for final bmasss analysis. Default is 1e-6.
 #' @param NminThreshold A numerical value that indicates a sample size threshold to use where SNPs below which are removed. Default is 0.
 #' @param PrintMergedData A logical TRUE/FALSE flag that indicates whether the intermediary 'merged datafile' should be included in the final bmass output; this file combines all the phenotypes for every SNP provided just prior to thresholding for marginally significant SNPs. Default is FALSE. 
 #' @param PrintProgress A logical TRUE/FALSE flag that indicates whether progress statements should be printed to stderr() during the course of running bmass() or not. Default is FALSE.
@@ -25,7 +23,18 @@
 #' }
 #'
 #' @export
-bmass <- function (DataSources, GWASsnps = NULL, MergedDataSources = NULL, ZScoresCorMatrix = NULL, ExpectedColumnNames = c("Chr", "BP", "Marker", "MAF", "A1", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors=NULL, UseFlatPriors=FALSE, GWASThreshFlag = TRUE, GWASThreshValue = 5e-8, NminThreshold = 0, PruneMarginalSNPs=TRUE, PruneMarginalSNPs_bpWindow=5e5, PrintMergedData=FALSE, PrintProgress=FALSE, bmassSeedValue=1) {
+bmass <- function (DataSources, GWASsnps = NULL, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, GWASThreshFlag = TRUE, GWASThreshValue = 5e-8, NminThreshold = 0, PrintMergedData=FALSE, PrintProgress=FALSE, ...) {
+
+	MergedDataSources <- dots::dots('MergedDataSources', NULL, ...)
+	ZScoresCorMatrix <- dots::dots('ZScoresCorMatrix', NULL, ...)
+	ExpectedColumnNames <- dots::dots('ExpectedColumnNames', c("Chr", "BP", "Marker", "MAF", "A1", "Direction", "pValue", "N"), ...)
+	GWASsnps_AnnotateWindow <- dots::dots('GWASsnps_AnnotateWindow', 5e5, ...)
+	SigmaAlphas <- dots::dots('SigmaAlphas', c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ...)
+	ProvidedPriors <- dots::dots('ProvidedPriors', NULL, ...)
+	UseFlatPriors <- dots::dots('UseFlatPriors', NULL, ...)
+	PruneMarginalSNPs <- dots::dots('PruneMarginalSNPs', TRUE, ...)
+	PruneMarginalSNPs_bpWindow <- dots::dots('PruneMarginalSNPs_bpWindow', 5e5, ...)
+	bmassSeedValue <- dots::dots('bmassSeedValue', 1, ...)
 
         bmassOutput <- list()
 	bmassOutput$MergedDataSources <- NULL
@@ -99,4 +108,3 @@ bmass <- function (DataSources, GWASsnps = NULL, MergedDataSources = NULL, ZScor
 	return(bmassOutput)
 
 }
-

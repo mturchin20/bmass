@@ -15,7 +15,7 @@ AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500
 }
 
 GetZScoreAndDirection <- function(DataSources1) {
-        ZScore <- qnorm(log(as.numeric(as.character(DataSources1["pValue"]))/2), lower.tail=FALSE, log.p=TRUE);
+        ZScore <- stats::qnorm(log(as.numeric(as.character(DataSources1["pValue"]))/2), lower.tail=FALSE, log.p=TRUE);
         if (DataSources1["Direction"] == "-") {
                 ZScore <- ZScore * -1;
         }
@@ -176,7 +176,7 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
 
 	#If no input `ZScoresCorMatrix`, then should be `NULL`
         if (is.null(ZScoresCorMatrix)) {
-		ZScoresCorMatrix <- cor(ZScoresNullset)
+		ZScoresCorMatrix <- stats::cor(ZScoresNullset)
 	}
 
         LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Determining initial threshold statistics.", sep=""))
@@ -184,12 +184,12 @@ ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources
         ZScoresCorMatrix_Inverse <- chol2inv(chol(ZScoresCorMatrix))
         ZScoresFull_mvstat <- rowSums(ZScoresFull * (ZScoresFull %*% ZScoresCorMatrix_Inverse))
         MergedDataSources$mvstat <- ZScoresFull_mvstat
-        ZScoresFull_mvstat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_mvstat, df=ncol(ZScoresFull), log.p=TRUE, lower.tail=FALSE)
+        ZScoresFull_mvstat_log10pVal <- -log10(exp(1))*stats::pchisq(ZScoresFull_mvstat, df=ncol(ZScoresFull), log.p=TRUE, lower.tail=FALSE)
         MergedDataSources$mvstat_log10pVal <- ZScoresFull_mvstat_log10pVal
 
         ZScoresFull_unistat <- apply(ZScoresFull^2, 1, max)
         MergedDataSources$unistat <- ZScoresFull_unistat
-        ZScoresFull_unistat_log10pVal <- -log10(exp(1))*pchisq(ZScoresFull_unistat, df=1, log.p=TRUE, lower.tail=FALSE)
+        ZScoresFull_unistat_log10pVal <- -log10(exp(1))*stats::pchisq(ZScoresFull_unistat, df=1, log.p=TRUE, lower.tail=FALSE)
         MergedDataSources$unistat_log10pVal <- ZScoresFull_unistat_log10pVal
 
         #Creating subset of marginally significant SNPs using SNPMarginalUnivariateThreshold and SNPMarginalMultivariateThreshold

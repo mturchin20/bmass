@@ -23,6 +23,9 @@ A matrix containing each model that was a SNP's top model at least once, along w
 Get a summary of the top models per SNP across all multivariate \{U,D,I\} combinations based on posterior probabilities
 }
 \examples{
+\dontrun{
 GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
 bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+}
+
 }

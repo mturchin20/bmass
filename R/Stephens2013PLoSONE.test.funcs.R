@@ -8,11 +8,13 @@
 # thus Pr(given configuration) = pi if configuration is null,
 # and (1-pi) (1/d) (1/(d1+d2)) d0! d1! d2!/d!
 computeprior = function(z,pi){
-	dvec = tabulate(z+1,nbin=3)
+	dvec = tabulate(z+1,nbins=3)
  	d = length(z)
  	return(ifelse(dvec[2]>0,(1-pi)*(1/d) * (1/(dvec[2]+dvec[3])) * 1/choose(d, dvec[1]) * 1/choose(d-dvec[1],dvec[2]), 0))
 }
 
+#picks out the partition gamma with all 1s (ie all in D)
+allones = function(gamma){return(prod(gamma==1))}
 
 #this function is similar to the "from summaries" function
 #but allows us to deal with the fact that n may be different for each SNP
