@@ -31,4 +31,9 @@ DataSources <- c("bmass_TestData1", "bmass_TestData2")
 #
 #})
 
+#Don't forget to test the following in the 'basic R' test file
+#test_that("Check merge() functionality", {
+#
+#})
+
 rm(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs, envir = .GlobalEnv)

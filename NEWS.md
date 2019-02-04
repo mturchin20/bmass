@@ -1,6 +1,46 @@
 # Version News and Updates
 
 Version updates will be tracked and explained here. Major updates & releases will be particularly highlighted.
+    
+## bmass v0.1.3
+
+###### Summary
+* Finished cleaning up all main comments leftover in every `*.R` file
+* Added in `Roxygen2` comments and the first vignette, and finished creating unit tests
+* Went through `devtools::check()` results and made required edits
+
+###### Since previous version (v0.1.2)
+* Cleaned comments & formatting from `bmass.R`, `Stephens2013PLoSONE.globallipids.GLCfuncs.R`, & `Stephens2013PLoSONE.test.funcs.R`
+* In `bmass.R` changed `GWASThreshFlag` from `0/1` to `FALSE/TRUE`
+  * Mmade related changes to `DetermineAndApplyPriors` in `GetResultsFromMarginalSNPsAndFormat.R`
+  * Switched `GWASThreshFlag` to default as `TRUE`
+* In `ResultsFollowupAnalysisAndPlotting.R` removed a large number of the functions that were potentially more manuscript-specific and likely to become deprecated (most of which were plotting-related)
+* Moved any `library()` calls to proper use of `Imports` in `DESCRIPTION` file
+
+###### Notes
+* Dealt with CHECK_0's in `GetResultsFromMarginalSNPsAndFormat.R` (ie `CHECK_0 -- Prob: Throw an error/fail thing here`)
+* In `bmass.R` changed `PrintLogStatements` to `PrintProgress` 
+* In `bmass.R` removed the loadings of `library(ggplot2)` and `library(reshape2)` 
+* In `bmass.R` removed the commented out `ExploreBestModelsUsingPosteriors()`
+* In `bmass.R` & main `bmass()` call added `"A1"` to `ExpectedColumnNames`
+
+###### Next steps (if applicable)
+* Finish doing necessary prep and checks for CRAN package submission
+* Setup and connect Travis CI to git repo
+* Change output of Matthew's code to use logBFs vs. lbf, and align with overall style of bmass wherever else applicable
+* Fix `Models` and `ModelPriors` outputs to more user-friendly versions
+  * Put phenotype names on top of `Models` and possibly condense `ModelPriors` across all the SigmaAlphas
+* Create second vignette on how to run `bmass()` with some data already created (ie a merged dataset, a phenotype correlation matrix, and priors)
+  * Include note that, if provided, `ZScoresCorMatrix` should have the same phenotype order as `DataSources` 
+* Finish unit tests in `test-ResultsFollowupAnalysisAndPlotting.R`, particularly evaluate issues with `GetTopModelsPerSNPViaPosteriors`
+* Finish unit tests in `test-Stephens2013PLoSONE.globallipids.GLCfuncs.R` and `test-Stephens2013PLoSONE.test.funcs.R`
+* Finish `merge()` unit tests in `tests/testthat/test-BasicRFunctionality.R`
+* Flesh out `CheckMergedDataSources` as an analogue to `CheckIndividualDataSources` for when a merged dataset is provided.
+* Double-check new `PassChecksForDataSources.R` additions
+  * Put in new checks for `Marker` column, input `MergeDataSources` file, etc... as well
+* Include check that all datasets have same A1 (in `MergeDataGWASAnnotateAndGetMarginalSNPs.R`) & that A1 part of `ExpectedColumnNames` 
+* Check/correct how `write(...stderr())` is functioning in `bmass.R` (since it seems like that might not be occuring like I was expecting it to?) 
+
 
 ## bmass v0.1.2
 
@@ -11,15 +51,7 @@ Version updates will be tracked and explained here. Major updates & releases wil
 * Followed up on a number of previous suggested comments/edits from prior work
 * Added in `GWASThreshFlag` & `GWASThreshValue` functionality
 
-[//]: # "* 20180827 NOTE -- keeping comments such as this one for the upcoming push for posterity, but will remove them afterwards unless they are explicitly going to be continued in development (eg if it's clear the issue has been decided against, will just remove the comment describing the situation afterwards)"
-
-[//]: # "* 20161106 HAVEN'T DONE THIS YET, WILL NEED TO IF ANNOTATEGWASSNPS JUST TAKES TOO LONG EG CANT ALL BE ONE FUNCTION CALL Split up data-preprocessing section from main `bmass()` call; 20171018 note sure if still keen/intend on doing this immediately? possibly a /very/ more down-the-line type of thing, or something for a future method that'll build off of this (like bmass + MASH thing); 20180827 moving towards a bare minimum 'more work', clean version of the current state, so considerations like this likely to be pushed towards next major version overhaul barring the consideration being quite immediatelyt necessary;" 
-
 ###### Since previous version (v0.1.1)
-
-[//]: # "* 20161106 HAVEN'T DONE THIS YET Changed `` in `GetSumAcrossSigmaAlphas_withPriors` to not replace 1s but simply check if there were multiple 1s summed across the number of SigmaAlphas expected. To have nSigmaAlpha 1s, eg 15 1s, would imply the original logBFs were all 0, and the 'summed' value should still be 1 so that converting back to log10 produces 0 and not log10(15). Currently I just replace any 1 with 0 automatically on the non-log scale, but it could conceivably happen that some BFs could be 1 across the SigmaAlphas, so to change that to 0 may be incorrect. 20171018 -- I don't think I'm actually going to do this now; I think keeping the check for 1s and then NegInfs is fine, and Matthew naturally avoided these issues by just summing over /all/ models for a given variant after de-logging each one (eg beyond unlikely every entry for a prior * logBF across all models for a variant would be 0)." 
-
-[//]: # "20171017 NOTE -- not sure what this is referring to since the history of the file/functions mentioned have always been separated. Feels like it's referring to `MergeDataSources` and `AnnotateMergedDataWithGWASSNPs` but they were separated from the start? * 20161106 HAVE DONE THIS BUT NEED TO EXPLAIN RESULT HERE Separating `MergeData___` from `___` in main `bmass()` call since the two parts take very different times, ie former is long while latter it short.; 20180827 -- I vaguely recall this occuring earlier on, but there is no committed versions or changes showing this progression or logic early on in the file histories of the repo. However, for posterity, I will be adding in a comment that alludes to this happening since the previous version, though it may be a bit off the mark. This comment here will also be included and then removed afterwards."
 * Separated `MergeDataSources()` from `AnnotateMergedDataWithGWASSNPs()` in main `bmass()` call since the two parts take very different times, ie former is longer than the latter.
 * Changed `AnnotateDataWithGWASSNPs` to a quicker version where the loop is over the GWAS SNPs and not the merged dataset; taking advantage of in-line conditional statements as well for row selection.
 * Included new flag `PrintMergedData` to indicate whether `bmassOutput$MergedDataSources` should be included as part of the output and not made `NULL`. This would be for whether a user wants to save a copy of `MergedDataSources` and reuse it for later runs. 
@@ -33,17 +65,9 @@ Version updates will be tracked and explained here. Major updates & releases wil
   * Also now checking and dropping SNPs that appear 'fixed' in dataset, eg MAF is equal to 0.
 * Moved MAF checks (eg if MAF <= .5, if fixed (0 or 1), etc...) to `CheckIndividualDataSources` section.
   * Added in `CheckDataSourceMAFIsMAF` and `CheckDataSourceMAFFixed` functions.
-
-[//]: # "20180827 NOTE -- realized the below two comments (which were earlier in the file) refer to the decision made just below, so moving them here for proper organization and then removing them after the next commit/push"
-
-[//]: # "20170105 NOTE -- maybe don't correct? Instead throw error and fail, saying that input should be forced to MAF and all files oriented towards that?" 
-
-[//]: # "20170125 NOTE -- decided, definitely don't correct this and remove this section/part of the code. Just drop/exit like before. Include a section in the 'checkdatafiles' to take care of this"
   * Additionally, now just quitting program if there are fixed SNPs or SNPs that are still > .5; rather have the user fix their datasets and make sure things are correct rather than doing processing mid-package/functions
 
 ###### Notes
-
-[//]: # "20171017 NOTE -- not sure what this was refering to? * 20170219 Fixed `NewSNPs$LogBFs` & `NewSNPs$Posteriors` line of `FinalizeAndFormatResults` in `GetResultsFromMarginalSNPsAndFormat.R` to properly combine the list of models first and then the proper subset of columns from `MarginalSNPs`."
 * Moved `bmass.devlog.vs1.txt` to `bmass.devlog.vs1.md`.
 * Changed adding max * length to just add max in `GetSumAcrossSigmaAlphas_withPriors`.
 * Moved to data.frame column calls via `$` from atomic vector style calling in `AnnotateDataWithGWASSNPs` after move away from `apply` function.
@@ -62,8 +86,6 @@ Version updates will be tracked and explained here. Major updates & releases wil
   * Put in new checks for `Marker` column, input `MergeDataSources` file, etc... as well
 * Finish cleaning up comments/edits from offline/pre-dissertation work
   * Start adding in necessary portions for proper R-package structure/eventual CRAN-submission (eg fleshed-out Roxygen2 comments, unit tests, vignettes, necessary additional datafiles for sections such as the unit tests and vignettes, etc...) 
-
-[//]: # "20180828 NOTE -- the following '*' had been included as if it had already been done, but checking code looks like it was started by not finished; pushing this to the next version since just want to check-in everything that's been done up until this point, but keeping the original message here to be used for later: 'Included check that all datasets have same A1; all datasets should be oriented to the same reference allele.'"
 * Include check that all datasets have same A1 & that A1 part of `ExpectedColumnNames` 
 * Move towards getting v1.0.0 prepared
 

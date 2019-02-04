@@ -120,7 +120,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
                 ModelPriors_Used <- Prior_FlatUnif
 
         } else if (is.null(GWASsnps) && UseFlatPriors == FALSE) {
-		#20171017 20190204 CHECK_1 -- Prob: Throw an error/fail thing here Soln: Made 'stop()' calls
 		stop("Error 1a (GetResultsFromMarginalSNPsAndFormat.R) -- code does not currently accept 'UseFlatPrior == FALSE' while not providing a list of GWAS snps (ie is.null(GWASsnps) == TRUE); please rerun with different argument options"); 
 #		PlaceHolder1 <- 1
 	} else {
@@ -143,7 +142,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 			PreviousSNPs_logBFs_Stacked <- as.matrix(MarginalSNPs_logBFs_Stacked[,MarginalSNPs$SNPs$GWASannot==1]) 
 		} 
 		else {
-			#20171017 20190204 CHECK_1 -- Prob: Throw an error/fail thing here Soln: Made 'stop()' calls
 			stop("Error 2a (GetResultsFromMarginalSNPsAndFormat.R) -- Unexpected conditional outcome, 'if (GWASThreshFlag)' nor 'if (!GWASThreshFlag)' are true");
 		}
 
@@ -170,7 +168,6 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		} else if (!GWASThreshFlag) {
 			PreviousSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs$SNPs$GWASannot==1,]
 		} else {
-			#20171017 20190204 CHECK_1 -- Prob: Throw an error/fail thing here Soln: Made 'stop()' calls
 			stop("Error 2b (GetResultsFromMarginalSNPsAndFormat.R) -- Unexpected conditional outcome, 'if (GWASThreshFlag)' nor 'if (!GWASThreshFlag)' are true");
 		}	
 	
@@ -192,7 +189,6 @@ FinalizeAndFormatResults <- function(DataSources, MarginalSNPs, PreviousSNPs, GW
 	MarginalSNPs_logBFs_Stacked <- MarginalSNPs$logBFs
 
         if (PruneMarginalSNPs == TRUE) {
-                #20160901 20180829 CHECK_1 -- Prob: Go over indepthits function, rewrite, or just lightly edit? redo names, double-check functionality? def get some unit testing in there Soln: not going to rewrite (for now), but pushing this into the rest of the 'to create unit tests for' notes I'm taking at the moment
                 MarginalSNPs_PrunedList <- indephits(MarginalSNPs$SNPs$logBFWeightedAvg, MarginalSNPs$SNPs$Chr, MarginalSNPs$SNPs$BP, T=PruneMarginalSNPs_bpWindow)
                 MarginalSNPs$SNPs <- MarginalSNPs$SNPs[MarginalSNPs_PrunedList==1,]
                 MarginalSNPs_logBFs_Stacked <- MarginalSNPs_logBFs_Stacked[,MarginalSNPs_PrunedList==1]

@@ -61,6 +61,10 @@ test_that("Check %in% functionality regarding TRUE/FALSE vectors", {
 	expect_equal(FALSE %in% VectorOfTrueFalse, TRUE)
 })
 
+#test_that("Check merge() functionality", {
+#
+#})
+
 test_that("Check basic LogFile functionality works", {
 	expect_equal(matrix(rbind(LogTest1, LogTest1)), LogTest2)
 })
