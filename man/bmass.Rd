@@ -28,6 +28,8 @@ bmass(DataSources, GWASsnps = NULL,
 \item{PrintMergedData}{A logical TRUE/FALSE flag that indicates whether the intermediary 'merged datafile' should be included in the final bmass output; this file combines all the phenotypes for every SNP provided just prior to thresholding for marginally significant SNPs. Default is FALSE.}
 
 \item{PrintProgress}{A logical TRUE/FALSE flag that indicates whether progress statements should be printed to stderr() during the course of running bmass() or not. Default is FALSE.}
+
+\item{...}{Additional optional arguments.}
 }
 \value{
 A list containing model, SNP, and posterior information for both the previously significant univariate SNPs ("PreviousSNPs") and the newly significant multivariate SNPs ("NewSNPs"). For a full breakdown of the bmass() output list structure, please see the associated vignettes.

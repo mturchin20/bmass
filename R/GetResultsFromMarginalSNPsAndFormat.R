@@ -89,6 +89,13 @@ GetLogBFsFromData <- function(DataSources, MarginalSNPs, ZScoresCorMatrix, Sigma
 
 }
 
+#' DetermineAndApplyPriors
+#'
+#' DetermineAndApplyPriors
+#' 
+#' @keywords internal
+#'
+#' @importFrom stats pnorm runif
 DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAlphas, Models, ModelPriors, ProvidedPriors, UseFlatPriors, GWASThreshFlag, GWASThreshValue, bmassSeedValue, LogFile) {
 
 	MarginalSNPs_logBFs_Stacked <- MarginalSNPs$logBFs	
@@ -100,7 +107,7 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 	ZScoreHitFlag1 <- c()
 	if (GWASThreshFlag) {
 		ZScoreHitFlag1 <- rep(0, nrow(MarginalSNPs$SNPs))
-		ZScoreHitFlag1[2*stats::pnorm(apply(abs(MarginalSNPs$SNPs[,grep("ZScore", colnames(MarginalSNPs$SNPs))]),1,max),0,1,lower.tail=FALSE) < GWASThreshValue] <- 1
+		ZScoreHitFlag1[2*pnorm(apply(abs(MarginalSNPs$SNPs[,grep("ZScore", colnames(MarginalSNPs$SNPs))]),1,max),0,1,lower.tail=FALSE) < GWASThreshValue] <- 1
 	}
 
 	if (!is.null(ProvidedPriors)) {
@@ -146,7 +153,7 @@ DetermineAndApplyPriors <- function(DataSources, MarginalSNPs, GWASsnps, SigmaAl
 		}
 
                 Prior_PreviousSNPsEB <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors, 100) #Vector with nModels*nSigmaAlphas entries
-                Prior_PreviousSNPsEB_check2 <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors*stats::runif(length(ModelPriors)), 100)
+                Prior_PreviousSNPsEB_check2 <- em.priorprobs(PreviousSNPs_logBFs_Stacked, ModelPriors*runif(length(ModelPriors)), 100)
 
                 MarginalSNPs_logBFs_Stacked_AvgwPrior <- lbf.av(MarginalSNPs_logBFs_Stacked, Prior_PreviousSNPsEB)
                 ModelPriors_Used <- Prior_PreviousSNPsEB

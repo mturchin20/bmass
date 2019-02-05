@@ -11,7 +11,7 @@
 #' @param NminThreshold A numerical value that indicates a sample size threshold to use where SNPs below which are removed. Default is 0.
 #' @param PrintMergedData A logical TRUE/FALSE flag that indicates whether the intermediary 'merged datafile' should be included in the final bmass output; this file combines all the phenotypes for every SNP provided just prior to thresholding for marginally significant SNPs. Default is FALSE. 
 #' @param PrintProgress A logical TRUE/FALSE flag that indicates whether progress statements should be printed to stderr() during the course of running bmass() or not. Default is FALSE.
-#'
+#' @param ... Additional optional arguments.
 #' @return A list containing model, SNP, and posterior information for both the previously significant univariate SNPs ("PreviousSNPs") and the newly significant multivariate SNPs ("NewSNPs"). For a full breakdown of the bmass() output list structure, please see the associated vignettes. 
 #'
 #' @examples
@@ -23,18 +23,11 @@
 #' }
 #'
 #' @export
-bmass <- function (DataSources, GWASsnps = NULL, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, GWASThreshFlag = TRUE, GWASThreshValue = 5e-8, NminThreshold = 0, PrintMergedData=FALSE, PrintProgress=FALSE, ...) {
+bmass <- function (DataSources, GWASsnps = NULL, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, GWASThreshFlag = TRUE, GWASThreshValue = 5e-8, NminThreshold = 0, PrintMergedData = FALSE, PrintProgress = FALSE, ...) {
+	return(bmassMain(DataSources, GWASsnps, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, GWASThreshFlag, GWASThreshValue, NminThreshold, PrintMergedData, PrintProgress, ...));
+}
 
-	MergedDataSources <- dots::dots('MergedDataSources', NULL, ...)
-	ZScoresCorMatrix <- dots::dots('ZScoresCorMatrix', NULL, ...)
-	ExpectedColumnNames <- dots::dots('ExpectedColumnNames', c("Chr", "BP", "Marker", "MAF", "A1", "Direction", "pValue", "N"), ...)
-	GWASsnps_AnnotateWindow <- dots::dots('GWASsnps_AnnotateWindow', 5e5, ...)
-	SigmaAlphas <- dots::dots('SigmaAlphas', c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ...)
-	ProvidedPriors <- dots::dots('ProvidedPriors', NULL, ...)
-	UseFlatPriors <- dots::dots('UseFlatPriors', NULL, ...)
-	PruneMarginalSNPs <- dots::dots('PruneMarginalSNPs', TRUE, ...)
-	PruneMarginalSNPs_bpWindow <- dots::dots('PruneMarginalSNPs_bpWindow', 5e5, ...)
-	bmassSeedValue <- dots::dots('bmassSeedValue', 1, ...)
+bmassMain <- function (DataSources, GWASsnps, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, GWASThreshFlag, GWASThreshValue, NminThreshold, PrintMergedData, PrintProgress, MergedDataSources = NULL, ZScoresCorMatrix = NULL, ExpectedColumnNames = c("Chr", "BP", "Marker", "MAF", "A1", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors = NULL, UseFlatPriors = NULL, PruneMarginalSNPs = TRUE, PruneMarginalSNPs_bpWindow = 5e5, bmassSeedValue = 1) {
 
         bmassOutput <- list()
 	bmassOutput$MergedDataSources <- NULL
