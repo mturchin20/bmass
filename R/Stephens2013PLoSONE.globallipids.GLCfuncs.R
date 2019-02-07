@@ -84,4 +84,3 @@ lbf.all=function(lbf,gamma){
 	bfall = apply(10^lbf*all,2, sum)/nsigma 
 	return(log10(bfall)+max)
 }
-

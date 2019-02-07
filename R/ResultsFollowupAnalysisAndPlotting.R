@@ -16,13 +16,32 @@ CountModelClasses <- function(ModelEntries) {
 	return(c(Count0Class, Count1Class, Count2Class))
 }
 
-GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, SigmaAlphas, LogFile) {
+#' Get Model Prior Matrix
+#'
+#' Creates a matrix containing the model descriptions and their associated priors
+#' 
+#' @param DataSources A string indicating the variable names of the input datafiles and phenotypes
+#' @param Models A matrix describing the models being explored (default output from running bmass)
+#' @param ModelPriors A vector containing the priors on each model across each tranche of sigma alpha (default output from running bmass; length is # models * # of sigma alphas)
+#' @param LogFile A matrix of string outputs for function logging purposes (default output from running bmass) 
+#' @param SigmaAlphas A vector containing the different values traversed for this 'effect size controlling' hyperparameter (see "Prior on Sigma_Alpha" in Stephens 2013 PLoS ONE; default is c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15))
+#'
+#' @return A matrix containing the original description of each model sort by prior, each model's trained prior, the cummulative prior distribution, and the model's original order position 
+#"
+#' @examples
+#' \dontrun{
+#' GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
+#' bmassOutput[c("ModelPriorMatrix", "LogFile")] <- GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
+#' }
+#'
+#' @export
+GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, LogFile, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15)) {
 
 	ModelPriors.Collapsed <- CollapseSigmaAlphasTogether(ModelPriors, length(SigmaAlphas))
 
 	ModelPriorMatrix <- cbind(Models,ModelPriors.Collapsed)[order(ModelPriors.Collapsed, decreasing=TRUE),]
 	ModelPriorMatrix <- data.frame(cbind(ModelPriorMatrix, cumsum(ModelPriorMatrix[,(length(DataSources)+1)])), order(ModelPriors.Collapsed, decreasing=TRUE))
-	colnames(ModelPriorMatrix) <- c(DataSources, "pValue", "Cumm_pValue", "OrigOrder")
+	colnames(ModelPriorMatrix) <- c(DataSources, "Prior", "Cumm_Prior", "OrigOrder")
 
 	return(list(ModelPriorMatrix=ModelPriorMatrix, LogFile=LogFile))
 
@@ -34,15 +53,15 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, SigmaAlphas, 
 #' 
 #' @param DataSources A string indicating the variable names of the input datafiles and phenotypes 
 #' @param ListSNPs A list produced from running bmass containing the SNPs of interest to get marginal posteriors for
-#' @param ModelPriorMatrix A matrix detailing the models being explored and their associated priors (default output from running bmass)
+#' @param ModelPriorMatrix A matrix detailing the models being explored and their associated priors (obtained by running 'GetModelPriorMatrix()')
 #' @param LogFile A matrix of string outputs for function logging purposes (default output from running bmass)  
 #'
 #' @return A matrix containing each model that was a SNP's top model at least once, along with related information; this matrix is appended to the input ListSNPs as a new object, "TopModels" (the full returned object is a list containing the input ListSNPs and the input LogFile)
 #'
 #' @examples
 #' \dontrun{
-#' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-#' bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+#' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+#' bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
 #' }
 #'
 #' @export
@@ -102,4 +121,3 @@ GetMarginalPosteriors <- function (DataSources, ListSNPs, Models, LogFile) {
 	return(list(ListSNPs=ListSNPs, LogFile=LogFile))
 
 }
-

@@ -231,6 +231,7 @@ This is set of priors determined for each multivariate model using the previous 
 [1] 1134
 dim?
 head?
+show output from GetPriorMatrix here?
 > head(cbind(bmassResults$Models, matrix(bmassResults$ModelPriors, nrow=81, byrow=FALSE)))
      [,1] [,2] [,3] [,4]          [,5]          [,6]          [,7]
 [1,]    0    0    0    0  0.000000e+00  0.000000e+00  0.000000e+00

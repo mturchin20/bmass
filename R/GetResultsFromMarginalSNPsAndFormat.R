@@ -20,14 +20,6 @@ CheckForAndReplaceZeroes <- function(x) {
         return(returnValue1)
 }
 
-#apply(10^matrix(0, ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
-#apply(10^matrix(c(0,1), ncol=2, nrow=2), c(1,2), CheckForAndReplaceOnes)
-#log10(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes))
-#log10(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum))
-#log10(sapply(apply(apply(10^matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), c(1,2), CheckForAndReplaceOnes), 2, sum), CheckForAndReplaceZeroes))
-#matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE) - matrix(apply(matrix(c(0,1), ncol=2, nrow=2, byrow=TRUE), 2, max), ncol=2, nrow=2, byrow=TRUE)
-#matrix(c(1,2,3,4,5,6,7,8,9,10,11,12), ncol=2)[seq.int(1, by=2, length.out=3),]
-
 #This function is expecting nSigmaAlphas Model x SNP matrices of logBFs stacked ontop of one another. ModelPriors_Matrix is a matrix containing the vector of model priors (ModelPriors = one set of model priors * nSigmaAlphas) replicated as a column for each snp. 
 GetSumAcrossSigmaAlphas_withPriors <- function(logBFs1, ModelPriors_Matrix, nGammas, nSigmaAlphas) {
 	WeightedSumAcrossAlphaSigmas <- matrix(0, ncol=ncol(logBFs1), nrow=nGammas)
@@ -84,6 +76,7 @@ GetLogBFsFromData <- function(DataSources, MarginalSNPs, ZScoresCorMatrix, Sigma
         MarginalSNPs_logBFs <- compute.allBFs.fromZscores(ZScoresMarginal, ZScoresCorMatrix, MarginalSNPs$SNPs$Nmin, MarginalSNPs$SNPs$MAF, SigmaAlphas)
         MarginalSNPs_logBFs_Stacked <- do.call(rbind, MarginalSNPs_logBFs$lbf)
 	MarginalSNPs$logBFs <- MarginalSNPs_logBFs_Stacked
+	colnames(MarginalSNPs_logBFs$gamma) <- DataSources
 
 	return(list(MarginalSNPs=MarginalSNPs, Models=MarginalSNPs_logBFs$gamma, ModelPriors=MarginalSNPs_logBFs$prior, LogFile=LogFile))
 

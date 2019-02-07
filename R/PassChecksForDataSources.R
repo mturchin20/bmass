@@ -158,17 +158,3 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 	return(LogFile)
 }
-
-
-
-
-# @param DataSources input names of datasources
-# @param LogFile rbind'ing vector text output
-# @param ExpectedColumnNames Comma-separ
-
-# @param DataFileNames Comma-separated list of all the phenotypes (ie names associated with each datafile) being analyzed. This should be in the same order as DataFileLocations.
-# @param DataFileLocations Comma-separated list of all the datafile locations being analyzed. This should be in the same order as PhenotypeList.
-# @param ExpectedColumnNames Comma-separ
-
-
-

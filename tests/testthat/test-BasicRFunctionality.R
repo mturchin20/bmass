@@ -12,6 +12,8 @@ assign("bmass_ZeroMatrix", matrix(0, nrow=2, ncol=2), envir = .GlobalEnv)
 #TestEvalParseCommands1 <- paste("Testing This With ", LogTest1, sep="")
 #TestEvalParseCommands2 <- eval(parse(text=paste("Testing This With ", LogTest1, sep="")))
 #eval(parse(text=paste("TestEvalParseCommands3 <- Testing This With ", LogTest1, sep="")))
+assign("MergeTest1", c(6.0e-13,3.1e-02,1.0e-01,7.6e-02,3.0e-09,5.6e-03,1.0e-07,5.0e-08,7.2e-01,0.0e+00,6.1e-01,2.0e-13,5.1e-02,2.6e-01,8.6e-01,5.0e-09,7.6e-03,4.0e-07,9.0e-08,1.2e-01,0.0e+00,6.6e-01), envir = .GlobalEnv)
+assign("MergeTest2", c(2.0e-13,5.1e-02,2.6e-01,8.6e-01,5.0e-09,7.6e-03,4.0e-07,9.0e-08,1.2e-01,0.0e+00,6.6e-01,6.0e-13,3.1e-02,1.0e-01,7.6e-02,3.0e-09,5.6e-03,1.0e-07,5.0e-08,7.2e-01,0.0e+00,6.1e-01), envir = .GlobalEnv)
 
 test_that("Check basic R functionality", {
 	expect_equal(is.null(NULL), TRUE)
@@ -61,14 +63,13 @@ test_that("Check %in% functionality regarding TRUE/FALSE vectors", {
 	expect_equal(FALSE %in% VectorOfTrueFalse, TRUE)
 })
 
-#test_that("Check merge() functionality", {
-#
-#})
+test_that("Check merge() functionality", {
+	expect_equal(c(matrix(unlist(merge(bmass_TestData1[,c("Marker", "pValue")], bmass_TestData2[,c("Marker", "pValue")], by="Marker")[,2:3]))), MergeTest1, tolerance = 1e-6)
+	expect_equal(c(matrix(unlist(merge(bmass_TestData2[,c("Marker", "pValue")], bmass_TestData1[,c("Marker", "pValue")], by="Marker")[,2:3]))), MergeTest2, tolerance = 1e-6)
+})
 
 test_that("Check basic LogFile functionality works", {
 	expect_equal(matrix(rbind(LogTest1, LogTest1)), LogTest2)
 })
 
-rm(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs, bmass_ZeroMatrix, envir = .GlobalEnv)
-
-
+rm(bmass_TestData1, bmass_TestData2, bmass_TestSigSNPs, bmass_ZeroMatrix, MergeTest1, MergeTest2, envir = .GlobalEnv)
