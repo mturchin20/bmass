@@ -14,14 +14,13 @@ WriteLogFile <- function(OutputFileBase, OutputData) {
 	write(OutputData, file=FileNameLog, append=TRUE)
 }
 
-#' WriteTableLogFile
-#'
-#' WriteTableLogFile
-#' 
-#' @keywords internal
-#'
+# WriteTableLogFile
+# 
+# @keywords internal
+#
 #' @importFrom utils write.table
 WriteTableLogFile <- function(OutputFileBase, OutputData) {
 	FileNameLog <- paste(OutputFileBase, ".bmass.log", sep="")
-	write.table(OutputData, file=FileNameLog, append=TRUE, row.names=FALSE, quote=FALSE)
+	write.table(OutputData, file=FileNameLog, append=TRUE,
+                    row.names=FALSE, quote=FALSE)
 }

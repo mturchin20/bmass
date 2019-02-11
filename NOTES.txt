@@ -1,5 +1,20 @@
 notes
 =====
 
-+ Please do: Fill out README.
++ Please do: Fill out README. We have lots of good examples of this from
+  the Stephens lab; to start, see README in stephenslab/mixsqp repository.
+
++ Suggestion: Make sure roxygen2 docs are properly formatted (e.g., R
+  code should be inside \code{}). See mixsqp.R inside the
+  stephenslab/mixsqp repository for an example.
+
++ Please fix: Add an inst/CITATION file; see
+  github.com/stephenslab/mixsqp for an example.
+
++ Suggestion: Create a "release" on GitHub. (I can show you how.)
+
++ Suggestion: Create a pkgdown site, and activate GitHub Pages (see
+  https://github.com/stephenslab/mixsqp for an example of this). This
+  is easy to do once you have create the vignettes and roxygen2 docs
+  for your R functions.
 
