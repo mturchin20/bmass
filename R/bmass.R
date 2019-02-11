@@ -29,7 +29,8 @@
 #' indicating the basic multivariate p-value threshold to use when
 #' collecting marginally significant SNPs for final bmasss analysis.
 #' 
-#' @param NminThreshold A numerical value that indicates a sample size threshold to use where SNPs below which are removed.
+#' @param NminThreshold A numerical value that indicates a sample size
+#' threshold to use where SNPs below which are removed.
 #' 
 #' @param PrintMergedData A logical TRUE/FALSE flag that indicates
 #' whether the intermediary 'merged datafile' should be included in
@@ -61,7 +62,7 @@
 #' @export
 #' 
 bmass <- function (DataSources, GWASsnps = NULL, SNPMarginalUnivariateThreshold = 1e-6, SNPMarginalMultivariateThreshold = 1e-6, GWASThreshFlag = TRUE, GWASThreshValue = 5e-8, NminThreshold = 0, PrintMergedData = FALSE, PrintProgress = FALSE, ...) {
-	return(bmassMain(DataSources, GWASsnps, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, GWASThreshFlag, GWASThreshValue, NminThreshold, PrintMergedData, PrintProgress, ...));
+	return(bmassMain(DataSources, GWASsnps, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, GWASThreshFlag, GWASThreshValue, NminThreshold, PrintMergedData, PrintProgress, ...))
 }
 
 bmassMain <- function (DataSources, GWASsnps, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, GWASThreshFlag, GWASThreshValue, NminThreshold, PrintMergedData, PrintProgress, MergedDataSources = NULL, ZScoresCorMatrix = NULL, ExpectedColumnNames = c("Chr", "BP", "Marker", "MAF", "A1", "Direction", "pValue", "N"), GWASsnps_AnnotateWindow = 5e5, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15), ProvidedPriors = NULL, UseFlatPriors = NULL, PruneMarginalSNPs = TRUE, PruneMarginalSNPs_bpWindow = 5e5, bmassSeedValue = 1) {

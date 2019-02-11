@@ -8,7 +8,8 @@ GetTopModelsPerSNPViaPosteriors(DataSources, ListSNPs, ModelPriorMatrix,
   LogFile)
 }
 \arguments{
-\item{DataSources}{A string indicating the variable names of the input datafiles and phenotypes.}
+\item{DataSources}{A string indicating the variable names of the
+input datafiles and phenotypes.}
 
 \item{ListSNPs}{A list produced from running bmass containing the
 SNPs of interest to get marginal posteriors for.}

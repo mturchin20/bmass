@@ -37,7 +37,8 @@ summary statistics are just from the discovery cohort).}
 \item{GWASThreshValue}{A numerical value indicating the univariate
 p-value threshold to use in conjunction with the GWASThreshFlag.}
 
-\item{NminThreshold}{A numerical value that indicates a sample size threshold to use where SNPs below which are removed.}
+\item{NminThreshold}{A numerical value that indicates a sample size
+threshold to use where SNPs below which are removed.}
 
 \item{PrintMergedData}{A logical TRUE/FALSE flag that indicates
 whether the intermediary 'merged datafile' should be included in

@@ -14,12 +14,6 @@ AnnotateDataWithGWASSNPs <- function (MergedDataSource1, GWASsnps1, BPWindow=500
         return(GWASannot1)
 }
 
-#' GetZScoreAndDirection
-#'
-#' GetZScoreAndDirection
-#' 
-#' @keywords internal
-#'
 #' @importFrom stats qnorm
 GetZScoreAndDirection <- function(DataSources1) {
         ZScore <- qnorm(log(as.numeric(as.character(DataSources1["pValue"]))/2), lower.tail=FALSE, log.p=TRUE);
@@ -64,8 +58,6 @@ MergeDataSources <- function (DataSources, LogFile) {
                 if (nrow(MergedDataSources)==0) {
                         MergedDataSources <- eval(parse(text=CurrentDataSource))
                         MergedDataSources$ZScore <- apply(MergedDataSources[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
-#                       MergedDataSources$pValue <- NULL
-#                       MergedDataSources$Direction <- NULL
                         MergedDataSources_namesCurrent <- names(MergedDataSources)
                         MergedDataSources_namesNew <- c()
                         for (columnHeader1 in MergedDataSources_namesCurrent) {
@@ -80,8 +72,6 @@ MergeDataSources <- function (DataSources, LogFile) {
 		} else {
                         CurrentDataSource_temp <- eval(parse(text=paste(CurrentDataSource, "[,c(\"Chr\", \"BP\", \"A1\", \"Direction\", \"pValue\", \"N\")]", sep="")))
                         CurrentDataSource_temp$ZScore <- apply(CurrentDataSource_temp[,c("pValue", "Direction")], 1, GetZScoreAndDirection)
-#                       CurrentDataSource_temp$Direction <- NULL
-#                       CurrentDataSource_temp$pValue <- NULL
                         CurrentDataSource_temp_namesCurrent <- names(CurrentDataSource_temp)
                         CurrentDataSource_temp_namesNew <- c()
                         for (columnHeader1 in CurrentDataSource_temp_namesCurrent) {
@@ -92,10 +82,6 @@ MergeDataSources <- function (DataSources, LogFile) {
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_Chr <- NULL", sep="")))
                         eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_BP <- NULL", sep="")))
 			
-#			if (FALSE %in% eval(parse(text=paste("ifelse(MergedDataSources$A1==MergedDataSources$", CurrentDataSource, "_A1), TRUE, FALSE)))) {
-#
-#			}
-
 			eval(parse(text=paste("CurrentDataSource_temp$", CurrentDataSource, "_A1 <- NULL", sep="")))
                         MergedDataSources <- merge(MergedDataSources, CurrentDataSource_temp, by="ChrBP")
 
@@ -131,12 +117,6 @@ AnnotateMergedDataWithGWASSNPs <- function(MergedDataSources, GWASsnps, GWASsnps
 
 }
 
-#' ProcessMergedAndAnnotatedDataSources
-#'
-#' ProcessMergedAndAnnotatedDataSources
-#' 
-#' @keywords internal
-#'
 #' @importFrom stats cor pchisq
 ProcessMergedAndAnnotatedDataSources <- function (DataSources, MergedDataSources, ZScoresCorMatrix, SNPMarginalUnivariateThreshold, SNPMarginalMultivariateThreshold, LogFile) {
 

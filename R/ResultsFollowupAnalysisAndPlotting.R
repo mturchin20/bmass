@@ -68,7 +68,8 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, LogFile, Sigm
 #' multivariate \{U,D,I\} combinations based on posterior
 #' probabilities.
 #' 
-#' @param DataSources A string indicating the variable names of the input datafiles and phenotypes.
+#' @param DataSources A string indicating the variable names of the
+#' input datafiles and phenotypes.
 #' 
 #' @param ListSNPs A list produced from running bmass containing the
 #' SNPs of interest to get marginal posteriors for.

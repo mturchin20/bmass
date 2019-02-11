@@ -15,7 +15,6 @@ centered.lbf = function(lbf){
 	return(t(t(lbf) - apply(lbf,2,max)))
 }
 
-
 #compute posterior from prior and matrix of log10 bfs
 #lbf is nmodels by p snps
 #prior is nmodel vector
