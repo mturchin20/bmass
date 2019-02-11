@@ -10,7 +10,7 @@ notes
   other functions. See mixsqp.R inside the stephenslab/mixsqp
   repository for an example.
 
-+ Please fix: Add an inst/CITATION file; see
++ Please do: Add an inst/CITATION file; see
   github.com/stephenslab/mixsqp for an example.
 
 + Suggestion: Create a "release" on GitHub. (I can show you how.)
@@ -19,4 +19,7 @@ notes
   https://github.com/stephenslab/mixsqp for an example of this). This
   is easy to do once you have create the vignettes and roxygen2 docs
   for your R functions.
+
++ Suggestion: Fix up vignette so that rendering/"knitting" the
+  document will run the R code.
 

@@ -37,8 +37,12 @@ their associated priors.
 }
 \examples{
 \dontrun{
-GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
-bmassOutput[c("ModelPriorMatrix", "LogFile")] <- GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
+GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),bmassOutput$Models,
+                    bmassOutput$ModelPriors,bmassOutput$LogFile)
+bmassOutput[c("ModelPriorMatrix", "LogFile")] <-
+  GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),
+                      bmassOutput$Models,bmassOutput$ModelPriors,
+                      bmassOutput$LogFile)
 }
 
 }

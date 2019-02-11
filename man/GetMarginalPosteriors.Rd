@@ -32,8 +32,13 @@ phenotype belongs to categories \{U,D,I\} across each SNP
 }
 \examples{
 \dontrun{
-GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-bmassOutput[c("NewSNPs", "LogFile")] <- GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+                      bmassOutput$NewSNPs,bmassOutput$Models,
+                      bmassOutput$LogFile)
+bmassOutput[c("NewSNPs", "LogFile")] <-
+  GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+                        bmassOutput$NewSNPs,bmassOutput$Models,
+                        bmassOutput$LogFile)
 }
 
 }

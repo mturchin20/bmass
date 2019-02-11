@@ -65,11 +65,16 @@ univariate GWAS statistics on the same set of SNPs
 }
 \examples{
 \dontrun{
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, NminThreshold = 50000) 
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshValue = 1e-8, NminThreshold = 50000, PrintProgress=TRUE) 
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE, SNPMarginalUnivariateThreshold = 1e-4, SNPMarginalMultivariateThreshold = 1e-4, PrintMergedData = TRUE) 
+bmass(c("HDL","LDL","TG","TC"),GWASsnps,NminThreshold = 50000) 
+bmass(c("HDL","LDL","TG","TC"),GWASsnps,GWASThreshValue = 1e-8,
+  NminThreshold = 50000, PrintProgress = TRUE) 
+bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE,
+  SNPMarginalUnivariateThreshold = 1e-4,
+  SNPMarginalMultivariateThreshold = 1e-4,
+  PrintMergedData = TRUE) 
 bmassOutput <- list()
-bmassOutput <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, NminThreshold = 50000) 
+bmassOutput <- bmass(c("HDL","LDL","TG","TC"),
+  GWASsnps,NminThreshold = 50000) 
 }
 
 }

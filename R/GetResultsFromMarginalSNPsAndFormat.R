@@ -1,8 +1,8 @@
-#This function expects columns from nSigmaAlphas stacked Model x SNP
-#matrices of posterior probabilities, such that a single column (ie
-#single SNP) is converted to a Model x nSigmaAlphas matrix and summed
-#across rows for a single posterior probability per Model (eg the
-#'marginal' of across all sigma_alphas)
+# This function expects columns from nSigmaAlphas stacked Model x SNP
+# matrices of posterior probabilities, such that a single column (ie
+# single SNP) is converted to a Model x nSigmaAlphas matrix and summed
+# across rows for a single posterior probability per Model (eg the
+# "marginal" of across all sigma_alphas)
 CollapseSigmaAlphasTogether <- function (inputValues1, nSigmaAlphas) {
         CollapsedInputs <- apply(matrix(inputValues1, ncol=nSigmaAlphas, byrow=FALSE), 1, sum)
         return(CollapsedInputs)

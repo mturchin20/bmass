@@ -35,8 +35,12 @@ probabilities.
 }
 \examples{
 \dontrun{
-GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
-bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"),
+  bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,
+  bmassOutput$LogFile)
+bmassOutput[c("NewSNPs", "LogFile")] <-
+  GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
+  bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,bmassOutput$LogFile)
 }
 
 }

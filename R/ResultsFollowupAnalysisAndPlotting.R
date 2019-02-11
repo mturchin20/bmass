@@ -44,8 +44,12 @@ CountModelClasses <- function(ModelEntries) {
 #"
 #' @examples
 #' \dontrun{
-#' GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
-#' bmassOutput[c("ModelPriorMatrix", "LogFile")] <- GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
+#' GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),bmassOutput$Models,
+#'                     bmassOutput$ModelPriors,bmassOutput$LogFile)
+#' bmassOutput[c("ModelPriorMatrix", "LogFile")] <-
+#'   GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),
+#'                       bmassOutput$Models,bmassOutput$ModelPriors,
+#'                       bmassOutput$LogFile)
 #' }
 #'
 #' @export
@@ -89,8 +93,12 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, LogFile, Sigm
 #'
 #' @examples
 #' \dontrun{
-#' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
-#' bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+#' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"),
+#'   bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,
+#'   bmassOutput$LogFile)
+#' bmassOutput[c("NewSNPs", "LogFile")] <-
+#'   GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
+#'   bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,bmassOutput$LogFile)
 #' }
 #'
 #' @export
@@ -146,8 +154,13 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 #'
 #' @examples
 #' \dontrun{
-#' GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-#' bmassOutput[c("NewSNPs", "LogFile")] <- GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+#' GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+#'                       bmassOutput$NewSNPs,bmassOutput$Models,
+#'                       bmassOutput$LogFile)
+#' bmassOutput[c("NewSNPs", "LogFile")] <-
+#'   GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+#'                         bmassOutput$NewSNPs,bmassOutput$Models,
+#'                         bmassOutput$LogFile)
 #' }
 #'
 #' @export
