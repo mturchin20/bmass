@@ -5,6 +5,7 @@
 \alias{bmass_TestData2}
 \title{bmass Example Dataset 2}
 \format{A data frame with 11 rows and 9 variables:
+
 \describe{
   \item{Chr}{chromosome}
   \item{BP}{basepair position}
@@ -20,11 +21,8 @@ effect size, + or -}
 \source{
 Manually created
 }
-\usage{
-bmass_TestData2
-}
 \description{
 A manually created sample dataset for use in vignettes
-and unit tests
+and unit tests.
 }
-\keyword{datasets}
+\keyword{data}
