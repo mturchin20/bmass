@@ -12,7 +12,7 @@ GetTopModelsPerSNPViaPosteriors(DataSources, ListSNPs, ModelPriorMatrix,
 
 \item{ListSNPs}{A list produced from running bmass containing the SNPs of interest to get marginal posteriors for}
 
-\item{ModelPriorMatrix}{A matrix detailing the models being explored and their associated priors (default output from running bmass)}
+\item{ModelPriorMatrix}{A matrix detailing the models being explored and their associated priors (obtained by running 'GetModelPriorMatrix()')}
 
 \item{LogFile}{A matrix of string outputs for function logging purposes (default output from running bmass)}
 }
@@ -24,8 +24,8 @@ Get a summary of the top models per SNP across all multivariate \{U,D,I\} combin
 }
 \examples{
 \dontrun{
-GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
 }
 
 }

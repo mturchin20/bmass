@@ -74,14 +74,13 @@ Now with our four `GlobalLipids2013` files properly formatted and QCed, we are a
 
 ```
 library("bmass");
-library("devtools"); devtools::load_all("/home/mturchin20/project/Lab_Stuff/StephensLab/bmass");
 HDL <- read.table("jointGwasMc_HDL.formatted.QCed.txt.gz", header=T);
 LDL <- read.table("jointGwasMc_LDL.formatted.QCed.HDLMatch.txt.gz", header=T);
 TG <- read.table("jointGwasMc_TG.formatted.QCed.HDLMatch.txt.gz", header=T); 
 TC <- read.table("jointGwasMc_TC.formatted.QCed.HDLMatch.txt.gz", header=T);
-GWASsnps <- read.table("../data/GlobalLipids2013.GWASsnps.txt", header=T);
+load("bmassDirectory/data/GlobalLipids2013.GWASsnps.rda");
 Phenotypes <- c("HDL", "LDL", "TG", "TC");
-bmassResults <- bmass(Phenotypes, GWASsnps);
+bmassResults <- bmass(Phenotypes, GlobalLipids2013.GWASsnps);
 ```
 
 Note that to run `bmass` we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype's respective data file. Also note that you will see a warning that one or more of the `GlobalLipids2013` datafiles contains p-values smaller than the threshold at which R can handle converting them into logarthmic scale -- this is to be expected.  
@@ -213,34 +212,36 @@ This is a matrix displaying all the model combinations possible given the set of
 > dim(bmassResults$Models)
 [1] 81  4
 > head(bmassResults$Models)
-     [,1] [,2] [,3] [,4]
-[1,]    0    0    0    0
-[2,]    1    0    0    0
-[3,]    2    0    0    0
-[4,]    0    1    0    0
-[5,]    1    1    0    0
-[6,]    2    1    0    0
+     HDL LDL TG TC
+[1,]   0   0  0  0
+[2,]   1   0  0  0
+[3,]   2   0  0  0
+[4,]   0   1  0  0
+[5,]   1   1  0  0
+[6,]   2   1  0  0
 ``` 
 
 
 #### ModelPriors
 
-This is set of priors determined for each multivariate model using the previous univariate GWAS SNPs and an EM algorithm setup (see eq. 36 in Stephens 2013). Note that for any model which does not contain at least one phenotype in the directly associated category, the prior was automatically set to 0 (aside from the global null model of all phenotypes set to unassociated). 
+This is the set of trained priors determined for each multivariate model using the previous univariate GWAS SNPs and an EM algorithm (see eq. 36 in Stephens 2013). Note that for any model which does not contain at least one phenotype in the directly associated category, the prior was automatically set to 0 (aside from the global null model of all phenotypes set to unassociated). 
+
+Also note that ModelPriors contains a full set of model priors for each value of the hyperparameter sigma_alpha (see "Prior on sigma_alpha" in Stephens 2013); these values are stored in `SigmaAlphas`, and by default are set to `c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15)` (hence 81 models * 14 sigma_alphas = 1134 priors). To see a more interpretable form of the model priors, use the `GetModelPriorMatrix()` function as shown below.
 ```
 > length(bmassResults$ModelPriors)
 [1] 1134
-dim?
-head?
-show output from GetPriorMatrix here?
-> head(cbind(bmassResults$Models, matrix(bmassResults$ModelPriors, nrow=81, byrow=FALSE)))
-     [,1] [,2] [,3] [,4]          [,5]          [,6]          [,7]
-[1,]    0    0    0    0  0.000000e+00  0.000000e+00  0.000000e+00
-[2,]    1    0    0    0  0.000000e+00 1.524507e-270 1.032154e-247
-[3,]    2    0    0    0  0.000000e+00  0.000000e+00  0.000000e+00
-[4,]    0    1    0    0  0.000000e+00  0.000000e+00  0.000000e+00
-[5,]    1    1    0    0 8.712578e-276 8.168092e-194 9.142506e-140
-[6,]    2    1    0    0  0.000000e+00  0.000000e+00  0.000000e+00
+> bmassResults[c("ModelPriorMatrix", "LogFile")] <- GetModelPriorMatrix(Phenotypes, bmassResults$Models, bmassResults$ModelPriors, bmassResults$LogFile)
+> head(bmassResults$ModelPriorMatrix)
+  HDL LDL TG TC      Prior Cumm_Prior OrigOrder
+1   1   2  1  1 0.32744537  0.3274454        44
+2   1   2  2  1 0.13788501  0.4653304        53
+3   1   1  1  2 0.11727440  0.5826048        68
+4   1   1  1  1 0.07801825  0.6606230        41
+5   1   2  1  2 0.06210658  0.7227296        71
+6   2   1  2  2 0.05698876  0.7797184        78
 ``` 
+
+`ModelPriorMatrix` contains the model descriptions as provided in `Models` along with the combined trained priors across each sigma_alpha value; the `ModelPriomatrix` is sorted by decreasing model prior value and also shows the cumulative distribution of the priors as well as the original order position of each model.
 
 
 #### GWASlogBFMinThreshold
@@ -252,6 +253,3 @@ This is the empirical weighted average BF threshold (BFavg) used to determine wh
 ```
 
 So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` analysis has a BFavg value >= 4.289906 (and is also more than a 1Mb window away from a previous univariate GWAS SNP). 
-
-
-
