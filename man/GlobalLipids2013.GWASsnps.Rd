@@ -5,19 +5,17 @@
 \alias{GlobalLipids2013.GWASsnps}
 \title{GlobalLipids2013 GWAS SNPs}
 \format{A data frame with 157 rows and 2 variables:
+
 \describe{
   \item{Chr}{chromosome}
   \item{BP}{basepair position}
 }}
 \source{
-Supplementary Tables 2 and 3 from \url{https://www.nature.com/articles/ng.2797}
-}
-\usage{
-GlobalLipids2013.GWASsnps
+Supplementary Tables 2 and 3 from
+\url{https://www.nature.com/articles/ng.2797}.
 }
 \description{
-A list of the univariate GWAS significant SNPs from the 
-GlobalLipids2013 dataset to be used in the main bmass 
-vignette
+A list of the univariate GWAS significant SNPs from
+the GlobalLipids2013 dataset to be used in the main bmass vignette.
 }
-\keyword{datasets}
+\keyword{data}

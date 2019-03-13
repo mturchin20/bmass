@@ -16,25 +16,44 @@ CountModelClasses <- function(ModelEntries) {
 	return(c(Count0Class, Count1Class, Count2Class))
 }
 
-#' Get Model Prior Matrix
+#' @title Get Model Prior Matrix
 #'
-#' Creates a matrix containing the model descriptions and their associated priors
+#' @description Creates a matrix containing the model descriptions and
+#' their associated priors.
 #' 
-#' @param DataSources A string indicating the variable names of the input datafiles and phenotypes
-#' @param Models A matrix describing the models being explored (default output from running bmass)
-#' @param ModelPriors A vector containing the priors on each model across each tranche of sigma alpha (default output from running bmass; length is # models * # of sigma alphas)
-#' @param LogFile A matrix of string outputs for function logging purposes (default output from running bmass) 
-#' @param SigmaAlphas A vector containing the different values traversed for this 'effect size controlling' hyperparameter (see "Prior on Sigma_Alpha" in Stephens 2013 PLoS ONE; default is c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15))
+#' @param DataSources A string indicating the variable names of the
+#' input datafiles and phenotypes.
+#' 
+#' @param Models A matrix describing the models being explored
+#' (default output from running bmass).
+#' 
+#' @param ModelPriors A vector containing the priors on each model
+#' across each tranche of sigma alpha (default output from running
+#' bmass; length is number of models times number of of sigma alphas).
+#' 
+#' @param LogFile A matrix of string outputs for function logging
+#' purposes (default output from running bmass).
+#' 
+#' @param SigmaAlphas A vector containing the different values
+#' traversed for this 'effect size controlling' hyperparameter (see
+#' "Prior on Sigma_Alpha" in Stephens 2013 PLoS ONE.
 #'
-#' @return A matrix containing the original description of each model sort by prior, each model's trained prior, the cummulative prior distribution, and the model's original order position 
+#' @return A matrix containing the original description of each model
+#' sort by prior, each model's trained prior, the cummulative prior
+#' distribution, and the model's original order position.
 #"
 #' @examples
 #' \dontrun{
-#' GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
-#' bmassOutput[c("ModelPriorMatrix", "LogFile")] <- GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"), bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
+#' GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),bmassOutput$Models,
+#'                     bmassOutput$ModelPriors,bmassOutput$LogFile)
+#' bmassOutput[c("ModelPriorMatrix", "LogFile")] <-
+#'   GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),
+#'                       bmassOutput$Models,bmassOutput$ModelPriors,
+#'                       bmassOutput$LogFile)
 #' }
 #'
 #' @export
+#' 
 GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, LogFile, SigmaAlphas = c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15)) {
 
 	ModelPriors.Collapsed <- CollapseSigmaAlphasTogether(ModelPriors, length(SigmaAlphas))
@@ -47,24 +66,43 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, LogFile, Sigm
 
 }
 
-#' Get Top Multivariate Models
+#' @title Get Top Multivariate Models
 #'
-#' Get a summary of the top models per SNP across all multivariate \{U,D,I\} combinations based on posterior probabilities 
+#' @description Get a summary of the top models per SNP across all
+#' multivariate \{U,D,I\} combinations based on posterior
+#' probabilities.
 #' 
-#' @param DataSources A string indicating the variable names of the input datafiles and phenotypes 
-#' @param ListSNPs A list produced from running bmass containing the SNPs of interest to get marginal posteriors for
-#' @param ModelPriorMatrix A matrix detailing the models being explored and their associated priors (obtained by running 'GetModelPriorMatrix()')
-#' @param LogFile A matrix of string outputs for function logging purposes (default output from running bmass)  
+#' @param DataSources A string indicating the variable names of the
+#' input datafiles and phenotypes.
+#' 
+#' @param ListSNPs A list produced from running bmass containing the
+#' SNPs of interest to get marginal posteriors for.
+#' 
+#' @param ModelPriorMatrix A matrix detailing the models being
+#' explored and their associated priors (obtained by running
+#' 'GetModelPriorMatrix()')
+#' 
+#' @param LogFile A matrix of string outputs for function logging
+#' purposes (default output from running bmass).
 #'
-#' @return A matrix containing each model that was a SNP's top model at least once, along with related information; this matrix is appended to the input ListSNPs as a new object, "TopModels" (the full returned object is a list containing the input ListSNPs and the input LogFile)
+#' @return A matrix containing each model that was a SNP's top model
+#' at least once, along with related information; this matrix is
+#' appended to the input ListSNPs as a new object, "TopModels" (the
+#' full returned object is a list containing the input ListSNPs and
+#' the input LogFile).
 #'
 #' @examples
 #' \dontrun{
-#' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
-#' bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+#' GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"),
+#'   bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,
+#'   bmassOutput$LogFile)
+#' bmassOutput[c("NewSNPs", "LogFile")] <-
+#'   GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
+#'   bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,bmassOutput$LogFile)
 #' }
 #'
 #' @export
+#' 
 GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMatrix, LogFile) {
 
 	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Running GetTopModelsPerSNPViaPosteriors().", sep=""))
@@ -91,24 +129,42 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 
 }
 
-#' Get Marginal \{U,D,I\} Posteriors
+#' @title Get Marginal \{U,D,I\} Posteriors
 #'
-#' Get marginal posteriors for how much every individual phenotype belongs to categories \{U,D,I\} across each SNP
+#' @description Get marginal posteriors for how much every individual
+#' phenotype belongs to categories \{U,D,I\} across each SNP
 #' 
-#' @param DataSources A string indicating the variable names of the input datafiles and phenotypes 
-#' @param ListSNPs A list produced from running bmass containing the SNPs of interest to get marginal posteriors for
-#' @param Models A matrix describing the models being explored (default output from running bmass)
-#' @param LogFile A matrix of string outputs for function logging purposes (default output from running bmass)  
+#' @param DataSources A string indicating the variable names of the
+#' input datafiles and phenotypes.
+#' 
+#' @param ListSNPs A list produced from running bmass containing the
+#' SNPs of interest to get marginal posteriors for.
+#' 
+#' @param Models A matrix describing the models being explored
+#' (default output from running bmass).
+#' 
+#' @param LogFile A matrix of string outputs for function logging
+#' purposes (default output from running bmass).
 #'
-#' @return A list containing three matrices of SNPs x Phenotypes marginal posteriors for each category \{U,D,I\}; this list is appended to the input ListSNPs as a new object, "Posteriors" (the full returned object is a list containing the input ListSNPs and the input LogFile)
+#' @return A list containing three matrices of SNPs x Phenotypes
+#' marginal posteriors for each category \{U,D,I\}; this list is
+#' appended to the input ListSNPs as a new object, "Posteriors" (the
+#' full returned object is a list containing the input ListSNPs and
+#' the input LogFile).
 #'
 #' @examples
 #' \dontrun{
-#' GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-#' bmassOutput[c("NewSNPs", "LogFile")] <- GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+#' GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+#'                       bmassOutput$NewSNPs,bmassOutput$Models,
+#'                       bmassOutput$LogFile)
+#' bmassOutput[c("NewSNPs", "LogFile")] <-
+#'   GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+#'                         bmassOutput$NewSNPs,bmassOutput$Models,
+#'                         bmassOutput$LogFile)
 #' }
 #'
 #' @export
+#' 
 GetMarginalPosteriors <- function (DataSources, ListSNPs, Models, LogFile) {
 	
 	LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- Running GetMarginalPosteriors().", sep=""))

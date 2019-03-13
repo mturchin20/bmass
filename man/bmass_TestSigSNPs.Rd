@@ -5,6 +5,7 @@
 \alias{bmass_TestSigSNPs}
 \title{bmass Example GWAS SNPs}
 \format{A data frame with 2 rows and 2 variables:
+
 \describe{
   \item{Chr}{chromosome}
   \item{BP}{basepair position}
@@ -12,12 +13,8 @@
 \source{
 Manually created
 }
-\usage{
-bmass_TestSigSNPs
-}
 \description{
 A manually created list of GWAS significant SNPs to be
-used in conjunction with 'bmass_TestData1' and 
-'bmass_TestData2'
+used in conjunction with 'bmass_TestData1' and 'bmass_TestData2'.
 }
-\keyword{datasets}
+\keyword{data}

@@ -8,24 +8,48 @@ GetTopModelsPerSNPViaPosteriors(DataSources, ListSNPs, ModelPriorMatrix,
   LogFile)
 }
 \arguments{
-\item{DataSources}{A string indicating the variable names of the input datafiles and phenotypes}
+\item{DataSources}{A string indicating the variable names of the
+input datafiles and phenotypes.}
 
-\item{ListSNPs}{A list produced from running bmass containing the SNPs of interest to get marginal posteriors for}
+\item{ListSNPs}{A list produced from running bmass containing the
+SNPs of interest to get marginal posteriors for.}
 
+<<<<<<< HEAD
 \item{ModelPriorMatrix}{A matrix detailing the models being explored and their associated priors (obtained by running 'GetModelPriorMatrix()')}
+=======
+\item{ModelPriorMatrix}{A matrix detailing the models being
+explored and their associated priors (obtained by running
+'GetModelPriorMatrix()')}
+>>>>>>> 83f531beeaf20eebc0ea829d45b8c2d1aba4e785
 
-\item{LogFile}{A matrix of string outputs for function logging purposes (default output from running bmass)}
+\item{LogFile}{A matrix of string outputs for function logging
+purposes (default output from running bmass).}
 }
 \value{
-A matrix containing each model that was a SNP's top model at least once, along with related information; this matrix is appended to the input ListSNPs as a new object, "TopModels" (the full returned object is a list containing the input ListSNPs and the input LogFile)
+A matrix containing each model that was a SNP's top model
+at least once, along with related information; this matrix is
+appended to the input ListSNPs as a new object, "TopModels" (the
+full returned object is a list containing the input ListSNPs and
+the input LogFile).
 }
 \description{
-Get a summary of the top models per SNP across all multivariate \{U,D,I\} combinations based on posterior probabilities
+Get a summary of the top models per SNP across all
+multivariate \{U,D,I\} combinations based on posterior
+probabilities.
 }
 \examples{
 \dontrun{
+<<<<<<< HEAD
 GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
 bmassOutput[c("NewSNPs", "LogFile")] <- GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+=======
+GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"),
+  bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,
+  bmassOutput$LogFile)
+bmassOutput[c("NewSNPs", "LogFile")] <-
+  GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
+  bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,bmassOutput$LogFile)
+>>>>>>> 83f531beeaf20eebc0ea829d45b8c2d1aba4e785
 }
 
 }
