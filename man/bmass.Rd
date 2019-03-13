@@ -11,38 +11,70 @@ bmass(DataSources, GWASsnps = NULL,
   PrintMergedData = FALSE, PrintProgress = FALSE, ...)
 }
 \arguments{
-\item{DataSources}{A string indicating the variable names of the input datafiles and phenotypes}
+\item{DataSources}{A string indicating the variable names of the
+input datafiles and phenotypes.}
 
-\item{GWASsnps}{A data.table containing rows of SNPs that were univariate genome-wide significant in the phenotypes being used for analysis; GWASsnps input file should have two columns, one for chromosome and another for basepair position (with column headers of "Chr" and "BP")}
+\item{GWASsnps}{A data.table containing rows of SNPs that were
+univariate genome-wide significant in the phenotypes being used for
+analysis; GWASsnps input file should have two columns, one for
+chromosome and another for basepair position (with column headers
+of "Chr" and "BP").}
 
-\item{SNPMarginalUnivariateThreshold}{A numerical value indicating the univariate p-value threshold to use when collecting marginally significant SNPs for final bmass analysis. Default is 1e-6.}
+\item{SNPMarginalUnivariateThreshold}{A numerical value indicating
+the univariate p-value threshold to use when collecting marginally
+significant SNPs for final bmass analysis.}
 
-\item{SNPMarginalMultivariateThreshold}{A numerical value indicating the basic multivariate p-value threshold to use when collecting marginally significant SNPs for final bmasss analysis. Default is 1e-6.}
+\item{SNPMarginalMultivariateThreshold}{A numerical value
+indicating the basic multivariate p-value threshold to use when
+collecting marginally significant SNPs for final bmasss analysis.}
 
-\item{GWASThreshFlag}{A logical TRUE/FALSE flag that indicates whether to threshold input GWASsnps list by a univariate GWAS p-value or not (eg the input GWASsnps list contains variants that are significant from discovery + replication data, but the input summary statistics are just from the discovery cohort). Default is TRUE.}
+\item{GWASThreshFlag}{A logical TRUE/FALSE flag that indicates
+whether to threshold input GWASsnps list by a univariate GWAS
+p-value or not (eg the input GWASsnps list contains variants that
+are significant from discovery + replication data, but the input
+summary statistics are just from the discovery cohort).}
 
-\item{GWASThreshValue}{A numerical value indicating the univariate p-value threshold to use in conjunction with the GWASThreshFlag. Default is 5e-8.}
+\item{GWASThreshValue}{A numerical value indicating the univariate
+p-value threshold to use in conjunction with the GWASThreshFlag.}
 
-\item{NminThreshold}{A numerical value that indicates a sample size threshold to use where SNPs below which are removed. Default is 0.}
+\item{NminThreshold}{A numerical value that indicates a sample size
+threshold to use where SNPs below which are removed.}
 
-\item{PrintMergedData}{A logical TRUE/FALSE flag that indicates whether the intermediary 'merged datafile' should be included in the final bmass output; this file combines all the phenotypes for every SNP provided just prior to thresholding for marginally significant SNPs. Default is FALSE.}
+\item{PrintMergedData}{A logical TRUE/FALSE flag that indicates
+whether the intermediary 'merged datafile' should be included in
+the final bmass output; this file combines all the phenotypes for
+every SNP provided just prior to thresholding for marginally
+significant SNPs.}
 
-\item{PrintProgress}{A logical TRUE/FALSE flag that indicates whether progress statements should be printed to stderr() during the course of running bmass() or not. Default is FALSE.}
+\item{PrintProgress}{A logical TRUE/FALSE flag that indicates
+whether progress statements should be printed to stderr() during
+the course of running bmass() or not.}
 
 \item{...}{Additional optional arguments.}
 }
 \value{
-A list containing model, SNP, and posterior information for both the previously significant univariate SNPs ("PreviousSNPs") and the newly significant multivariate SNPs ("NewSNPs"). For a full breakdown of the bmass() output list structure, please see the associated vignettes.
+A list containing model, SNP, and posterior information for
+both the previously significant univariate SNPs ("PreviousSNPs")
+and the newly significant multivariate SNPs ("NewSNPs"). For a full
+breakdown of the bmass() output list structure, please see the
+associated vignettes.
 }
 \description{
-Run bmass on a set of phenotypes that each have univariate GWAS statistics on the same set of SNPs
+Run bmass on a set of phenotypes that each have
+univariate GWAS statistics on the same set of SNPs
 }
 \examples{
 \dontrun{
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, NminThreshold = 50000) 
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshValue = 1e-8, NminThreshold = 50000, PrintProgress=TRUE) 
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE, SNPMarginalUnivariateThreshold = 1e-4, SNPMarginalMultivariateThreshold = 1e-4, PrintMergedData = TRUE) 
-bmassOutput <- list(); bmassOutput <- bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, NminThreshold = 50000) 
+bmass(c("HDL","LDL","TG","TC"),GWASsnps,NminThreshold = 50000) 
+bmass(c("HDL","LDL","TG","TC"),GWASsnps,GWASThreshValue = 1e-8,
+  NminThreshold = 50000, PrintProgress = TRUE) 
+bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE,
+  SNPMarginalUnivariateThreshold = 1e-4,
+  SNPMarginalMultivariateThreshold = 1e-4,
+  PrintMergedData = TRUE) 
+bmassOutput <- list()
+bmassOutput <- bmass(c("HDL","LDL","TG","TC"),
+  GWASsnps,NminThreshold = 50000) 
 }
 
 }

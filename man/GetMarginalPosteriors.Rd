@@ -7,24 +7,38 @@
 GetMarginalPosteriors(DataSources, ListSNPs, Models, LogFile)
 }
 \arguments{
-\item{DataSources}{A string indicating the variable names of the input datafiles and phenotypes}
+\item{DataSources}{A string indicating the variable names of the
+input datafiles and phenotypes.}
 
-\item{ListSNPs}{A list produced from running bmass containing the SNPs of interest to get marginal posteriors for}
+\item{ListSNPs}{A list produced from running bmass containing the
+SNPs of interest to get marginal posteriors for.}
 
-\item{Models}{A matrix describing the models being explored (default output from running bmass)}
+\item{Models}{A matrix describing the models being explored
+(default output from running bmass).}
 
-\item{LogFile}{A matrix of string outputs for function logging purposes (default output from running bmass)}
+\item{LogFile}{A matrix of string outputs for function logging
+purposes (default output from running bmass).}
 }
 \value{
-A list containing three matrices of SNPs x Phenotypes marginal posteriors for each category \{U,D,I\}; this list is appended to the input ListSNPs as a new object, "Posteriors" (the full returned object is a list containing the input ListSNPs and the input LogFile)
+A list containing three matrices of SNPs x Phenotypes
+marginal posteriors for each category \{U,D,I\}; this list is
+appended to the input ListSNPs as a new object, "Posteriors" (the
+full returned object is a list containing the input ListSNPs and
+the input LogFile).
 }
 \description{
-Get marginal posteriors for how much every individual phenotype belongs to categories \{U,D,I\} across each SNP
+Get marginal posteriors for how much every individual
+phenotype belongs to categories \{U,D,I\} across each SNP
 }
 \examples{
 \dontrun{
-GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-bmassOutput[c("NewSNPs", "LogFile")] <- GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"), bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
+GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+                      bmassOutput$NewSNPs,bmassOutput$Models,
+                      bmassOutput$LogFile)
+bmassOutput[c("NewSNPs", "LogFile")] <-
+  GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
+                        bmassOutput$NewSNPs,bmassOutput$Models,
+                        bmassOutput$LogFile)
 }
 
 }
