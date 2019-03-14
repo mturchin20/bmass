@@ -4,13 +4,12 @@ author: "Michael C Turchin"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{bmass-intro}
+  %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-This is an introductory example of how to run `bmass`. In this
-introductory example, we will:
+This is an introductory example of how to run `bmass`. In this introductory example, we will:
 
 * Download our example dataset
 * Quality control (QC) & format our example dataset
@@ -19,13 +18,12 @@ introductory example, we will:
 
 ## Downloading `GlobalLipids2013`
 
-For this vigenette, we will be download and analyze the
-`GlobalLipids2013` dataset. To download the necessary files from
-http://csg.sph.umich.edu/willer/public/lipids2013/, run the following:
+For this vigenette, we will be download and analyze the `GlobalLipids2013` dataset. To download the necessary files from http://csg.sph.umich.edu/willer/public/lipids2013/, run the following:
 
 ```
 mkdir my-directory/GlobalLipids2013
 cd my-directory/GlobalLipids2013
+
 wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_LDL.txt.gz
 wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_HDL.txt.gz
 wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TG.txt.gz
@@ -34,27 +32,11 @@ wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TC.txt.gz
 
 ## Formatting & QC'ing our dataset
 
-To run bmass, it is recommended that at least a minimal level of QC is
-performed on the datasets of interest. Additionally, it is important
-that all the single nucleotide polymorphisms (SNPs) being analyzed are
-oriented to the same reference allele across all the phenotypes being
-included. This latter situation is emphasized so that the correct
-direction of effect is assigned to each phenotype for a given SNP
-(which is oriented based on reference allele).
+To run bmass, it is recommended that at least a minimal level of QC is performed on the datasets of interest. Additionally, it is important that all the single nucleotide polymorphisms (SNPs) being analyzed are oriented to the same reference allele across all the phenotypes being included. This latter situation is emphasized so that the correct direction of effect is assigned to each phenotype for a given SNP (which is oriented based on reference allele).
 
-Below is example bash code on how to reformat, conduct some basic QC,
-and orient the reference alleles on the `GlobalLipids2013`
-dataset. First, we will reformat our input datafiles to match the
-requirements for `bmass`. `bmass` expects input files to have the
-following columns: Chromosome, Basepair, Marker ID, Minor Allele
-Frequency (MAF), Reference Allele, Alternative Allele, Direction of
-Effect, p-Value, and Sample Size (N).
+Below is example bash code on how to reformat, conduct some basic QC, and orient the reference alleles on the `GlobalLipids2013` dataset. First, we will reformat our input datafiles to match the requirements for `bmass`. `bmass` expects input files to have the following columns: Chromosome, Basepair, Marker ID, Minor Allele Frequency (MAF), Reference Allele, Alternative Allele, Direction of Effect, p-Value, and Sample Size (N). 
 
-To create files that match these specifications, we will conduct the
-following: extract the columns that are needed, orient SNPs to the
-minor allele, and extract the direction of effect from the provided
-effect sizes.
-
+To create files that match these specifications, we will conduct the following: extract the columns that are needed, orient SNPs to the minor allele, and extract the direction of effect from the provided effect sizes.
 ```
 zcat jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_HDL.formatted.txt.gz 
 
@@ -259,12 +241,9 @@ Also note that ModelPriors contains a full set of model priors for each value of
 6   2   1  2  2 0.05698876  0.7797184        78
 ``` 
 
-<<<<<<< HEAD
 `ModelPriorMatrix` contains the model descriptions as provided in `Models` along with the combined trained priors across each sigma_alpha value; the `ModelPriomatrix` is sorted by decreasing model prior value and also shows the cumulative distribution of the priors as well as the original order position of each model.
 
 
-=======
->>>>>>> 83f531beeaf20eebc0ea829d45b8c2d1aba4e785
 #### GWASlogBFMinThreshold
 
 This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are 'multivariate significant'. As described in Stephens 2013, each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model's BF, where weights are determined from the previous univariate GWAS SNPs (eq. 8 in Stephens 2013). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.
