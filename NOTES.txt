@@ -1,7 +1,7 @@
 notes
 =====
 
-+ Please do: Fill out README. We have lots of good examples of this from
+Working On + Please do: Fill out README. We have lots of good examples of this from
   the Stephens lab; to start, see README in stephenslab/mixsqp repository.
 
 + Please do: Make sure roxygen2 docs are properly formatted (e.g., R
@@ -10,18 +10,32 @@ notes
   other functions. See mixsqp.R inside the stephenslab/mixsqp
   repository for an example.
 
-+ Please do: Add an inst/CITATION file; see
+FINISHED + Please do: Add an inst/CITATION file; see
   github.com/stephenslab/mixsqp for an example.
 
-+ Suggestion: Create a "release" on GitHub. (I can show you how.)
+Working On + Suggestion: Create a "release" on GitHub. (I can show you how.)
 
-+ Suggestion: Create a pkgdown site, and activate GitHub Pages (see
+Working On + Suggestion: Create a pkgdown site, and activate GitHub Pages (see
   https://github.com/stephenslab/mixsqp for an example of this). This
   is easy to do once you have create the vignettes and roxygen2 docs
   for your R functions.
 
-+ Suggestion: Fix up vignette so that rendering/"knitting" the
+Working On + Suggestion: Fix up vignette so that rendering/"knitting" the
   document will run the R code.
 
 + Suggestion: Likewise, it would be helpful if some of the examples
   where not inside "dontrun" so that we know that they actually run!
+
+Working On + Please Do: 1. Fill out the README with basic details about the package. See for example:
+  https://github.com/stephenslab/mixsqp
+  https://github.com/stephenslab/smashr
+
++ Please Do: 2. Make sure roxygen2 docs are properly formatted, particularly code &
+  equations.
+
+Working on + Please Do: 3. Make the vignette and examples all runable---which is a great way to have
+  tests "for free"!  In particular, it would be great if you could create a
+  vignette that allows someone to "jump right in" to learning about bmass
+  without having to follow all these tedious preprocessing steps. The vignette
+  doesn't need to be long (I would say a short intro is best).
+
