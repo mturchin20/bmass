@@ -1,0 +1,15 @@
+citHeader("To cite the bmass package in publications, please use:")
+
+citEntry(entry   = "Unpublished",
+	title   = 
+		paste("Bayesian multivariate re-analysis of large", 
+		"genetic studies identifies many new associations"),
+	author  = "Michael C Turchin and Matthew Stephens",
+	journal = "bioRxiv",
+	note    = "#####",
+	year    = "2019",
+	textVersion = 
+		paste("Michael C Turchin and Matthew Stephens (2019).", 
+		"Bayesian multivariate re-analysis of large genetic", 
+		"studies identifies many new associations.", 
+		"bioRxiv:#####."))
