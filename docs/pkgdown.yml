@@ -1,5 +1,7 @@
 pandoc: 2.3.1
 pkgdown: 1.3.0
 pkgdown_sha: ~
-articles: []
+articles:
+  bmassIntro.1.SimulatedData: bmassIntro.1.SimulatedData.html
+  bmassIntro.2.RealData: bmassIntro.2.RealData.html
 

@@ -94,22 +94,22 @@
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#bmass-bayesian-multivariate-analysis-of-summary-statistics" class="anchor"></a>bmass: Bayesian multivariate analysis of summary statistics</h1></div>
 
-<p>The bmass R package provides accessible functions for running the algorithms described in [Stephens 2013 PLoS ONE][stephens2013] and applied to multiple large, publicly available GWAS datasets in [Turchin and Stephens 2019][biorxiv-paper]. bmass conducts a Bayesian multivariate analysis of GWAS data using univariate association summary statistics. Output inclues whether any new SNPs are found as multivariate genome-wide significant as well as posterior probabilities of each significant SNP’s assignment to different multivariate models.</p>
-<p>For more details on the results of applying bmass to publicly available GWAS datasets, please see [our paper on bioRxiv][biorxiv-paper]. For details regarding the underlying algorthims of bmass, please see [Stephens 2013 PLoS ONE][stephens2013].</p>
-<p>If you find a bug, or you have a question or feedback on our work, please post an [issue][issues].</p>
+<p>The bmass R package provides accessible functions for running the algorithms described in <a href="https://doi.org/10.1371/journal.pone.0065245">Stephens 2013 PLoS ONE</a> and applied to multiple large, publicly available GWAS datasets in <a href="https://www.biorxiv.org/">Turchin and Stephens 2019</a>. bmass conducts a Bayesian multivariate analysis of GWAS data using univariate association summary statistics. Output inclues whether any new SNPs are found as multivariate genome-wide significant as well as posterior probabilities of each significant SNP’s assignment to different multivariate models.</p>
+<p>For more details on the results of applying bmass to publicly available GWAS datasets, please see <a href="https://www.biorxiv.org/">our paper on bioRxiv</a>. For more details regarding the underlying algorthims of bmass, please see <a href="https://doi.org/10.1371/journal.pone.0065245">Stephens 2013 PLoS ONE</a>.</p>
+<p>If you find a bug, or you have a question or feedback on our work, please post an <a href="https://github.com/mturchin20/bmass/issues">issue</a>.</p>
 <div id="citing-this-work" class="section level2">
 <h2 class="hasAnchor">
 <a href="#citing-this-work" class="anchor"></a>Citing this work</h2>
 <p>If you find the bmass package or any of the source code in this repository useful for your work, please cite:</p>
 <blockquote>
-<p>Michael Turchin and Matthew Stephens (2019) <em>Bayesian multivariate re-analysis of large genetic studies identifies many new associations.</em> [bioRxiv:#####][biorxiv-paper].</p>
+<p>Michael Turchin and Matthew Stephens (2019) <em>Bayesian multivariate re-analysis of large genetic studies identifies many new associations.</em> <a href="https://www.biorxiv.org/">bioRxiv:#####</a>.</p>
 </blockquote>
 </div>
 <div id="license" class="section level2">
 <h2 class="hasAnchor">
 <a href="#license" class="anchor"></a>License</h2>
 <p>Copyright (c) 2016-2019, Michael Turchin and Matthew Stephens.</p>
-<p>All source code and software in this repository are made available under the terms of the [MIT license][mit-license]. See file <a href="LICENSE">LICENSE</a> for the full text of the license.</p>
+<p>All source code and software in this repository are made available under the terms of the <a href="https://opensource.org/licenses/mit-license.html">MIT license</a>. See file <a href="LICENSE">LICENSE</a> for the full text of the license.</p>
 </div>
 <div id="quick-start" class="section level2">
 <h2 class="hasAnchor">
@@ -118,13 +118,12 @@
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"bmass"</span>)</a></code></pre></div>
 <p>Once you have installed the package, load the package in R:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(bmass)</a></code></pre></div>
-<p>Next, view and run the example code provided in the first <a href="http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html">introductory vignette</a> using simulated data. A second, more advanced <a href="http://mturchin20.github.io/bmass/articles/bmassIntro.2.RealData.html">introductory vignette</a> is also available that involves downloading, processing, and analyzing the [GlobalLipids 2013][globallipids2013] data.</p>
+<p>Next, view and run the example code provided in the first <a href="http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html">introductory vignette</a> using simulated data. A second, more advanced <a href="http://mturchin20.github.io/bmass/articles/bmassIntro.2.RealData.html">introductory vignette</a> is also available that involves downloading, processing, and analyzing the <a href="http://csg.sph.umich.edu/willer/public/lipids2013/">GlobalLipids 2013</a> data.</p>
 </div>
 <div id="credits" class="section level2">
 <h2 class="hasAnchor">
 <a href="#credits" class="anchor"></a>Credits</h2>
-<p>The bmass R package was developed by [Michael Turchin][michaelt] at the [University of Chicago][uchicago], with contributions from [Peter Carbonetto][peter] and [Matthew Stephens][matthew], and based on the R code provided in [Stephens 2013 PLoS ONE][stephens2013].</p>
-<p>[biorxiv-paper]: [globallipids2013]: <a href="http://csg.sph.umich.edu/willer/public/lipids2013/" class="uri">http://csg.sph.umich.edu/willer/public/lipids2013/</a> [issues]: <a href="https://github.com/mturchin20/bmass/issues" class="uri">https://github.com/mturchin20/bmass/issues</a> [matthew]: <a href="http://stephenslab.uchicago.edu" class="uri">http://stephenslab.uchicago.edu</a> [michaelt]: <a href="http://home.uchicago.edu/mturchin20/index.html" class="uri">http://home.uchicago.edu/mturchin20/index.html</a> [mit-license]: <a href="https://opensource.org/licenses/mit-license.html" class="uri">https://opensource.org/licenses/mit-license.html</a> [peter]: <a href="https://pcarbo.github.io" class="uri">https://pcarbo.github.io</a> [stephens2013]: <a href="https://doi.org/10.1371/journal.pone.0065245" class="uri">https://doi.org/10.1371/journal.pone.0065245</a> [uchicago]: <a href="https://www.uchicago.edu" class="uri">https://www.uchicago.edu</a></p>
+<p>The bmass R package was developed by <a href="http://home.uchicago.edu/mturchin20/index.html">Michael Turchin</a> at the <a href="https://www.uchicago.edu">University of Chicago</a>, with contributions from <a href="https://pcarbo.github.io">Peter Carbonetto</a> and <a href="http://stephenslab.uchicago.edu">Matthew Stephens</a>, and based on the R code provided in <a href="https://doi.org/10.1371/journal.pone.0065245">Stephens 2013 PLoS ONE</a>.</p>
 </div>
 </div>
   </div>
@@ -164,6 +163,7 @@
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://travis-ci.org/mturchin20/bmass"><img src="https://travis-ci.org/mturchin20/bmass.svg?branch=master" alt="Travis Build Status"></a></li>
+<li><a href="https://travis-ci.org/stephenslab/mixsqp"><img src="https://travis-ci.org/stephenslab/mixsqp.svg?branch=master" alt="Travis Build Status"></a></li>
 </ul>
 </div>
 </div>
