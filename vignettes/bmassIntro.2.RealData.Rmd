@@ -84,7 +84,7 @@ join <(zcat jointGwasMc_HDL.formatted.QCed.txt.gz | awk '{ print $1 "_" $2 "\t" 
 
 Now with our four `GlobalLipids2013` files properly formatted and QCed, we are able to run `bmass`. To do so, we will also need the list of published univariate GWAS SNPs from the `GlobalLipids2013` publication (presented as two columns per SNP, chromosome and basepair position) -- these have been provided in the `data` subdirectory (`GlobalLipids2013.GWASsnps.txt`). To run `bmass` with our prepared input datafiles and our list of univariate GWAS SNPs, we run the following R code:
 
-```
+```{r eval=FALSE}
 library("bmass");
 HDL <- read.table("jointGwasMc_HDL.formatted.QCed.txt.gz", header=T);
 LDL <- read.table("jointGwasMc_LDL.formatted.QCed.HDLMatch.txt.gz", header=T);
@@ -101,7 +101,7 @@ Note once again that to run `bmass` we supply a vector of phenotype names that a
 ## Accessing & exploring results
 
 `bmass` returns a list containing multiple areas of information, including separate sublists pertaining to the previous univariate GWAS SNPs used for training the multivariate model priors and the new multivariate SNPs (if any) bmass has idenfitifed as significant. Run `summary(bmassResults)` and you should see the following:
-```
+```{r eval=FALSE}
 > summary(bmassResults)
                       Length Class  Mode     
 MarginalSNPs             3   -none- list     
@@ -120,7 +120,7 @@ We will touch on all the above outputs.
 #### NewSNPs
 
 The `NewSNPs` sublist contains information pertaining to the new significant multivariate associations found by `bmass`, if any were identified. Running `summary(bmassResults$NewSNPs)` you should see the following:
-```
+```{r eval=FALSE}
 > summary(bmassResults$NewSNPs)
            Length Class      Mode   
 SNPs         30   data.frame list   
@@ -129,7 +129,7 @@ Posteriors 5427   -none-     numeric
 ```
 
 `bmassResults$NewSNPs$SNPs` contains the 'main' `bmass` output of interest -- the list of new multivariate associations found by `bmass` and those SNPs' related information. The format of this output appears as follows:
-```
+```{r eval=FALSE}
 > head(bmassResults$NewSNPs$SNPs, n=3)
               ChrBP Chr        BP    Marker    MAF A1 HDL_A2 HDL_Direction
 1704   10_101902054  10 101902054 rs2862954 0.4631  C      T             +
@@ -154,7 +154,7 @@ Posteriors 5427   -none-     numeric
 ```
 
 `NewSNPs$logBFs` contains the log10 Bayes Factor (BF) for each multivariate model tested (in the form of a Model x SNP matrix, with the first columns of the matrix describing each model). `NewSNPs$Posteriors` is a similar matrix, just with each matrix entry representing the posterior probability for each model/SNP combination instead of the log10 BF. 
-```
+```{r eval=FALSE}
 > dim(bmassResults$NewSNPs$logBFs)
 [1] 81 67
 > bmassResults$NewSNPs$logBFs[1:5,1:10]
@@ -176,7 +176,7 @@ Posteriors 5427   -none-     numeric
 #### PreviousSNPs
 
 `PreviousSNPs` contains similar information as `NewSNPs` does, but pertaining to the set of previous univariate GWAS significant SNPs used to train the multivariate model priors and set the empirical significance threshold for weighted average BF. Running `summary(bmassResults$PreviousSNPs)` you see:
-```
+```{r eval=FALSE}
 > summary(bmassResults$PreviousSNPs)
              Length Class      Mode   
 logBFs       12069  -none-     numeric
@@ -193,7 +193,7 @@ The format of `DontPassSNPs` is the same seen in `NewSNPs$SNPs` and `PreviousSNP
 #### MarginalSNPs
 
 `MarginalSNPs` contains the same information as `NewSNPs` and `PreviousSNPs`, but pertaining to the set of marginally significant SNPs extracted from the intermediate `MergedDataSources` dataset (a data.frame that contains all the input phenotype files combined) based on the `SNPMarginalUnivariateThreshold` and `SNPMarginalMultivariateThreshold` values (default of 1e-6 for each). `summary(bmassResults$MarginalSNPs)` returns:
-```
+```{r eval=FALSE}
 > summary(bmassResults$MarginalSNPs)
            Length Class      Mode   
 SNPs          30  data.frame list   
@@ -207,7 +207,7 @@ Posteriors 20493  -none-     numeric
 #### ZScoresCorMatrix
 
 This is the phenotype correlation matrix (V_0 hat in `Detailed Methods (Global Lipids Analysis)` of Stephens 2013 PLoS ONE) derived from extracting all the 'null' SNPs (abs(ZScore) < 2 for every phenotype) in the dataset.
-```
+```{r eval=FALSE}
 > bmassResults$ZScoresCorMatrix
            HDL_ZScore LDL_ZScore  TG_ZScore TC_ZScore
 HDL_ZScore  1.0000000 -0.0872789 -0.3655508 0.1523894
@@ -220,7 +220,7 @@ TC_ZScore   0.1523894  0.8223175  0.2892982 1.0000000
 #### Models
 
 This is a matrix displaying all the model combinations possible given the set of d input phenotypes and 3 model categories of directly associated (1), indirectly associated (2), and unassociated (0). The total number of models displayed should be 3^d.
-```
+```{r eval=FALSE}
 > dim(bmassResults$Models)
 [1] 81  4
 > head(bmassResults$Models)
@@ -239,7 +239,7 @@ This is a matrix displaying all the model combinations possible given the set of
 This is the set of trained priors determined for each multivariate model using the previous univariate GWAS SNPs and an EM algorithm (see eq. 36 in Stephens 2013). Note that for any model which does not contain at least one phenotype in the directly associated category, the prior was automatically set to 0 (aside from the global null model of all phenotypes set to unassociated). 
 
 Also note that ModelPriors contains a full set of model priors for each value of the hyperparameter sigma_alpha (see "Prior on sigma_alpha" in Stephens 2013); these values are stored in `SigmaAlphas`, and by default are set to `c(0.005,0.0075,0.01,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.15)` (hence 81 models * 14 sigma_alphas = 1134 priors). To see a more interpretable form of the model priors, use the `GetModelPriorMatrix()` function as shown below.
-```
+```{r eval=FALSE}
 > length(bmassResults$ModelPriors)
 [1] 1134
 > bmassResults[c("ModelPriorMatrix", "LogFile")] <- GetModelPriorMatrix(Phenotypes, bmassResults$Models, bmassResults$ModelPriors, bmassResults$LogFile)
@@ -259,7 +259,7 @@ Also note that ModelPriors contains a full set of model priors for each value of
 #### GWASlogBFMinThreshold
 
 This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are 'multivariate significant'. As described in [Stephens 2013][stephens2013], each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model's BF, where weights are determined from the previous univariate GWAS SNPs (eq. 1 in [Turchin and Stephens 2019][biorxiv-paper] or eq. 8 in [Stephens 2013][stephens2013]). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.
-```
+```{r eval=FALSE}
 > bmassResults$GWASlogBFMinThreshold
 [1] 4.289906
 ```
