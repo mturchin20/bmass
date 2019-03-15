@@ -86,7 +86,7 @@
       <h1>bmass Introduction</h1>
                         <h4 class="author">Michael C Turchin</h4>
             
-            <h4 class="date">2019-03-14</h4>
+            <h4 class="date">2019-03-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mturchin20/bmass/blob/master/vignettes/bmassIntro.2.RealData.Rmd"><code>vignettes/bmassIntro.2.RealData.Rmd</code></a></small>
       <div class="hidden name"><code>bmassIntro.2.RealData.Rmd</code></div>
@@ -95,19 +95,20 @@
 
     
     
-<p>This is an introductory example of how to run <code>bmass</code>. In this introductory example, we will:</p>
+<p>This is an advanced introductory vignette for running <code>bmass</code>. Here, we will use real data and explore multiple components of the <code><a href="../reference/bmass.html">bmass()</a></code> output. Specifically, we will:</p>
 <ul>
-<li>Download our example dataset</li>
-<li>Quality control (QC) &amp; format our example dataset</li>
+<li>Download our real dataset</li>
+<li>Quality control (QC) &amp; format our dataset</li>
 <li>Run <code>bmass</code>
 </li>
-<li>Access &amp; explore results</li>
+<li>Access &amp; explore a variety of results</li>
 </ul>
+<p>For a more basic introductory vignette using a smaller, simulated dataset, please see <a href="http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html">here</a>.</p>
 <div id="downloading-globallipids2013" class="section level2">
 <h2 class="hasAnchor">
 <a href="#downloading-globallipids2013" class="anchor"></a>Downloading <code>GlobalLipids2013</code>
 </h2>
-<p>For this vigenette, we will be download and analyze the <code>GlobalLipids2013</code> dataset. To download the necessary files from <a href="http://csg.sph.umich.edu/willer/public/lipids2013/" class="uri">http://csg.sph.umich.edu/willer/public/lipids2013/</a>, run the following:</p>
+<p>For this vigenette, we will be download and analyze the <code>GlobalLipids2013</code> dataset. To download the necessary files from <a href="http://csg.sph.umich.edu/willer/public/lipids2013/">http://csg.sph.umich.edu/willer/public/lipids2013/</a>, run the following:</p>
 <pre><code>mkdir my-directory/GlobalLipids2013
 cd my-directory/GlobalLipids2013
 
@@ -120,7 +121,18 @@ wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TC.txt.gz</
 <h2 class="hasAnchor">
 <a href="#formatting-qcing-our-dataset" class="anchor"></a>Formatting &amp; QC’ing our dataset</h2>
 <p>To run bmass, it is recommended that at least a minimal level of QC is performed on the datasets of interest. Additionally, it is important that all the single nucleotide polymorphisms (SNPs) being analyzed are oriented to the same reference allele across all the phenotypes being included. This latter situation is emphasized so that the correct direction of effect is assigned to each phenotype for a given SNP (which is oriented based on reference allele).</p>
-<p>Below is example bash code on how to reformat, conduct some basic QC, and orient the reference alleles on the <code>GlobalLipids2013</code> dataset. First, we will reformat our input datafiles to match the requirements for <code>bmass</code>. <code>bmass</code> expects input files to have the following columns: Chromosome, Basepair, Marker ID, Minor Allele Frequency (MAF), Reference Allele, Alternative Allele, Direction of Effect, p-Value, and Sample Size (N).</p>
+<p>Below is example <code>bash</code> code on how to reformat, conduct some basic QC, and orient the reference alleles on the <code>GlobalLipids2013</code> dataset. First, we will reformat our input datafiles to match the requirements for <code>bmass</code>. <code>bmass</code> expects input files to have the following columns –</p>
+<ul>
+<li>Chr: Chromosome</li>
+<li>BP: Basepair Position</li>
+<li>Marker: Variant ID information, such as a rsID # (should be a unique value for each variant)</li>
+<li>MAF: Minor Allele Frequency</li>
+<li>A1: Reference allele</li>
+<li>A2: AlternativeaAllele</li>
+<li>Direction: Direction of effect size (a column of “+” or “-”)</li>
+<li>pValue: p-Value from univariate GWAS</li>
+<li>N: Sample size</li>
+</ul>
 <p>To create files that match these specifications, we will conduct the following: extract the columns that are needed, orient SNPs to the minor allele, and extract the direction of effect from the provided effect sizes.</p>
 <pre><code>zcat jointGwasMc_HDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] &gt; 0) { $F[6] = "+"; } elsif ($F[6] &lt; 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip &gt; jointGwasMc_HDL.formatted.txt.gz 
 
@@ -129,7 +141,7 @@ zcat jointGwasMc_LDL.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "
 zcat jointGwasMc_TG.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] &gt; 0) { $F[6] = "+"; } elsif ($F[6] &lt; 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip &gt; jointGwasMc_TG.formatted.txt.gz 
 
 zcat jointGwasMc_TC.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] &gt; 0) { $F[6] = "+"; } elsif ($F[6] &lt; 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip &gt; jointGwasMc_TC.formatted.txt.gz </code></pre>
-<p>Next, we will conduct some basic level QC steps. These steps include: remove duplicate entries of SNPs, remove SNPs that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF &lt; .01), have sample sample sizes &lt; 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). We will also orient each SNP/phenotype file to its respective minor allele.</p>
+<p>Next, we will conduct some basic QC. These steps include: remove SNPs that have duplicate entries, that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF &lt; .01), have sample sample sizes &lt; 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). We will also orient each SNP/phenotype file to its respective minor allele.</p>
 <pre><code>join &lt;(zcat jointGwasMc_HDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) &lt;(zcat jointGwasMc_HDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] &gt; .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] &gt; .01) { if ($F[8] &gt;= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | cat &lt;(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip &gt; jointGwasMc_HDL.formatted.QCed.txt.gz 
 
 join &lt;(zcat jointGwasMc_LDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) &lt;(zcat jointGwasMc_LDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] &gt; .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] &gt; .01) { if ($F[8] &gt;= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | gzip &gt; jointGwasMc_LDL.formatted.QCed.txt.gz 
@@ -157,7 +169,7 @@ TC &lt;- read.table("jointGwasMc_TC.formatted.QCed.HDLMatch.txt.gz", header=T);
 load("bmassDirectory/data/GlobalLipids2013.GWASsnps.rda");
 Phenotypes &lt;- c("HDL", "LDL", "TG", "TC");
 bmassResults &lt;- bmass(Phenotypes, GlobalLipids2013.GWASsnps);</a></code></pre>
-<p>Note that to run <code>bmass</code> we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype’s respective data file. Also note that you will see a warning that one or more of the <code>GlobalLipids2013</code> datafiles contains p-values smaller than the threshold at which R can handle converting them into logarthmic scale – this is to be expected.</p>
+<p>Note once again that to run <code>bmass</code> we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype’s respective data file. Also note that you will see a warning that one or more of the <code>GlobalLipids2013</code> datafiles contains p-values smaller than the threshold at which R can handle converting them into logarthmic scale – this is to be expected.</p>
 </div>
 <div id="accessing-exploring-results" class="section level2">
 <h2 class="hasAnchor">
@@ -293,7 +305,7 @@ TC_ZScore   0.1523894  0.8223175  0.2892982 1.0000000</code></pre>
 <div id="gwaslogbfminthreshold" class="section level4">
 <h4 class="hasAnchor">
 <a href="#gwaslogbfminthreshold" class="anchor"></a>GWASlogBFMinThreshold</h4>
-<p>This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are ‘multivariate significant’. As described in Stephens 2013, each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model’s BF, where weights are determined from the previous univariate GWAS SNPs (eq. 8 in Stephens 2013). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.</p>
+<p>This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are ‘multivariate significant’. As described in <a href="https://doi.org/10.1371/journal.pone.0065245">Stephens 2013</a>, each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model’s BF, where weights are determined from the previous univariate GWAS SNPs (eq. 1 in <a href="https://www.biorxiv.org/">Turchin and Stephens 2019</a> or eq. 8 in <a href="https://doi.org/10.1371/journal.pone.0065245">Stephens 2013</a>). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.</p>
 <pre><code>&gt; bmassResults$GWASlogBFMinThreshold
 [1] 4.289906</code></pre>
 <p>So every new multivariate SNP <code>bmass</code> identifies in this <code>GlobalLipids2013</code> analysis has a BFavg value &gt;= 4.289906 (and is also more than a 1Mb window away from a previous univariate GWAS SNP).</p>
