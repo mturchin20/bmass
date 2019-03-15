@@ -9,16 +9,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-This is an introductory example of how to run `bmass`. In this introductory example, we will:
+This is an advanced introductory vignette for running `bmass`. Here, we will use real data and explore multiple components of the `bmass()` output. Specifically, we will: 
 
-* Download our example dataset
-* Quality control (QC) & format our example dataset
+* Download our real dataset
+* Quality control (QC) & format our dataset
 * Run `bmass`
-* Access & explore results
+* Access & explore a variety of results
+
+For a more basic introductory vignette using a smaller, simulated dataset, please see [here][bmass-vignette1].
 
 ## Downloading `GlobalLipids2013`
 
-For this vigenette, we will be download and analyze the `GlobalLipids2013` dataset. To download the necessary files from http://csg.sph.umich.edu/willer/public/lipids2013/, run the following:
+For this vigenette, we will be download and analyze the `GlobalLipids2013` dataset. To download the necessary files from [http://csg.sph.umich.edu/willer/public/lipids2013/][globallipids2013], run the following:
 
 ```
 mkdir my-directory/GlobalLipids2013
@@ -34,7 +36,17 @@ wget http://csg.sph.umich.edu/abecasis/public/lipids2013/jointGwasMc_TC.txt.gz
 
 To run bmass, it is recommended that at least a minimal level of QC is performed on the datasets of interest. Additionally, it is important that all the single nucleotide polymorphisms (SNPs) being analyzed are oriented to the same reference allele across all the phenotypes being included. This latter situation is emphasized so that the correct direction of effect is assigned to each phenotype for a given SNP (which is oriented based on reference allele).
 
-Below is example bash code on how to reformat, conduct some basic QC, and orient the reference alleles on the `GlobalLipids2013` dataset. First, we will reformat our input datafiles to match the requirements for `bmass`. `bmass` expects input files to have the following columns: Chromosome, Basepair, Marker ID, Minor Allele Frequency (MAF), Reference Allele, Alternative Allele, Direction of Effect, p-Value, and Sample Size (N). 
+Below is example `bash` code on how to reformat, conduct some basic QC, and orient the reference alleles on the `GlobalLipids2013` dataset. First, we will reformat our input datafiles to match the requirements for `bmass`. `bmass` expects input files to have the following columns -- 
+
+* Chr: Chromosome
+* BP: Basepair Position
+* Marker: Variant ID information, such as a rsID # (should be a unique value for each variant)
+* MAF: Minor Allele Frequency
+* A1: Reference allele
+* A2: AlternativeaAllele
+* Direction: Direction of effect size (a column of "+" or "-")
+* pValue: p-Value from univariate GWAS
+* N: Sample size
 
 To create files that match these specifications, we will conduct the following: extract the columns that are needed, orient SNPs to the minor allele, and extract the direction of effect from the provided effect sizes.
 ```
@@ -47,7 +59,7 @@ zcat jointGwasMc_TG.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\
 zcat jointGwasMc_TC.txt.gz | sed 's/:/ /g' | sed 's/chr//g' | awk '{ print $1 "\t" $2 "\t" $5 "\t" $12 "\t" $6 "\t" $7 "\t" $8 "\t" $11 "\t" $10 }' | perl -lane '$F[4] = uc($F[4]); $F[5] = uc($F[5]); if ($F[6] > 0) { $F[6] = "+"; } elsif ($F[6] < 0) { $F[6] = "-"; } else { $F[6] = 0; } print join("\t", @F);' | grep -v SNP_hg18 | gzip > jointGwasMc_TC.formatted.txt.gz 
 ```
 
-Next, we will conduct some basic level QC steps. These steps include: remove duplicate entries of SNPs, remove SNPs that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF < .01), have sample sample sizes < 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). We will also orient each SNP/phenotype file to its respective minor allele.  
+Next, we will conduct some basic QC. These steps include: remove SNPs that have duplicate entries, that do not have entries in every field, do not have MAF information, that are fixed (MAF = 0), are rare (MAF < .01), have sample sample sizes < 50000, and have effect sizes of 0 (ie direction of effect is indeterminable). We will also orient each SNP/phenotype file to its respective minor allele.  
 ```
 join <(zcat jointGwasMc_HDL.formatted.txt.gz | awk '{ print $1 "_" $2 }' | grep -v hg18 | sort | uniq -u) <(zcat jointGwasMc_HDL.formatted.txt.gz | grep -v hg | grep -v ^rs | grep -v NA | perl -lane 'if ($F[3] > .5) { ($F[4], $F[5]) = ($F[5], $F[4]); if ($F[6] eq "+") { $F[6] = "-"; } elsif ($F[6] eq "-") { $F[6] = "+"; } else { $F[6] = 0; } $F[3] = 1 - $F[3]; } if ($F[6] ne "0") { if ($F[3] > .01) { if ($F[8] >= 50000) { print join("\t", @F); } } }' | awk '{ print $1 "_" $2 "\t" $0 }' | sort -k 1,1) | perl -lane 'print join("\t", @F[1..$#F]);' | cat <(echo -e "Chr\tBP\tMarker\tMAF\tA1\tA2\tDirection\tpValue\tN") - | gzip > jointGwasMc_HDL.formatted.QCed.txt.gz 
 
@@ -83,7 +95,7 @@ Phenotypes <- c("HDL", "LDL", "TG", "TC");
 bmassResults <- bmass(Phenotypes, GlobalLipids2013.GWASsnps);
 ```
 
-Note that to run `bmass` we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype's respective data file. Also note that you will see a warning that one or more of the `GlobalLipids2013` datafiles contains p-values smaller than the threshold at which R can handle converting them into logarthmic scale -- this is to be expected.  
+Note once again that to run `bmass` we supply a vector of phenotype names that also correspond to the variable names referencing each phenotype's respective data file. Also note that you will see a warning that one or more of the `GlobalLipids2013` datafiles contains p-values smaller than the threshold at which R can handle converting them into logarthmic scale -- this is to be expected.  
 
 
 ## Accessing & exploring results
@@ -246,10 +258,15 @@ Also note that ModelPriors contains a full set of model priors for each value of
 
 #### GWASlogBFMinThreshold
 
-This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are 'multivariate significant'. As described in Stephens 2013, each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model's BF, where weights are determined from the previous univariate GWAS SNPs (eq. 8 in Stephens 2013). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.
+This is the empirical weighted average BF threshold (BFavg) used to determine whether any new SNPs are 'multivariate significant'. As described in [Stephens 2013][stephens2013], each SNP has a single summary metric combining all the information across each multivariate model tested; this summary metric is the weighted average of each model's BF, where weights are determined from the previous univariate GWAS SNPs (eq. 1 in [Turchin and Stephens 2019][biorxiv-paper] or eq. 8 in [Stephens 2013][stephens2013]). This summary metric is also calculated for the previous unviariate GWAS SNPs themselves, and the smallest BFavg among them becomes the threshold above which new SNPs are considered multivariate significant.
 ```
 > bmassResults$GWASlogBFMinThreshold
 [1] 4.289906
 ```
 
-So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` analysis has a BFavg value >= 4.289906 (and is also more than a 1Mb window away from a previous univariate GWAS SNP). 
+So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` analysis has a BFavg value >= 4.289906 (and is also more than a 1Mb window away from a previous univariate GWAS SNP).
+
+[bmass-vignette1]: http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html
+[biorxiv-paper]: https://www.biorxiv.org/
+[globallipids2013]: http://csg.sph.umich.edu/willer/public/lipids2013/
+[stephens2013]: https://doi.org/10.1371/journal.pone.0065245

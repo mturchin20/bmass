@@ -16,6 +16,7 @@ Supplementary Tables 2 and 3 from
 }
 \description{
 A list of the univariate GWAS significant SNPs from
-the GlobalLipids2013 dataset to be used in the main bmass vignette.
+the GlobalLipids2013 dataset to be used in the second introductory 
+bmass vignette.
 }
 \keyword{data}

@@ -3,7 +3,7 @@
 \docType{data}
 \name{bmass_TestData1}
 \alias{bmass_TestData1}
-\title{bmass Example Dataset 1}
+\title{bmass Test Dataset 1}
 \format{A data frame with 11 rows and 9 variables:
 
 \describe{
@@ -22,7 +22,7 @@ effect size, + or -}
 Manually created
 }
 \description{
-A manually created sample dataset for use in vignettes
-and unit tests.
+A manually created sample dataset for use in unit
+tests.
 }
 \keyword{data}

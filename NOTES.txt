@@ -1,7 +1,7 @@
 notes
 =====
 
-Working On + Please do: Fill out README. We have lots of good examples of this from
+FINISHED + Please do: Fill out README. We have lots of good examples of this from
   the Stephens lab; to start, see README in stephenslab/mixsqp repository.
 
 + Please do: Make sure roxygen2 docs are properly formatted (e.g., R
@@ -13,9 +13,9 @@ Working On + Please do: Fill out README. We have lots of good examples of this f
 FINISHED + Please do: Add an inst/CITATION file; see
   github.com/stephenslab/mixsqp for an example.
 
-Working On + Suggestion: Create a "release" on GitHub. (I can show you how.)
+FINISHED + Suggestion: Create a "release" on GitHub. (I can show you how.)
 
-Working On + Suggestion: Create a pkgdown site, and activate GitHub Pages (see
+FINISHED + Suggestion: Create a pkgdown site, and activate GitHub Pages (see
   https://github.com/stephenslab/mixsqp for an example of this). This
   is easy to do once you have create the vignettes and roxygen2 docs
   for your R functions.
@@ -26,7 +26,7 @@ Working On + Suggestion: Fix up vignette so that rendering/"knitting" the
 + Suggestion: Likewise, it would be helpful if some of the examples
   where not inside "dontrun" so that we know that they actually run!
 
-Working On + Please Do: 1. Fill out the README with basic details about the package. See for example:
+FINISHED + Please Do: 1. Fill out the README with basic details about the package. See for example:
   https://github.com/stephenslab/mixsqp
   https://github.com/stephenslab/smashr
 
