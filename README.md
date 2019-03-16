@@ -41,14 +41,14 @@ file [LICENSE](LICENSE) for the full text of the license.
 
 Install bmass from [CRAN](http://www.r-pkg.org/pkg/bmass):
 
-```R
+```{r}
 install.packages("bmass")
 ```
 
 Once you have installed the package, load the package in R:
 
-```R
-library(bmass)
+```{r}
+library("bmass")
 ```
 
 Next, view and run the example code provided in the first 
