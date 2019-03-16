@@ -12,7 +12,7 @@
 }}
 \source{
 Supplementary Tables 2 and 3 from
-\url{https://www.nature.com/articles/ng.2797}.
+\url{https://doi.org/10.1038/ng.2797}.
 }
 \description{
 A list of the univariate GWAS significant SNPs from

@@ -33,8 +33,8 @@
 <meta property="og:title" content="Get Top Multivariate Models — GetTopModelsPerSNPViaPosteriors" />
 
 <meta property="og:description" content="Get a summary of the top models per SNP across all
-multivariate {U,D,I} combinations based on posterior
-probabilities." />
+multivariate {U,D,I} combinations based on 
+posterior probabilities." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -91,7 +91,7 @@ probabilities." />
       <a href="../articles/bmassIntro.1.SimulatedData.html">bmass Introduction -- Simulated Data</a>
     </li>
     <li>
-      <a href="../articles/bmassIntro.2.RealData.html">bmass Introduction</a>
+      <a href="../articles/bmassIntro.2.RealData.html">bmass Introduction -- Real Data</a>
     </li>
   </ul>
 </li>
@@ -127,8 +127,8 @@ probabilities." />
     <div class="ref-description">
     
     <p>Get a summary of the top models per SNP across all
-multivariate {U,D,I} combinations based on posterior
-probabilities.</p>
+multivariate {<b>U</b>,<b>D</b>,<b>I</b>} combinations based on 
+posterior probabilities.</p>
     
     </div>
 
@@ -145,19 +145,19 @@ input datafiles and phenotypes.</p></td>
     </tr>
     <tr>
       <th>ListSNPs</th>
-      <td><p>A list produced from running bmass containing the
-SNPs of interest to get marginal posteriors for.</p></td>
+      <td><p>A list produced from running <code><a href='bmass.html'>bmass</a></code> 
+containing the SNPs of interest to get marginal posteriors for.</p></td>
     </tr>
     <tr>
       <th>ModelPriorMatrix</th>
       <td><p>A matrix detailing the models being
 explored and their associated priors (obtained by running
-'GetModelPriorMatrix()')</p></td>
+<code><a href='GetModelPriorMatrix.html'>GetModelPriorMatrix</a></code>)</p></td>
     </tr>
     <tr>
       <th>LogFile</th>
       <td><p>A matrix of string outputs for function logging
-purposes (default output from running bmass).</p></td>
+purposes (default output from running <code><a href='bmass.html'>bmass</a></code>).</p></td>
     </tr>
     </table>
     
@@ -165,20 +165,26 @@ purposes (default output from running bmass).</p></td>
 
     <p>A matrix containing each model that was a SNP's top model
 at least once, along with related information; this matrix is
-appended to the input ListSNPs as a new object, "TopModels" (the
-full returned object is a list containing the input ListSNPs and
+appended to the input ListSNPs as a new object, <code>TopModels</code> 
+(the full returned object is a list containing the input ListSNPs and
 the input LogFile).</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'>GetTopModelsPerSNPViaPosteriors</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>, <span class='st'>"LDL"</span>, <span class='st'>"TG"</span>, <span class='st'>"TC"</span>),
-  <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>,<span class='no'>bmassOutput</span>$<span class='no'>ModelPriorMatrix</span>,
-  <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
 <span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"NewSNPs"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
   <span class='fu'>GetTopModelsPerSNPViaPosteriors</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>),
-  <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>,<span class='no'>bmassOutput</span>$<span class='no'>ModelPriorMatrix</span>,<span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
-<span class='co'># }</span><div class='input'>
+  <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>, <span class='no'>bmassOutput</span>$<span class='no'>ModelPriorMatrix</span>, <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
+<span class='co'># }</span><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
+<span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bmass.html'>bmass</a></span>(<span class='no'>Phenotypes</span>, <span class='no'>bmass_SimulatedSigSNPs</span>)
+<span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"ModelPriorMatrix"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
+  <span class='fu'><a href='GetModelPriorMatrix.html'>GetModelPriorMatrix</a></span>(<span class='no'>Phenotypes</span>, <span class='no'>bmassOutput</span>$<span class='no'>Models</span>,
+  <span class='no'>bmassOutput</span>$<span class='no'>ModelPriors</span>, <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
+<span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"PreviousSNPs"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
+  <span class='fu'>GetTopModelsPerSNPViaPosteriors</span>(<span class='no'>Phenotypes</span>,
+  <span class='no'>bmassOutput</span>$<span class='no'>PreviousSNPs</span>, <span class='no'>bmassOutput</span>$<span class='no'>ModelPriorMatrix</span>, <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
+<span class='fu'><a href='https://www.rdocumentation.org/packages/utils/topics/head'>head</a></span>(<span class='no'>bmassOutput</span>$<span class='no'>PreviousSNPs</span>$<span class='no'>TopModels</span>)</div><div class='output co'>#&gt;      bmass_SimulatedData1_bmass_SimulatedData2 n   MeanPosterior OriginalPrior
+#&gt; [1,] "1_1"                                     "2" "1"           "1"          </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

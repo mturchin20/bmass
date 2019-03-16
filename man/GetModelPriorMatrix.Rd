@@ -13,18 +13,20 @@ GetModelPriorMatrix(DataSources, Models, ModelPriors, LogFile,
 input datafiles and phenotypes.}
 
 \item{Models}{A matrix describing the models being explored
-(default output from running bmass).}
+(default output from running \code{\link{bmass}}).}
 
 \item{ModelPriors}{A vector containing the priors on each model
 across each tranche of sigma alpha (default output from running
-bmass; length is number of models times number of of sigma alphas).}
+\code{\link{bmass}}; length is number of models times number of 
+sigma alphas).}
 
 \item{LogFile}{A matrix of string outputs for function logging
-purposes (default output from running bmass).}
+purposes (default output from running \code{\link{bmass}}).}
 
 \item{SigmaAlphas}{A vector containing the different values
 traversed for this 'effect size controlling' hyperparameter (see
-"Prior on Sigma_Alpha" in Stephens 2013 PLoS ONE.}
+"Prior on Sigma_Alpha" in Stephens 2013 PLoS ONE, 
+\url{https://doi.org/10.1371/journal.pone.0065245}).}
 }
 \value{
 A matrix containing the original description of each model
@@ -37,12 +39,15 @@ their associated priors.
 }
 \examples{
 \dontrun{
-GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),bmassOutput$Models,
-                    bmassOutput$ModelPriors,bmassOutput$LogFile)
 bmassOutput[c("ModelPriorMatrix", "LogFile")] <-
   GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),
-                      bmassOutput$Models,bmassOutput$ModelPriors,
-                      bmassOutput$LogFile)
+  bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
 }
+Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
+bmassOutput <- bmass(Phenotypes,bmass_SimulatedSigSNPs)
+bmassOutput[c("ModelPriorMatrix", "LogFile")] <- 
+  GetModelPriorMatrix(Phenotypes, bmassOutput$Models,
+  bmassOutput$ModelPriors, bmassOutput$LogFile)
+head(bmassOutput$ModelPriorMatrix)
 
 }

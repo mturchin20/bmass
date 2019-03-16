@@ -11,36 +11,42 @@ GetTopModelsPerSNPViaPosteriors(DataSources, ListSNPs, ModelPriorMatrix,
 \item{DataSources}{A string indicating the variable names of the
 input datafiles and phenotypes.}
 
-\item{ListSNPs}{A list produced from running bmass containing the
-SNPs of interest to get marginal posteriors for.}
+\item{ListSNPs}{A list produced from running \code{\link{bmass}} 
+containing the SNPs of interest to get marginal posteriors for.}
 
 \item{ModelPriorMatrix}{A matrix detailing the models being
 explored and their associated priors (obtained by running
-'GetModelPriorMatrix()')}
+\code{\link{GetModelPriorMatrix}})}
 
 \item{LogFile}{A matrix of string outputs for function logging
-purposes (default output from running bmass).}
+purposes (default output from running \code{\link{bmass}}).}
 }
 \value{
 A matrix containing each model that was a SNP's top model
 at least once, along with related information; this matrix is
-appended to the input ListSNPs as a new object, "TopModels" (the
-full returned object is a list containing the input ListSNPs and
+appended to the input ListSNPs as a new object, \code{TopModels} 
+(the full returned object is a list containing the input ListSNPs and
 the input LogFile).
 }
 \description{
 Get a summary of the top models per SNP across all
-multivariate \{U,D,I\} combinations based on posterior
-probabilities.
+multivariate \{\bold{U},\bold{D},\bold{I}\} combinations based on 
+posterior probabilities.
 }
 \examples{
 \dontrun{
-GetTopModelsPerSNPViaPosteriors(c("HDL", "LDL", "TG", "TC"),
-  bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,
-  bmassOutput$LogFile)
 bmassOutput[c("NewSNPs", "LogFile")] <-
   GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
-  bmassOutput$NewSNPs,bmassOutput$ModelPriorMatrix,bmassOutput$LogFile)
+  bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
 }
+Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
+bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
+bmassOutput[c("ModelPriorMatrix", "LogFile")] <- 
+  GetModelPriorMatrix(Phenotypes, bmassOutput$Models,
+  bmassOutput$ModelPriors, bmassOutput$LogFile)
+bmassOutput[c("PreviousSNPs", "LogFile")] <-
+  GetTopModelsPerSNPViaPosteriors(Phenotypes,
+  bmassOutput$PreviousSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
+head(bmassOutput$PreviousSNPs$TopModels)
 
 }

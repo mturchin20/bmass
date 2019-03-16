@@ -1,5 +1,5 @@
 ---
-title: "bmass Introduction"
+title: "bmass Introduction -- Real Data"
 author: "Michael C Turchin"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -265,6 +265,10 @@ This is the empirical weighted average BF threshold (BFavg) used to determine wh
 ```
 
 So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` analysis has a BFavg value >= 4.289906 (and is also more than a 1Mb window away from a previous univariate GWAS SNP).
+
+
+[//]: #  ##Additional functions
+
 
 [bmass-vignette1]: http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html
 [biorxiv-paper]: https://www.biorxiv.org/

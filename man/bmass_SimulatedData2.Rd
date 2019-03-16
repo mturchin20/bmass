@@ -22,6 +22,7 @@ effect size, + or -}
 Manually created
 }
 \description{
-A manually created sample dataset for use in vignettes.
+A manually created sample dataset for use in Roxygen2
+documents and vignettes.
 }
 \keyword{data}

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get Marginal {U,D,I} Posteriors — GetMarginalPosteriors • bmass</title>
+<title>Get Marginal {<b>U</b>,<b>D</b>,<b>I</b>} Posteriors — GetMarginalPosteriors • bmass</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,10 +30,11 @@
 
 
 
-<meta property="og:title" content="Get Marginal {U,D,I} Posteriors — GetMarginalPosteriors" />
+<meta property="og:title" content="Get Marginal {<b>U</b>,<b>D</b>,<b>I</b>} Posteriors — GetMarginalPosteriors" />
 
 <meta property="og:description" content="Get marginal posteriors for how much every individual
-phenotype belongs to categories {U,D,I} across each SNP" />
+phenotype belongs to categories {U,D,I} 
+across each SNP" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -90,7 +91,7 @@ phenotype belongs to categories {U,D,I} across each SNP" />
       <a href="../articles/bmassIntro.1.SimulatedData.html">bmass Introduction -- Simulated Data</a>
     </li>
     <li>
-      <a href="../articles/bmassIntro.2.RealData.html">bmass Introduction</a>
+      <a href="../articles/bmassIntro.2.RealData.html">bmass Introduction -- Real Data</a>
     </li>
   </ul>
 </li>
@@ -118,7 +119,7 @@ phenotype belongs to categories {U,D,I} across each SNP" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get Marginal {U,D,I} Posteriors</h1>
+    <h1>Get Marginal {<b>U</b>,<b>D</b>,<b>I</b>} Posteriors</h1>
     <small class="dont-index">Source: <a href='https://github.com/mturchin20/bmass/blob/master/R/ResultsFollowupAnalysisAndPlotting.R'><code>R/ResultsFollowupAnalysisAndPlotting.R</code></a></small>
     <div class="hidden name"><code>GetMarginalPosteriors.Rd</code></div>
     </div>
@@ -126,7 +127,8 @@ phenotype belongs to categories {U,D,I} across each SNP" />
     <div class="ref-description">
     
     <p>Get marginal posteriors for how much every individual
-phenotype belongs to categories {U,D,I} across each SNP</p>
+phenotype belongs to categories {<b>U</b>,<b>D</b>,<b>I</b>} 
+across each SNP</p>
     
     </div>
 
@@ -142,40 +144,55 @@ input datafiles and phenotypes.</p></td>
     </tr>
     <tr>
       <th>ListSNPs</th>
-      <td><p>A list produced from running bmass containing the
-SNPs of interest to get marginal posteriors for.</p></td>
+      <td><p>A list produced from running <code><a href='bmass.html'>bmass</a></code> 
+containing the SNPs of interest to get marginal posteriors for.</p></td>
     </tr>
     <tr>
       <th>Models</th>
       <td><p>A matrix describing the models being explored
-(default output from running bmass).</p></td>
+(default output from running <code><a href='bmass.html'>bmass</a></code>).</p></td>
     </tr>
     <tr>
       <th>LogFile</th>
       <td><p>A matrix of string outputs for function logging
-purposes (default output from running bmass).</p></td>
+purposes (default output from running <code><a href='bmass.html'>bmass</a></code>).</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A list containing three matrices of SNPs x Phenotypes
-marginal posteriors for each category {U,D,I}; this list is
-appended to the input ListSNPs as a new object, "Posteriors" (the
-full returned object is a list containing the input ListSNPs and
-the input LogFile).</p>
+marginal posteriors for each category {<b>U</b>,<b>D</b>,<b>I</b>}; 
+this list is appended to the input ListSNPs as a new object, 
+<code>Marginals</code> (the full returned object is a list containing the 
+input ListSNPs and the input LogFile).</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'>GetMarginalPosteriors</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>, <span class='st'>"LDL"</span>, <span class='st'>"TG"</span>, <span class='st'>"TC"</span>),
-                      <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>,<span class='no'>bmassOutput</span>$<span class='no'>Models</span>,
-                      <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
 <span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"NewSNPs"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
   <span class='fu'>GetMarginalPosteriors</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>, <span class='st'>"LDL"</span>, <span class='st'>"TG"</span>, <span class='st'>"TC"</span>),
-                        <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>,<span class='no'>bmassOutput</span>$<span class='no'>Models</span>,
-                        <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
-<span class='co'># }</span><div class='input'>
+  <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>, <span class='no'>bmassOutput</span>$<span class='no'>Models</span>, <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
+<span class='co'># }</span><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
+<span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bmass.html'>bmass</a></span>(<span class='no'>Phenotypes</span>, <span class='no'>bmass_SimulatedSigSNPs</span>)
+<span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"PreviousSNPs"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
+<span class='fu'>GetMarginalPosteriors</span>(<span class='no'>Phenotypes</span>, <span class='no'>bmassOutput</span>$<span class='no'>PreviousSNPs</span>,
+<span class='no'>bmassOutput</span>$<span class='no'>Models</span>, <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
+<span class='no'>bmassOutput</span>$<span class='no'>PreviousSNPs</span>$<span class='no'>Marginals</span></div><div class='output co'>#&gt; $pU
+#&gt;                      1_1000 2_3000
+#&gt; bmass_SimulatedData1      0      0
+#&gt; bmass_SimulatedData2      0      0
+#&gt; 
+#&gt; $pD
+#&gt;      1_1000 2_3000
+#&gt; [1,]      1      1
+#&gt; [2,]      1      1
+#&gt; 
+#&gt; $pI
+#&gt;             1_1000        2_3000
+#&gt; [1,] 7.404466e-157 3.099810e-156
+#&gt; [2,] 3.359480e-145 6.197017e-144
+#&gt; </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

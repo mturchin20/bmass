@@ -112,7 +112,6 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- DataSources passed column headers check.", sep=""))
 		
-		#20160901 20180830 CHECK_10 -- Prob: Check multiple columns in entries to make sure input types/classes are as what's exepected? Eg chr/bp numeric, alleles chars, N and pvals numeric? Do X/23 conversion stuff before ondividual data column class/type checks first Soln1: probably fine with what have here, but give once-over before finishing things up to determine if there needs to be any other additions (already have a few that are good things ti have here)
 		DataSourcesCheckDirectionColumn <- sapply(DataSources, CheckDataSourceDirectionColumn)
 		if (FALSE %in% DataSourcesCheckDirectionColumn) {
 			stop(Sys.time(), " -- the following data sources have entries other than + and - in the Direction column. Please fix and rerun bmass: ", paste(DataSources[!DataSourcesCheckDirectionColumn], collapse=" "))
@@ -145,15 +144,14 @@ CheckIndividualDataSources <- function (DataSources, GWASsnps, ExpectedColumnNam
 			LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- ProvidedPriors was provided and passed checks.", sep=""))
 		}
 	
-		#20160902 CHECK_0 -- Prob: Go through all other input variables and make sure they are the expected formats/inputs, eg numeric, character, etcetc
 		if (!is.numeric(NminThreshold)) {
-			stop(Sys.time(), " -- .")
+			stop(Sys.time(), " -- input variable NminThreshold is not numeric as needed. Please fix and rerub bmass.")
 		}
 
 	} else {
 		
 		LogFile <- rbind(LogFile, paste(format(Sys.time()), " -- MergedDataSources file provided, going through data checks.", sep=""))
-		#20180830 NOTE -- just get rid of this little if/else section here, since not doing a 'checkmergeddatasources' thing here like I was potentially anticipating; would just do it as a separate function call, not as an if/else thing here (see commented out setup in `bmass.R` atm, and then move/alter code to potentially include something like that below/here as a placeholder for now (eg an empty function below that has that name with nothing else in it really aside from like a PH <- 1 situation or something like that))
+	
 	}
 
 	return(LogFile)

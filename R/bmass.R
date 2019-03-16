@@ -1,68 +1,78 @@
-#' @title Bayesian multivariate analysis of summary statistics (bmass)
+#' @title Bayesian multivariate analysis of summary statistics 
+#' (\code{bmass})
 #'
-#' @description Run bmass on a set of phenotypes that each have
+#' @description Run \code{bmass} on a set of phenotypes that each have
 #' univariate GWAS statistics on the same set of SNPs
 #' 
 #' @param DataSources A string indicating the variable names of the
-#' input datafiles and phenotypes.
+#' input datafiles and phenotypes. No default value.
 #' 
 #' @param GWASsnps A data.table containing rows of SNPs that were
 #' univariate genome-wide significant in the phenotypes being used for
-#' analysis; GWASsnps input file should have two columns, one for
-#' chromosome and another for basepair position (with column headers
-#' of "Chr" and "BP").
+#' analysis; \code{GWASsnps} input file should have two columns, one 
+#' for chromosome and another for basepair position (with column headers
+#' of \code{Chr} and \code{BP}). No default value.
 #' 
-#' @param GWASThreshFlag A logical TRUE/FALSE flag that indicates
-#' whether to threshold input GWASsnps list by a univariate GWAS
-#' p-value or not (eg the input GWASsnps list contains variants that
-#' are significant from discovery + replication data, but the input
-#' summary statistics are just from the discovery cohort).
+#' @param GWASThreshFlag A logical \code{TRUE}/\code{FALSE} flag that 
+#' indicates whether to threshold input \code{GWASsnps} list by a 
+#' univariate GWAS p-value or not (eg the input \code{GWASsnps} list 
+#' contains variants that are significant from discovery + replication 
+#' data, but the input summary statistics are just from the discovery 
+#' cohort). Default is \code{TRUE}.
 #' 
 #' @param GWASThreshValue A numerical value indicating the univariate
-#' p-value threshold to use in conjunction with the GWASThreshFlag.
+#' p-value threshold to use in conjunction with the \code{GWASThreshFlag}.
+#' Default is \code{5e-8}.
 #' 
 #' @param SNPMarginalUnivariateThreshold A numerical value indicating
 #' the univariate p-value threshold to use when collecting marginally
-#' significant SNPs for final bmass analysis.
+#' significant SNPs for final \code{bmass} analysis. Default is 
+#' \code{1e-6}.
 #' 
 #' @param SNPMarginalMultivariateThreshold A numerical value
 #' indicating the basic multivariate p-value threshold to use when
-#' collecting marginally significant SNPs for final bmasss analysis.
+#' collecting marginally significant SNPs for final \code{bmass} 
+#' analysis. Default is \code{1e-6}.
 #' 
 #' @param NminThreshold A numerical value that indicates a sample size
-#' threshold to use where SNPs below which are removed.
+#' threshold to use where SNPs below which are removed. Default is
+#' \code{0}. 
 #' 
-#' @param PrintMergedData A logical TRUE/FALSE flag that indicates
-#' whether the intermediary 'merged datafile' should be included in
-#' the final bmass output; this file combines all the phenotypes for
-#' every SNP provided just prior to thresholding for marginally
-#' significant SNPs.
+#' @param PrintMergedData A logical \code{TRUE}/\code{FALSE} flag that 
+#' indicates whether the intermediary 'merged datafile' should be included 
+#' in the final \code{bmass} output; this file combines all the phenotypes 
+#' for every SNP provided just prior to thresholding for marginally
+#' significant SNPs. Default is \code{FALSE}.
 #' 
-#' @param PrintProgress A logical TRUE/FALSE flag that indicates
-#' whether progress statements should be printed to stderr() during
-#' the course of running bmass() or not.
+#' @param PrintProgress A logical \code{TRUE}/\code{FALSE} flag that 
+#' indicates whether progress statements should be printed to 
+#' \code{stderr} during the course of running \code{bmass} or not.
+#' Default is \code{FALSE}.
 #' 
 #' @param ... Additional optional arguments.
 #' 
 #' @return A list containing model, SNP, and posterior information for
-#' both the previously significant univariate SNPs ("PreviousSNPs")
-#' and the newly significant multivariate SNPs ("NewSNPs"). For a full
-#' breakdown of the bmass() output list structure, please see the
-#' associated vignettes.
+#' both the previously significant univariate SNPs (\code{PreviousSNPs})
+#' and the newly significant multivariate SNPs (\code{NewSNPs}). For a 
+#' full breakdown of the \code{bmass} output list structure, please see 
+#' the associated vignettes.
 #'
 #' @examples
 #' \dontrun{
-#' bmass(c("HDL","LDL","TG","TC"),GWASsnps,NminThreshold = 50000) 
-#' bmass(c("HDL","LDL","TG","TC"),GWASsnps,GWASThreshValue = 1e-8,
+#' bmass(c("HDL","LDL","TG","TC"), GWASsnps, NminThreshold = 50000) 
+#' bmass(c("HDL","LDL","TG","TC"), GWASsnps, GWASThreshValue = 1e-8,
 #'   NminThreshold = 50000, PrintProgress = TRUE) 
 #' bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE,
 #'   SNPMarginalUnivariateThreshold = 1e-4,
 #'   SNPMarginalMultivariateThreshold = 1e-4,
 #'   PrintMergedData = TRUE) 
-#' bmassOutput <- list()
 #' bmassOutput <- bmass(c("HDL","LDL","TG","TC"),
-#'   GWASsnps,NminThreshold = 50000) 
+#'   GWASsnps, NminThreshold = 50000) 
 #' }
+#' Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
+#' bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
+#' summary(bmassOutput)
+#' bmassOutput$NewSNPs$SNPs
 #'
 #' @export
 #' 

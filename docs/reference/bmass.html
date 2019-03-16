@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bayesian multivariate analysis of summary statistics (bmass) — bmass • bmass</title>
+<title>Bayesian multivariate analysis of summary statistics 
+(<code>bmass</code>) — bmass • bmass</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,7 +31,8 @@
 
 
 
-<meta property="og:title" content="Bayesian multivariate analysis of summary statistics (bmass) — bmass" />
+<meta property="og:title" content="Bayesian multivariate analysis of summary statistics 
+(<code>bmass</code>) — bmass" />
 
 <meta property="og:description" content="Run bmass on a set of phenotypes that each have
 univariate GWAS statistics on the same set of SNPs" />
@@ -90,7 +92,7 @@ univariate GWAS statistics on the same set of SNPs" />
       <a href="../articles/bmassIntro.1.SimulatedData.html">bmass Introduction -- Simulated Data</a>
     </li>
     <li>
-      <a href="../articles/bmassIntro.2.RealData.html">bmass Introduction</a>
+      <a href="../articles/bmassIntro.2.RealData.html">bmass Introduction -- Real Data</a>
     </li>
   </ul>
 </li>
@@ -118,14 +120,15 @@ univariate GWAS statistics on the same set of SNPs" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Bayesian multivariate analysis of summary statistics (bmass)</h1>
+    <h1>Bayesian multivariate analysis of summary statistics 
+(<code>bmass</code>)</h1>
     <small class="dont-index">Source: <a href='https://github.com/mturchin20/bmass/blob/master/R/bmass.R'><code>R/bmass.R</code></a></small>
     <div class="hidden name"><code>bmass.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Run bmass on a set of phenotypes that each have
+    <p>Run <code>bmass</code> on a set of phenotypes that each have
 univariate GWAS statistics on the same set of SNPs</p>
     
     </div>
@@ -142,59 +145,65 @@ univariate GWAS statistics on the same set of SNPs</p>
     <tr>
       <th>DataSources</th>
       <td><p>A string indicating the variable names of the
-input datafiles and phenotypes.</p></td>
+input datafiles and phenotypes. No default value.</p></td>
     </tr>
     <tr>
       <th>GWASsnps</th>
       <td><p>A data.table containing rows of SNPs that were
 univariate genome-wide significant in the phenotypes being used for
-analysis; GWASsnps input file should have two columns, one for
-chromosome and another for basepair position (with column headers
-of "Chr" and "BP").</p></td>
+analysis; <code>GWASsnps</code> input file should have two columns, one 
+for chromosome and another for basepair position (with column headers
+of <code>Chr</code> and <code>BP</code>). No default value.</p></td>
     </tr>
     <tr>
       <th>SNPMarginalUnivariateThreshold</th>
       <td><p>A numerical value indicating
 the univariate p-value threshold to use when collecting marginally
-significant SNPs for final bmass analysis.</p></td>
+significant SNPs for final <code>bmass</code> analysis. Default is 
+<code>1e-6</code>.</p></td>
     </tr>
     <tr>
       <th>SNPMarginalMultivariateThreshold</th>
       <td><p>A numerical value
 indicating the basic multivariate p-value threshold to use when
-collecting marginally significant SNPs for final bmasss analysis.</p></td>
+collecting marginally significant SNPs for final <code>bmass</code> 
+analysis. Default is <code>1e-6</code>.</p></td>
     </tr>
     <tr>
       <th>GWASThreshFlag</th>
-      <td><p>A logical TRUE/FALSE flag that indicates
-whether to threshold input GWASsnps list by a univariate GWAS
-p-value or not (eg the input GWASsnps list contains variants that
-are significant from discovery + replication data, but the input
-summary statistics are just from the discovery cohort).</p></td>
+      <td><p>A logical <code>TRUE</code>/<code>FALSE</code> flag that 
+indicates whether to threshold input <code>GWASsnps</code> list by a 
+univariate GWAS p-value or not (eg the input <code>GWASsnps</code> list 
+contains variants that are significant from discovery + replication 
+data, but the input summary statistics are just from the discovery 
+cohort). Default is <code>TRUE</code>.</p></td>
     </tr>
     <tr>
       <th>GWASThreshValue</th>
       <td><p>A numerical value indicating the univariate
-p-value threshold to use in conjunction with the GWASThreshFlag.</p></td>
+p-value threshold to use in conjunction with the <code>GWASThreshFlag</code>.
+Default is <code>5e-8</code>.</p></td>
     </tr>
     <tr>
       <th>NminThreshold</th>
       <td><p>A numerical value that indicates a sample size
-threshold to use where SNPs below which are removed.</p></td>
+threshold to use where SNPs below which are removed. Default is
+<code>0</code>.</p></td>
     </tr>
     <tr>
       <th>PrintMergedData</th>
-      <td><p>A logical TRUE/FALSE flag that indicates
-whether the intermediary 'merged datafile' should be included in
-the final bmass output; this file combines all the phenotypes for
-every SNP provided just prior to thresholding for marginally
-significant SNPs.</p></td>
+      <td><p>A logical <code>TRUE</code>/<code>FALSE</code> flag that 
+indicates whether the intermediary 'merged datafile' should be included 
+in the final <code>bmass</code> output; this file combines all the phenotypes 
+for every SNP provided just prior to thresholding for marginally
+significant SNPs. Default is <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>PrintProgress</th>
-      <td><p>A logical TRUE/FALSE flag that indicates
-whether progress statements should be printed to stderr() during
-the course of running bmass() or not.</p></td>
+      <td><p>A logical <code>TRUE</code>/<code>FALSE</code> flag that 
+indicates whether progress statements should be printed to 
+<code>stderr</code> during the course of running <code>bmass</code> or not.
+Default is <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -205,25 +214,45 @@ the course of running bmass() or not.</p></td>
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A list containing model, SNP, and posterior information for
-both the previously significant univariate SNPs ("PreviousSNPs")
-and the newly significant multivariate SNPs ("NewSNPs"). For a full
-breakdown of the bmass() output list structure, please see the
-associated vignettes.</p>
+both the previously significant univariate SNPs (<code>PreviousSNPs</code>)
+and the newly significant multivariate SNPs (<code>NewSNPs</code>). For a 
+full breakdown of the <code>bmass</code> output list structure, please see 
+the associated vignettes.</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>),<span class='no'>GWASsnps</span>,<span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>)
-<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>),<span class='no'>GWASsnps</span>,<span class='kw'>GWASThreshValue</span> <span class='kw'>=</span> <span class='fl'>1e-8</span>,
+<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>), <span class='no'>GWASsnps</span>, <span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>)
+<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>), <span class='no'>GWASsnps</span>, <span class='kw'>GWASThreshValue</span> <span class='kw'>=</span> <span class='fl'>1e-8</span>,
   <span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>, <span class='kw'>PrintProgress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 <span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>, <span class='st'>"LDL"</span>, <span class='st'>"TG"</span>, <span class='st'>"TC"</span>), <span class='no'>GWASsnps</span>, <span class='kw'>GWASThreshFlag</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>SNPMarginalUnivariateThreshold</span> <span class='kw'>=</span> <span class='fl'>1e-4</span>,
   <span class='kw'>SNPMarginalMultivariateThreshold</span> <span class='kw'>=</span> <span class='fl'>1e-4</span>,
   <span class='kw'>PrintMergedData</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-<span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>()
 <span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>),
-  <span class='no'>GWASsnps</span>,<span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>)
-<span class='co'># }</span><div class='input'>
+  <span class='no'>GWASsnps</span>, <span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>)
+<span class='co'># }</span><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
+<span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'>bmass</span>(<span class='no'>Phenotypes</span>, <span class='no'>bmass_SimulatedSigSNPs</span>)
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary</a></span>(<span class='no'>bmassOutput</span>)</div><div class='output co'>#&gt;                       Length Class  Mode     
+#&gt; MarginalSNPs            3    -none- list     
+#&gt; PreviousSNPs            4    -none- list     
+#&gt; NewSNPs                 3    -none- list     
+#&gt; LogFile                19    -none- character
+#&gt; ZScoresCorMatrix        4    -none- numeric  
+#&gt; Models                 18    -none- numeric  
+#&gt; ModelPriors           126    -none- numeric  
+#&gt; GWASlogBFMinThreshold   1    -none- numeric  </div><div class='input'><span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>$<span class='no'>SNPs</span></div><div class='output co'>#&gt;    ChrBP Chr   BP Marker  MAF A1 bmass_SimulatedData1_A2
+#&gt; 9 4_7000   4 7000    rs8 0.15  G                       C
+#&gt;   bmass_SimulatedData1_Direction bmass_SimulatedData1_pValue
+#&gt; 9                              +                       7e-08
+#&gt;   bmass_SimulatedData1_N bmass_SimulatedData1_ZScore
+#&gt; 9                   2514                    5.391171
+#&gt;   bmass_SimulatedData2_Direction bmass_SimulatedData2_pValue
+#&gt; 9                              -                       6e-08
+#&gt;   bmass_SimulatedData2_N bmass_SimulatedData2_ZScore GWASannot   mvstat
+#&gt; 9                   2514                   -5.418801         0 145.0667
+#&gt;   mvstat_log10pVal  unistat unistat_log10pVal Nmin logBFWeightedAvg
+#&gt; 9         31.50084 29.36341          7.221849 2514           29.107</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

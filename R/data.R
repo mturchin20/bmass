@@ -86,7 +86,8 @@ NULL
 #'
 #' @docType data
 #' 
-#' @description A manually created sample dataset for use in vignettes.
+#' @description A manually created sample dataset for use in Roxygen2
+#' documents and vignettes.
 #'
 #' @format A data frame with 11 rows and 9 variables:
 #' 
@@ -115,7 +116,8 @@ NULL
 #'
 #' @docType data
 #'
-#' @description A manually created sample dataset for use in vignettes.
+#' @description A manually created sample dataset for use in Roxygen2
+#' documents and vignettes.
 #'
 #' @format A data frame with 11 rows and 9 variables:
 #' 
@@ -178,7 +180,7 @@ NULL
 #' }
 #' 
 #' @source Supplementary Tables 2 and 3 from
-#' \url{https://www.nature.com/articles/ng.2797}.
+#' \url{https://doi.org/10.1038/ng.2797}.
 #' 
 #' @keywords data
 #'

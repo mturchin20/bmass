@@ -2,7 +2,7 @@
 % Please edit documentation in R/ResultsFollowupAnalysisAndPlotting.R
 \name{GetMarginalPosteriors}
 \alias{GetMarginalPosteriors}
-\title{Get Marginal \{U,D,I\} Posteriors}
+\title{Get Marginal \{\bold{U},\bold{D},\bold{I}\} Posteriors}
 \usage{
 GetMarginalPosteriors(DataSources, ListSNPs, Models, LogFile)
 }
@@ -10,35 +10,38 @@ GetMarginalPosteriors(DataSources, ListSNPs, Models, LogFile)
 \item{DataSources}{A string indicating the variable names of the
 input datafiles and phenotypes.}
 
-\item{ListSNPs}{A list produced from running bmass containing the
-SNPs of interest to get marginal posteriors for.}
+\item{ListSNPs}{A list produced from running \code{\link{bmass}} 
+containing the SNPs of interest to get marginal posteriors for.}
 
 \item{Models}{A matrix describing the models being explored
-(default output from running bmass).}
+(default output from running \code{\link{bmass}}).}
 
 \item{LogFile}{A matrix of string outputs for function logging
-purposes (default output from running bmass).}
+purposes (default output from running \code{\link{bmass}}).}
 }
 \value{
 A list containing three matrices of SNPs x Phenotypes
-marginal posteriors for each category \{U,D,I\}; this list is
-appended to the input ListSNPs as a new object, "Posteriors" (the
-full returned object is a list containing the input ListSNPs and
-the input LogFile).
+marginal posteriors for each category \{\bold{U},\bold{D},\bold{I}\}; 
+this list is appended to the input ListSNPs as a new object, 
+\code{Marginals} (the full returned object is a list containing the 
+input ListSNPs and the input LogFile).
 }
 \description{
 Get marginal posteriors for how much every individual
-phenotype belongs to categories \{U,D,I\} across each SNP
+phenotype belongs to categories \{\bold{U},\bold{D},\bold{I}\} 
+across each SNP
 }
 \examples{
 \dontrun{
-GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
-                      bmassOutput$NewSNPs,bmassOutput$Models,
-                      bmassOutput$LogFile)
 bmassOutput[c("NewSNPs", "LogFile")] <-
   GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
-                        bmassOutput$NewSNPs,bmassOutput$Models,
-                        bmassOutput$LogFile)
+  bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
 }
+Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
+bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
+bmassOutput[c("PreviousSNPs", "LogFile")] <-
+GetMarginalPosteriors(Phenotypes, bmassOutput$PreviousSNPs,
+bmassOutput$Models, bmassOutput$LogFile)
+bmassOutput$PreviousSNPs$Marginals
 
 }
