@@ -1,7 +1,44 @@
 # Version News and Updates
 
 Version updates will be tracked and explained here. Major updates & releases will be particularly highlighted.
-    
+
+## bmass v1.0.0
+
+###### Summary
+* Finished prep for CRAN submission
+* Setup Travis CI for repo
+* Finished leftover unit tests
+* Moved vignette setup into two introductory examples
+* Edits and suggestions from Peter Carbonetto to help with first main release
+
+###### Since previous version (v0.1.3)
+* Finished doing necessary prep and checks for CRAN package submission
+  * Finished documenting leftover objects and function arguments for `Roxgyen2` & `devtools::check()`
+* Setup and connected Travis CI to git repo
+* Finished unit tests in `tests/testthat/test-BasicRFunctionality.R`, `test-ResultsFollowupAnalysisAndPlotting.R`, `test-Stephens2013PLoSONE.globallipids.GLCfuncs.R`, and `test-Stephens2013PLoSONE.test.funcs.R`
+* Made `Models` output more user-friendly versions
+  * Put phenotype names on top of `Models` and directed users in main vignette to utilize `GetModelPriorMatrix()` for a more interpretable version of `ModelPriors`
+* Made a new introductory vignette using a small, simulated dataset, and moved the previous one into a 'more advanced' introductory example (referened as a 'real data' example)
+* Merged and adopted edits made by Peter Carbonetto, as well as adopted a few of his suggestions
+  * Added proper `releases` on the github repo#
+  * Created a `pkgdown` website for the github repo
+  * Created the new vignette as described above
+  * Updated `README.md`
+  * Further cleaned up `roxygen2` comments & examples
+
+###### Notes
+* Changed inputs of `GetModelPriorMatrix()` in `ResultsFollowupAnalysisAndPlotting.R` so that `SigmaAlphas` is given a default value to begin with and therefore positioned after `LogFile` 
+
+###### Next steps (if applicable)
+* Change output of Matthew's code to use logBFs vs. lbf, and align with overall style of bmass wherever else applicable
+* Create second vignette on how to run `bmass()` with some data already created (ie a merged dataset, a phenotype correlation matrix, and priors)
+  * Include note that, if provided, `ZScoresCorMatrix` should have the same phenotype order as `DataSources` 
+* Double-check new `PassChecksForDataSources.R` additions
+* Flesh out `CheckMergedDataSources` as an analogue to `CheckIndividualDataSources` for when a merged dataset is provided.
+* Include check that all datasets have same A1 (in `MergeDataGWASAnnotateAndGetMarginalSNPs.R`) & that A1 part of `ExpectedColumnNames` 
+* Include some of the extra, downstream functions such as `GetModelPriorMatrix()` in the advanced, introductory vignette
+
+
 ## bmass v0.1.3
 
 ###### Summary

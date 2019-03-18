@@ -147,7 +147,7 @@ bmassMain <- function (DataSources, GWASsnps, SNPMarginalUnivariateThreshold, SN
 	bmassOutput[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")] <- FinalizeAndFormatResults(DataSources, bmassOutput$MarginalSNPs, bmassOutput$PreviousSNPs, GWASsnps, bmassOutput$GWASlogBFMinThreshold, SigmaAlphas, bmassOutput$Models, bmassOutput$ModelPriors, NminThreshold, PruneMarginalSNPs, PruneMarginalSNPs_bpWindow, bmassOutput$LogFile)[c("MarginalSNPs", "PreviousSNPs", "NewSNPs", "LogFile")]
 
 	if (PrintProgress == TRUE) {
-        	write(paste(format(Sys.time()), " -- finishing bmass, exiting.", sep=""), stderr())
+        	write(paste(format(Sys.time()), " -- Finishing bmass, exiting.", sep=""), stderr())
 	}
 
 	return(bmassOutput)
