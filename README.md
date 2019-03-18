@@ -39,10 +39,16 @@ file [LICENSE](LICENSE) for the full text of the license.
 
 ## Quick Start
 
-Install bmass from [CRAN](http://www.r-pkg.org/pkg/bmass):
+To install `bmass` from [CRAN](http://www.r-pkg.org/pkg/bmass):
 
 ```{r}
 install.packages("bmass")
+```
+
+To install the most recent dev version of `bmass` from [github](https://github.com/mturchin20/bmass):
+```{r}
+install.packages("devtools")
+devtools::install_github("mturchin20/bmass@v1.0.0", build_vignettes=TRUE)
 ```
 
 Once you have installed the package, load the package in R:
