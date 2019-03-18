@@ -1,7 +1,7 @@
 Encoding: UTF-8
 Type: Package
 Package: bmass
-Version: 0.1.4
+Version: 0.1.3
 Date: 2019-03-18
 Title: Bayesian Multivariate Analysis of Summary Statistics
 Authors@R: c(person("Michael","Turchin",email = "mturchin20@uchicago.edu",

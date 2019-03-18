@@ -1,4 +1,5 @@
 ^Meta$
+^doc$
 ^docs$
 ^\.travis\.yml$
 ^.*\.Rproj$
