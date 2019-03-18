@@ -77,7 +77,8 @@ bmassResults$GWASlogBFMinThreshold
 
 Any `MarginalSNPs` with `logBFWeightedAvg` greater than this value are designated as new multivariate associations (see eq. 1 in [Turchin and Stephens bioRxiv 2019][biorxiv-paper]).
 
-For further exploration and details of `bmass` output, please continue to the second introductory vignette found [here][bmass-vignette2]. 
+For further exploration and details of `bmass` output, please see the
+second introductory vignette.
 
 [bmass-vignette2]: http://mturchin20.github.io/bmass/articles/bmassIntro.2.RealData.html
 [biorxiv-paper]: https://www.biorxiv.org/
