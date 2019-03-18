@@ -1,6 +1,0 @@
-notes
-=====
-
-FINISHED + Please do: Fill out README. We have lots of good examples of this from
-  the Stephens lab; to start, see README in stephenslab/mixsqp repository.
-
