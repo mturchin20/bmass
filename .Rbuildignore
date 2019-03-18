@@ -1,9 +1,11 @@
 ^Meta$
 ^doc$
+^docs$
 ^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.md$
 ^NOTES\.txt$
 ^LICENSE$
-
+^OLD$
+^temp$
