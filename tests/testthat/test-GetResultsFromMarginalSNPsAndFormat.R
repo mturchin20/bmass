@@ -1,5 +1,6 @@
 context("Tests for GetResultsFromMarginalSNPsAndFormat.R")
 
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(8345)
 assign("CollapseTest1", c(12,15,18), envir = .GlobalEnv)
 assign("CheckOnesTest1", c(0,2,3,4,5,6,7,8,9), envir = .GlobalEnv)

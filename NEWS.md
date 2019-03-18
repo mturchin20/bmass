@@ -2,6 +2,21 @@
 
 Version updates will be tracked and explained here. Major updates & releases will be particularly highlighted.
 
+## bmass v1.0.1
+
+###### Summary
+* Patches in between first release and final CRAN submission/acceptance
+
+###### Since previous version (v1.0.0)
+
+###### Notes
+* Fixed 'Vignette Title' entries for both vignettes
+* Added in temp fix for R.3.6+ unit test re: use of RNG/`sample()`
+
+###### Next steps (if applicable)
+* See v.1.0.0 'Next steps'
+
+
 ## bmass v1.0.0
 
 ###### Summary
