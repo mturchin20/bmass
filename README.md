@@ -2,19 +2,19 @@
 
 [![Travis Build Status](https://travis-ci.org/mturchin20/bmass.svg?branch=master)](https://travis-ci.org/mturchin20/bmass)
 
-The bmass R package provides accessible functions for running the
+The `bmass` R package provides accessible functions for running the
 algorithms described in [Stephens 2013 PLoS ONE][stephens2013] and
 applied to multiple large, publicly available GWAS datasets in 
-[Turchin and Stephens 2019][biorxiv-paper]. bmass conducts a
+[Turchin and Stephens 2019][biorxiv-paper]. `bmass` conducts a
 Bayesian multivariate analysis of GWAS data using univariate
 association summary statistics. Output inclues whether any new SNPs 
 are found as multivariate genome-wide significant as well as posterior
 probabilities of each significant SNP's assignment to different
 multivariate models. 
 
-For more details on the results of applying bmass to publicly available
+For more details on the results of applying `bmass` to publicly available
 GWAS datasets, please see [our paper on bioRxiv][biorxiv-paper]. For
-more details regarding the underlying algorthims of bmass, please see 
+more details regarding the underlying algorthims of `bmass`, please see 
 [Stephens 2013 PLoS ONE][stephens2013].
 
 If you find a bug, or you have a question or feedback on our work,
@@ -22,7 +22,7 @@ please post an [issue][issues].
 
 ## Citing this work
 
-If you find the bmass package or any of the source code in this
+If you find the `bmass` package or any of the source code in this
 repository useful for your work, please cite:
 
 > Michael C. Turchin and Matthew Stephens (2019) *Bayesian multivariate
@@ -59,7 +59,7 @@ analyzing the [GlobalLipids 2013][globallipids2013] data.
 
 ## Credits
 
-The bmass R package was developed by [Michael Turchin][michaelt] at
+The `bmass` R package was developed by [Michael Turchin][michaelt] at
 the [University of Chicago][uchicago], with contributions from
 [Peter Carbonetto][peter] and [Matthew Stephens][matthew], and based
 on the R code provided in [Stephens 2013 PLoS ONE][stephens2013].
