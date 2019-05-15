@@ -2,10 +2,24 @@
 
 Version updates will be tracked and explained here. Major updates & releases will be particularly highlighted.
 
+## bmass v1.0.2
+
+###### Summary
+* Patches for CRAN resubmission
+
+###### Since previous version (v1.0.1)
+
+###### Notes
+* Added some requested reformatting in `DESCRIPTION`
+
+###### Next steps (if applicable)
+* See v.1.0.0 'Next steps'
+
+
 ## bmass v1.0.1
 
 ###### Summary
-* Patches in between first release and final CRAN submission/acceptance
+* Patches in-between first release and final CRAN submission/acceptance
 
 ###### Since previous version (v1.0.0)
 
