@@ -2,6 +2,20 @@
 
 Version updates will be tracked and explained here. Major updates & releases will be particularly highlighted.
 
+## bmass v1.0.3
+
+###### Summary
+* Patches for 2nd CRAN resubmission
+
+###### Since previous version (v1.0.2)
+
+###### Notes
+* Removed `\dontrun{}` chunks in most cases and otherwise put the same code in a `#' @section` chunk
+
+###### Next steps (if applicable)
+* See v.1.0.0 'Next steps'
+
+
 ## bmass v1.0.2
 
 ###### Summary

@@ -1,18 +1,8 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-* Edited the Description field in DESCRIPTION to
-  match proper, requested formatting and to 
-  include M. Stephens reference.
-
-* In the comments from the initial submission it 
-  was requested to "provide small executable examples 
-  in all of your Rd-files" and "They examples are 
-  wrapped in \dontrun{}, hence nothing gets tested."
-  However, please note that in each Rd-file where 
-  appropriate there is example code outside of the 
-  \dontrun{} chunks, and that commands such as 
-  'example("bmass")' run properly. Thank you.
+* Removed \dontrun{} in a few cases and replaced 
+  with a '@section' chunk in the remaining case
 
 ## Test environments
 * local OS X install, R 3.5.1
