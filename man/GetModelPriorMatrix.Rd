@@ -38,11 +38,6 @@ Creates a matrix containing the model descriptions and
 their associated priors.
 }
 \examples{
-\dontrun{
-bmassOutput[c("ModelPriorMatrix", "LogFile")] <-
-  GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),
-  bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
-}
 Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 bmassOutput <- bmass(Phenotypes,bmass_SimulatedSigSNPs)
 bmassOutput[c("ModelPriorMatrix", "LogFile")] <- 

@@ -45,11 +45,6 @@ CountModelClasses <- function(ModelEntries) {
 #' distribution, and the model's original order position.
 #"
 #' @examples
-#' \dontrun{
-#' bmassOutput[c("ModelPriorMatrix", "LogFile")] <-
-#'   GetModelPriorMatrix(c("HDL", "LDL", "TG", "TC"),
-#'   bmassOutput$Models, bmassOutput$ModelPriors, bmassOutput$LogFile)
-#' }
 #' Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 #' bmassOutput <- bmass(Phenotypes,bmass_SimulatedSigSNPs)
 #' bmassOutput[c("ModelPriorMatrix", "LogFile")] <- 
@@ -97,11 +92,6 @@ GetModelPriorMatrix <- function (DataSources, Models, ModelPriors, LogFile, Sigm
 #' the input LogFile).
 #'
 #' @examples
-#' \dontrun{
-#' bmassOutput[c("NewSNPs", "LogFile")] <-
-#'   GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
-#'   bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
-#' }
 #' Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 #' bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
 #' bmassOutput[c("ModelPriorMatrix", "LogFile")] <- 
@@ -165,11 +155,6 @@ GetTopModelsPerSNPViaPosteriors <- function (DataSources, ListSNPs, ModelPriorMa
 #' input ListSNPs and the input LogFile).
 #'
 #' @examples
-#' \dontrun{
-#' bmassOutput[c("NewSNPs", "LogFile")] <-
-#'   GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
-#'   bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-#' }
 #' Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 #' bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
 #' bmassOutput[c("PreviousSNPs", "LogFile")] <-

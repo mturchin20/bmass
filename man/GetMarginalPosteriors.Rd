@@ -32,11 +32,6 @@ phenotype belongs to categories \{\bold{U},\bold{D},\bold{I}\}
 across each SNP
 }
 \examples{
-\dontrun{
-bmassOutput[c("NewSNPs", "LogFile")] <-
-  GetMarginalPosteriors(c("HDL", "LDL", "TG", "TC"),
-  bmassOutput$NewSNPs, bmassOutput$Models, bmassOutput$LogFile)
-}
 Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
 bmassOutput[c("PreviousSNPs", "LogFile")] <-

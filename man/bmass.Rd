@@ -70,18 +70,20 @@ the associated vignettes.
 Run \code{bmass} on a set of phenotypes that each have
 univariate GWAS statistics on the same set of SNPs
 }
-\examples{
-\dontrun{
-bmass(c("HDL","LDL","TG","TC"), GWASsnps, NminThreshold = 50000) 
-bmass(c("HDL","LDL","TG","TC"), GWASsnps, GWASThreshValue = 1e-8,
-  NminThreshold = 50000, PrintProgress = TRUE) 
-bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE,
+\section{Other Examples}{
+
+\code{bmass(c("HDL","LDL","TG","TC"), GWASsnps, NminThreshold = 50000)}
+\code{bmass(c("HDL","LDL","TG","TC"), GWASsnps, GWASThreshValue = 1e-8,
+  NminThreshold = 50000, PrintProgress = TRUE)} 
+\code{bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE,
   SNPMarginalUnivariateThreshold = 1e-4,
   SNPMarginalMultivariateThreshold = 1e-4,
-  PrintMergedData = TRUE) 
-bmassOutput <- bmass(c("HDL","LDL","TG","TC"),
-  GWASsnps, NminThreshold = 50000) 
+  PrintMergedData = TRUE)} 
+\code{bmassOutput <- bmass(c("HDL","LDL","TG","TC"),
+  GWASsnps, NminThreshold = 50000)}
 }
+
+\examples{
 Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
 summary(bmassOutput)

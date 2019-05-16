@@ -34,11 +34,6 @@ multivariate \{\bold{U},\bold{D},\bold{I}\} combinations based on
 posterior probabilities.
 }
 \examples{
-\dontrun{
-bmassOutput[c("NewSNPs", "LogFile")] <-
-  GetTopModelsPerSNPViaPosteriors(c("HDL","LDL","TG","TC"),
-  bmassOutput$NewSNPs, bmassOutput$ModelPriorMatrix, bmassOutput$LogFile)
-}
 Phenotypes <- c("bmass_SimulatedData1", "bmass_SimulatedData2")
 bmassOutput <- bmass(Phenotypes, bmass_SimulatedSigSNPs)
 bmassOutput[c("ModelPriorMatrix", "LogFile")] <- 
