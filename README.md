@@ -27,7 +27,7 @@ repository useful for your work, please cite:
 
 > Michael C. Turchin and Matthew Stephens (2019) *Bayesian multivariate
 > re-analysis of large genetic studies identifies many new
-> associations.* [bioRxiv:#####][biorxiv-paper].
+> associations.* [bioRxiv:10.1101/638882][biorxiv-paper].
 
 ## License
 
@@ -67,7 +67,7 @@ on the R code provided in [Stephens 2013 PLoS ONE][stephens2013].
 [bmass-website]: http://mturchin20.github.io/bmass/ 
 [bmass-vignette1]: http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html
 [bmass-vignette2]: http://mturchin20.github.io/bmass/articles/bmassIntro.2.RealData.html
-[biorxiv-paper]: https://www.biorxiv.org/
+[biorxiv-paper]: https://www.biorxiv.org/content/10.1101/638882v1
 [globallipids2013]: http://csg.sph.umich.edu/willer/public/lipids2013/ 
 [issues]: https://github.com/mturchin20/bmass/issues
 [matthew]: http://stephenslab.uchicago.edu
