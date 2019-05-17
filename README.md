@@ -1,5 +1,6 @@
 # bmass: Bayesian multivariate analysis of summary statistics
 
+[![CRAN status badge](https://www.r-pkg.org/badges/version/bmass)](https://cran.r-project.org/package=bmass)
 [![Travis Build Status](https://travis-ci.org/mturchin20/bmass.svg?branch=master)](https://travis-ci.org/mturchin20/bmass)
 
 The `bmass` R package provides accessible functions for running the
@@ -39,10 +40,16 @@ file [LICENSE](LICENSE) for the full text of the license.
 
 ## Quick Start
 
-To install `bmass` from [github](https://github.com/mturchin20/bmass):
+To install `bmass` from [CRAN](https://cran.r-project.org/web/packages/bmass/index.html):
+
+```{r}
+install.packages("bmass")
+```
+
+To install the most recent dev version of `bmass` from [github](https://github.com/mturchin20/bmass):
 ```{r}
 install.packages("devtools")
-devtools::install_github("mturchin20/bmass@v1.0.0", build_vignettes=TRUE)
+devtools::install_github("mturchin20/bmass@v1.0.3", build_vignettes=TRUE)
 ```
 
 Once you have installed the package, load the package in R:
