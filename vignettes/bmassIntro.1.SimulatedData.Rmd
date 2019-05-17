@@ -81,6 +81,6 @@ For further exploration and details of `bmass` output, please see the
 second introductory vignette.
 
 [bmass-vignette2]: http://mturchin20.github.io/bmass/articles/bmassIntro.2.RealData.html
-[biorxiv-paper]: https://www.biorxiv.org/
+[biorxiv-paper]: https://www.biorxiv.org/content/10.1101/638882v1
 [globallipids2013]: http://csg.sph.umich.edu/willer/public/lipids2013/
 [stephens2013]: https://doi.org/10.1371/journal.pone.0065245

@@ -271,6 +271,6 @@ So every new multivariate SNP `bmass` identifies in this `GlobalLipids2013` anal
 
 
 [bmass-vignette1]: http://mturchin20.github.io/bmass/articles/bmassIntro.1.SimulatedData.html
-[biorxiv-paper]: https://www.biorxiv.org/
+[biorxiv-paper]: https://www.biorxiv.org/content/10.1101/638882v1
 [globallipids2013]: http://csg.sph.umich.edu/willer/public/lipids2013/
 [stephens2013]: https://doi.org/10.1371/journal.pone.0065245
