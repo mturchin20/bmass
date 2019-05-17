@@ -26,7 +26,7 @@ If you find the `bmass` package or any of the source code in this
 repository useful for your work, please cite:
 
 > Michael C. Turchin and Matthew Stephens (2019) *Bayesian multivariate
-> re-analysis of large genetic studies identifies many new
+> reanalysis of large genetic studies identifies many new
 > associations.* [bioRxiv:10.1101/638882][biorxiv-paper].
 
 ## License
