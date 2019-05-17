@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bmass</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -86,7 +86,7 @@
       <h1>bmass Introduction – Simulated Data</h1>
                         <h4 class="author">Michael C Turchin</h4>
             
-            <h4 class="date">2019-03-16</h4>
+            <h4 class="date">2019-05-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mturchin20/bmass/blob/master/vignettes/bmassIntro.1.SimulatedData.Rmd"><code>vignettes/bmassIntro.1.SimulatedData.Rmd</code></a></small>
       <div class="hidden name"><code>bmassIntro.1.SimulatedData.Rmd</code></div>
@@ -102,11 +102,11 @@
 <a href="#running-bmass" class="anchor"></a>Running <code>bmass</code>
 </h2>
 <p>For this introductory vignette, we will be using <code>bmass_SimulatedData1</code>, <code>bmass_SimulatedData2</code>, and <code>bmass_SimulatedSigSNPs</code>. These are simulated datasets created for the purposes of unit testing and this vignette. To load up ‘bmass’ and the datasets, run the following:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"bmass"</span>);</a>
-<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(bmass_SimulatedData1, bmass_SimulatedData2, bmass_SimulatedSigSNPs)</a>
-<a class="sourceLine" id="cb1-3" data-line-number="3">Phenotypes &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"bmass_SimulatedData1"</span>, <span class="st">"bmass_SimulatedData2"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"bmass"</span>);</a>
+<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(bmass_SimulatedData1, bmass_SimulatedData2, bmass_SimulatedSigSNPs)</a>
+<a class="sourceLine" id="cb1-3" title="3">Phenotypes &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"bmass_SimulatedData1"</span>, <span class="st">"bmass_SimulatedData2"</span>)</a></code></pre></div>
 <p>First, we’ll take a look at the format of one of our simulated datasets:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(bmass_SimulatedData1)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(bmass_SimulatedData1)</a></code></pre></div>
 <pre><code>##   Chr    BP Marker  MAF A1 A2 Direction  pValue    N
 ## 1   1  1000    rs1 0.20  A  G         - 6.0e-13 2500
 ## 2   1  2000    rs2 0.10  G  T         - 7.6e-02 2467
@@ -127,9 +127,9 @@
 <li>N: Sample size</li>
 </ul>
 <p>Now to run <code>bmass</code>, all we use is the following code:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">bmassResults &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bmass.html">bmass</a></span>(Phenotypes, bmass_SimulatedSigSNPs);</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">bmassResults &lt;-<span class="st"> </span><span class="kw"><a href="../reference/bmass.html">bmass</a></span>(Phenotypes, bmass_SimulatedSigSNPs);</a></code></pre></div>
 <p>Note that at its most basic level, we only need to provide two inputs for <code><a href="../reference/bmass.html">bmass()</a></code> to properly run: a vector of strings containing the variable names of each of our univariate summary GWAS datasets and a file containing the list of previously associated univariate genome-wide significant SNPs. The former input, the vector of strings, dictates to <code><a href="../reference/bmass.html">bmass()</a></code> where to find each dataset and what to call each phenotype being analyzed (ie the name of each variable containg the GWAS summary data is expected to correspond to the phenotype represented by that data). The latter input is just a list of each previous GWAS SNP with the following two columns of information, <code>Chr</code> and <code>BP</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">bmass_SimulatedSigSNPs</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">bmass_SimulatedSigSNPs</a></code></pre></div>
 <pre><code>##   Chr   BP
 ## 1   1 1000
 ## 2   2 3000</code></pre>
@@ -138,7 +138,7 @@
 <h2 class="hasAnchor">
 <a href="#exploring-basic-results" class="anchor"></a>Exploring basic results</h2>
 <p>Now to begin to get a sense of what <code><a href="../reference/bmass.html">bmass()</a></code> outputs, we can run the following:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(bmassResults)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(bmassResults)</a></code></pre></div>
 <pre><code>##                       Length Class  Mode     
 ## MarginalSNPs            3    -none- list     
 ## PreviousSNPs            4    -none- list     
@@ -150,12 +150,12 @@
 ## GWASlogBFMinThreshold   1    -none- numeric</code></pre>
 <p>As you can see, there are multiple output variables corresponding to different components of the results. For the purposes of this vignette, we will only touch on the first three variables shown from this <code><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary()</a></code> output: <code>PreviousSNPs</code>, <code>MarginalSNPS</code>, and <code>NewSNPs</code>. <code>PreviousSNPs</code> refers to information on the input GWAS SNPs we used for the analysis, <code>MarginalSNPs</code> refers to information on the the marginally significant SNPs that were used in the final steps of the analysis, and <code>NewSNPs</code> refers to information on any SNPs that reach multivariate genome-wide levels of significance.</p>
 <p>The main result most users will be immediately interested in is whether there are any new variants identified as genome-wide multivariate significant, and this can be determined by accessing the <code>NewSNPs</code> sublist:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(bmassResults<span class="op">$</span>NewSNPs)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(bmassResults<span class="op">$</span>NewSNPs)</a></code></pre></div>
 <pre><code>##            Length Class      Mode   
 ## SNPs       22     data.frame list   
 ## logBFs     27     -none-     numeric
 ## Posteriors 27     -none-     numeric</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(bmassResults<span class="op">$</span>NewSNPs<span class="op">$</span>SNPs)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(bmassResults<span class="op">$</span>NewSNPs<span class="op">$</span>SNPs)</a></code></pre></div>
 <pre><code>##    ChrBP Chr   BP Marker  MAF A1 bmass_SimulatedData1_A2
 ## 9 4_7000   4 7000    rs8 0.15  G                       C
 ##   bmass_SimulatedData1_Direction bmass_SimulatedData1_pValue
@@ -169,10 +169,10 @@
 ##   mvstat_log10pVal  unistat unistat_log10pVal Nmin logBFWeightedAvg
 ## 9         31.50084 29.36341          7.221849 2514           29.107</code></pre>
 <p>As you can see in this example, we have 1 new SNP that reaches multivariate genome-wide significance. This is determined by using the smallest log BF weighted average value among the previous univariate significanct GWAS SNPs (<code>PreviousSNPS</code>):</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">bmassResults<span class="op">$</span>GWASlogBFMinThreshold</a></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">bmassResults<span class="op">$</span>GWASlogBFMinThreshold</a></code></pre></div>
 <pre><code>## [1] 7.41173</code></pre>
-<p>Any <code>MarginalSNPs</code> with <code>logBFWeightedAvg</code> greater than this value are designated as new multivariate associations (see eq. 1 in <a href="https://www.biorxiv.org/">Turchin and Stephens bioRxiv 2019</a>).</p>
-<p>For further exploration and details of <code>bmass</code> output, please continue to the second introductory vignette found <a href="http://mturchin20.github.io/bmass/articles/bmassIntro.2.RealData.html">here</a>.</p>
+<p>Any <code>MarginalSNPs</code> with <code>logBFWeightedAvg</code> greater than this value are designated as new multivariate associations (see eq. 1 in <a href="https://www.biorxiv.org/content/10.1101/638882v1">Turchin and Stephens bioRxiv 2019</a>).</p>
+<p>For further exploration and details of <code>bmass</code> output, please see the second introductory vignette.</p>
 </div>
   </div>
 

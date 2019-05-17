@@ -65,7 +65,7 @@ posterior probabilities." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bmass</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -171,11 +171,7 @@ the input LogFile).</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"NewSNPs"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
-  <span class='fu'>GetTopModelsPerSNPViaPosteriors</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>),
-  <span class='no'>bmassOutput</span>$<span class='no'>NewSNPs</span>, <span class='no'>bmassOutput</span>$<span class='no'>ModelPriorMatrix</span>, <span class='no'>bmassOutput</span>$<span class='no'>LogFile</span>)
-<span class='co'># }</span><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
+    <pre class="examples"><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
 <span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='bmass.html'>bmass</a></span>(<span class='no'>Phenotypes</span>, <span class='no'>bmass_SimulatedSigSNPs</span>)
 <span class='no'>bmassOutput</span>[<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"ModelPriorMatrix"</span>, <span class='st'>"LogFile"</span>)] <span class='kw'>&lt;-</span>
   <span class='fu'><a href='GetModelPriorMatrix.html'>GetModelPriorMatrix</a></span>(<span class='no'>Phenotypes</span>, <span class='no'>bmassOutput</span>$<span class='no'>Models</span>,

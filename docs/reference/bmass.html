@@ -66,7 +66,7 @@ univariate GWAS statistics on the same set of SNPs" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">bmass</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.3</span>
       </span>
     </div>
 
@@ -219,19 +219,22 @@ and the newly significant multivariate SNPs (<code>NewSNPs</code>). For a
 full breakdown of the <code>bmass</code> output list structure, please see 
 the associated vignettes.</p>
     
+    <h2 class="hasAnchor" id="other-examples"><a class="anchor" href="#other-examples"></a>Other Examples</h2>
+
+    
+    <p><code>bmass(c("HDL","LDL","TG","TC"), GWASsnps, NminThreshold = 50000)</code>
+<code>bmass(c("HDL","LDL","TG","TC"), GWASsnps, GWASThreshValue = 1e-8,
+  NminThreshold = 50000, PrintProgress = TRUE)</code> 
+<code>bmass(c("HDL", "LDL", "TG", "TC"), GWASsnps, GWASThreshFlag = FALSE,
+  SNPMarginalUnivariateThreshold = 1e-4,
+  SNPMarginalMultivariateThreshold = 1e-4,
+  PrintMergedData = TRUE)</code> 
+<code>bmassOutput &lt;- bmass(c("HDL","LDL","TG","TC"),
+  GWASsnps, NminThreshold = 50000)</code></p>
+    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><span class='co'># NOT RUN {</span>
-<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>), <span class='no'>GWASsnps</span>, <span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>)
-<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>), <span class='no'>GWASsnps</span>, <span class='kw'>GWASThreshValue</span> <span class='kw'>=</span> <span class='fl'>1e-8</span>,
-  <span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>, <span class='kw'>PrintProgress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-<span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>, <span class='st'>"LDL"</span>, <span class='st'>"TG"</span>, <span class='st'>"TC"</span>), <span class='no'>GWASsnps</span>, <span class='kw'>GWASThreshFlag</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>SNPMarginalUnivariateThreshold</span> <span class='kw'>=</span> <span class='fl'>1e-4</span>,
-  <span class='kw'>SNPMarginalMultivariateThreshold</span> <span class='kw'>=</span> <span class='fl'>1e-4</span>,
-  <span class='kw'>PrintMergedData</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-<span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'>bmass</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"HDL"</span>,<span class='st'>"LDL"</span>,<span class='st'>"TG"</span>,<span class='st'>"TC"</span>),
-  <span class='no'>GWASsnps</span>, <span class='kw'>NminThreshold</span> <span class='kw'>=</span> <span class='fl'>50000</span>)
-<span class='co'># }</span><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
+    <pre class="examples"><div class='input'><span class='no'>Phenotypes</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"bmass_SimulatedData1"</span>, <span class='st'>"bmass_SimulatedData2"</span>)
 <span class='no'>bmassOutput</span> <span class='kw'>&lt;-</span> <span class='fu'>bmass</span>(<span class='no'>Phenotypes</span>, <span class='no'>bmass_SimulatedSigSNPs</span>)
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/summary'>summary</a></span>(<span class='no'>bmassOutput</span>)</div><div class='output co'>#&gt;                       Length Class  Mode     
 #&gt; MarginalSNPs            3    -none- list     
@@ -261,6 +264,8 @@ the associated vignettes.</p>
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#other-examples">Other Examples</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>
