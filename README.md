@@ -6,7 +6,7 @@
 The `bmass` R package provides accessible functions for running the
 algorithms described in [Stephens 2013 PLoS ONE][stephens2013] and
 applied to multiple large, publicly available GWAS datasets in 
-[Turchin and Stephens 2019][biorxiv-paper]. `bmass` conducts a
+[Turchin and Stephens 2019][plosgen-paper]. `bmass` conducts a
 Bayesian multivariate analysis of GWAS data using univariate
 association summary statistics. Output inclues whether any new SNPs 
 are found as multivariate genome-wide significant as well as posterior
@@ -14,7 +14,7 @@ probabilities of each significant SNP's assignment to different
 multivariate models. 
 
 For more details on the results of applying `bmass` to publicly available
-GWAS datasets, please see [our paper on bioRxiv][biorxiv-paper]. For
+GWAS datasets, please see [our paper in *PLOS Genetics*][plosgen-paper]. For
 more details regarding the underlying algorthims of `bmass`, please see 
 [Stephens 2013 PLoS ONE][stephens2013].
 
@@ -26,9 +26,10 @@ please post an [issue][issues].
 If you find the `bmass` package or any of the source code in this
 repository useful for your work, please cite:
 
-> Michael C. Turchin and Matthew Stephens (2019) *Bayesian multivariate
-> reanalysis of large genetic studies identifies many new
-> associations.* [bioRxiv:10.1101/638882][biorxiv-paper].
+> Turchin MC and Stephens M (2019) "Bayesian multivariate 
+> reanalysis of large genetic studies identifies many new 
+> associations." *PLOS Genetics* 15(10): e1008431. 
+> [doi.org/10.1371/journal.pgen.1008431][plosgen-paper]
 
 ## License
 
@@ -81,5 +82,6 @@ on the R code provided in [Stephens 2013 PLoS ONE][stephens2013].
 [michaelt]: http://home.uchicago.edu/mturchin20/index.html 
 [mit-license]: https://opensource.org/licenses/mit-license.html
 [peter]: https://pcarbo.github.io
+[plosgen-paper]: https://doi.org/10.1371/journal.pgen.1008431
 [stephens2013]: https://doi.org/10.1371/journal.pone.0065245
 [uchicago]: https://www.uchicago.edu
