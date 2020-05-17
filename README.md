@@ -6,7 +6,7 @@
 The `bmass` R package provides accessible functions for running the
 algorithms described in [Stephens 2013 PLoS ONE][stephens2013] and
 applied to multiple large, publicly available GWAS datasets in 
-[Turchin and Stephens 2019][plosgen-paper]. `bmass` conducts a
+[Turchin and Stephens 2019 PLoS Genetics][plosgen-paper]. `bmass` conducts a
 Bayesian multivariate analysis of GWAS data using univariate
 association summary statistics. Output inclues whether any new SNPs 
 are found as multivariate genome-wide significant as well as posterior
@@ -15,7 +15,7 @@ multivariate models.
 
 For more details on the results of applying `bmass` to publicly available
 GWAS datasets, please see [our paper in *PLOS Genetics*][plosgen-paper]. For
-more details regarding the underlying algorthims of `bmass`, please see 
+more details regarding the underlying algorithms of `bmass`, please see 
 [Stephens 2013 PLoS ONE][stephens2013].
 
 If you find a bug, or you have a question or feedback on our work,
