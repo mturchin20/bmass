@@ -1,7 +1,7 @@
 # bmass: Bayesian multivariate analysis of summary statistics
 
 [![CRAN status badge](https://www.r-pkg.org/badges/version/bmass)](https://cran.r-project.org/package=bmass)
-[![Travis Build Status](https://travis-ci.org/mturchin20/bmass.svg?branch=master)](https://travis-ci.org/mturchin20/bmass)
+[![Travis Build Status](https://travis-ci.com/mturchin20/bmass.svg?branch=master)](https://travis-ci.com/mturchin20/bmass)
 
 The `bmass` R package provides accessible functions for running the
 algorithms described in [Stephens 2013 PLOS ONE][stephens2013] and
